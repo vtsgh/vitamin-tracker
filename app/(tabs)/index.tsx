@@ -1,75 +1,342 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState, useRef } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
+import VitaminCapsule from '../../components/VitaminCapsule';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+interface FeatureButton {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: string;
+  color: string;
+  route: string;
+  enabled: boolean;
+}
 
-export default function HomeScreen() {
+const FEATURES: FeatureButton[] = [
+  {
+    id: 'schedule',
+    title: 'My Vitamin Schedule',
+    subtitle: 'View and manage your plans',
+    icon: '📅',
+    color: '#FF7F50', // Primary coral
+    route: '/schedule',
+    enabled: true
+  },
+  {
+    id: 'progress',
+    title: 'Progress Tracking',
+    subtitle: 'See your consistency',
+    icon: '📊',
+    color: '#98FB98', // Health green
+    route: '/progress',
+    enabled: true
+  },
+  {
+    id: 'reminders',
+    title: 'Smart Reminders',
+    subtitle: 'Customize notifications',
+    icon: '🔔',
+    color: '#87CEEB', // Soft blue
+    route: '/reminders',
+    enabled: false
+  },
+  {
+    id: 'health',
+    title: 'Health Insights',
+    subtitle: 'Learn about vitamins',
+    icon: '💡',
+    color: '#DDA0DD', // Light purple
+    route: '/health',
+    enabled: false
+  },
+  {
+    id: 'community',
+    title: 'Community',
+    subtitle: 'Connect with others',
+    icon: '👥',
+    color: '#FFB347', // Secondary orange
+    route: '/community',
+    enabled: false
+  },
+  {
+    id: 'settings',
+    title: 'Settings',
+    subtitle: 'Customize your experience',
+    icon: '⚙️',
+    color: '#6B7280', // Gray
+    route: '/settings',
+    enabled: false
+  }
+];
+
+export default function Home() {
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const lastTapTime = useRef(0);
+  
+  // Animation values
+  const titleOpacity = useSharedValue(0);
+  const subtitleOpacity = useSharedValue(0);
+  const capsuleScale = useSharedValue(0);
+  const buttonsOpacity = useSharedValue(0);
+  const capsuleRotation = useSharedValue(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      // Reset navigation state when screen comes into focus
+      setIsNavigating(false);
+      
+      // Only trigger intro animations on first load
+      if (!hasAnimated) {
+        startIntroAnimations();
+        setHasAnimated(true);
+      } else {
+        // Show elements immediately without animation when returning
+        showElementsImmediately();
+      }
+    }, [hasAnimated, startIntroAnimations, showElementsImmediately])
+  );
+
+  const startIntroAnimations = useCallback(() => {
+    // Reset all animations
+    titleOpacity.value = 0;
+    subtitleOpacity.value = 0;
+    capsuleScale.value = 0;
+    buttonsOpacity.value = 0;
+    capsuleRotation.value = 0;
+
+    // Sequence: Title -> Capsule -> Subtitle -> Buttons
+    // 1. Title fades in
+    titleOpacity.value = withTiming(1, { duration: 800 });
+
+    // 2. Capsule bounces in with rotation (delay 400ms)
+    setTimeout(() => {
+      capsuleScale.value = withSpring(1, { damping: 8, stiffness: 100 });
+      capsuleRotation.value = withSpring(360, { damping: 10, stiffness: 80 });
+    }, 400);
+
+    // 3. Subtitle fades in (delay 800ms)
+    setTimeout(() => {
+      subtitleOpacity.value = withTiming(1, { duration: 600 });
+    }, 800);
+
+    // 4. Buttons fade in (delay 1200ms)
+    setTimeout(() => {
+      buttonsOpacity.value = withTiming(1, { duration: 700 });
+    }, 1200);
+  }, [titleOpacity, capsuleScale, capsuleRotation, subtitleOpacity, buttonsOpacity]);
+
+  const showElementsImmediately = useCallback(() => {
+    // Show all elements immediately without animation when returning
+    titleOpacity.value = 1;
+    subtitleOpacity.value = 1;
+    capsuleScale.value = 1;
+    buttonsOpacity.value = 1;
+    capsuleRotation.value = 0; // Reset rotation
+  }, [titleOpacity, subtitleOpacity, capsuleScale, buttonsOpacity, capsuleRotation]);
+
+  const animatedTitleStyle = useAnimatedStyle(() => {
+    return {
+      opacity: titleOpacity.value,
+      transform: [{ translateY: withTiming((1 - titleOpacity.value) * -20) }],
+    };
+  });
+
+  const animatedSubtitleStyle = useAnimatedStyle(() => {
+    return {
+      opacity: subtitleOpacity.value,
+      transform: [{ translateY: withTiming((1 - subtitleOpacity.value) * -15) }],
+    };
+  });
+
+  const animatedCapsuleStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { scale: capsuleScale.value },
+        { rotate: `${capsuleRotation.value}deg` },
+      ],
+    };
+  });
+
+  const animatedButtonsStyle = useAnimatedStyle(() => {
+    return {
+      opacity: buttonsOpacity.value,
+      transform: [{ translateY: withTiming((1 - buttonsOpacity.value) * 20) }],
+    };
+  });
+
+  const handleFeaturePress = (feature: FeatureButton) => {
+    const now = Date.now();
+    if (now - lastTapTime.current < 1000) { // 1 second debounce
+      console.log('🚫 Blocked rapid tap - too soon');
+      return;
+    }
+    lastTapTime.current = now;
+
+    if (!feature.enabled) {
+      // Show coming soon message for disabled features
+      console.log(`🚧 ${feature.title} is coming soon!`);
+      return;
+    }
+
+    console.log(`✅ Navigating to ${feature.title}`);
+    setIsNavigating(true);
+    
+    router.push(feature.route as any);
+  };
+
+  const renderFeatureButton = (feature: FeatureButton, index: number) => {
+    const isDisabled = !feature.enabled;
+    
+    return (
+      <TouchableOpacity
+        key={feature.id}
+        style={[
+          styles.featureButton,
+          { backgroundColor: feature.color },
+          isDisabled && styles.disabledButton
+        ]}
+        onPress={() => handleFeaturePress(feature)}
+        disabled={isNavigating}
+      >
+        <View style={styles.featureButtonContent}>
+          <Text style={styles.featureIcon}>{feature.icon}</Text>
+          <View style={styles.featureTextContainer}>
+            <Text style={[styles.featureTitle, isDisabled && styles.disabledText]}>
+              {feature.title}
+            </Text>
+            <Text style={[styles.featureSubtitle, isDisabled && styles.disabledText]}>
+              {isDisabled ? 'Coming Soon!' : feature.subtitle}
+            </Text>
+          </View>
+          {!isDisabled && (
+            <Text style={styles.featureArrow}>→</Text>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.container}>
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <Animated.Text style={[styles.appTitle, animatedTitleStyle]}>
+            Welcome to Takeamin
+          </Animated.Text>
+          
+          <Animated.View style={[styles.capsuleContainer, animatedCapsuleStyle]}>
+            <VitaminCapsule size={80} />
+          </Animated.View>
+          
+          <Animated.Text style={[styles.appSubtitle, animatedSubtitleStyle]}>
+            Your personal vitamin companion for better health! 🌟
+          </Animated.Text>
+        </View>
+
+        {/* Feature Buttons Grid */}
+        <Animated.View style={[styles.featuresSection, animatedButtonsStyle]}>
+          <View style={styles.featuresGrid}>
+            {FEATURES.map((feature, index) => renderFeatureButton(feature, index))}
+          </View>
+        </Animated.View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#FAF3E0', // soft cream color
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+  },
+  heroSection: {
+    alignItems: 'center',
+    paddingTop: 40,
+    paddingBottom: 40,
+  },
+  appTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#FF7F50', // coral color
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  capsuleContainer: {
+    marginBottom: 20,
+  },
+  appSubtitle: {
+    fontSize: 18,
+    color: '#555',
+    textAlign: 'center',
+    lineHeight: 24,
+    paddingHorizontal: 20,
+  },
+  featuresSection: {
+    flex: 1,
+  },
+  featuresGrid: {
+    gap: 15,
+  },
+  featureButton: {
+    borderRadius: 20,
+    padding: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  featureButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  featureIcon: {
+    fontSize: 28,
+    marginRight: 15,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  featureTextContainer: {
+    flex: 1,
+  },
+  featureTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  featureSubtitle: {
+    fontSize: 14,
+    color: '#fff',
+    opacity: 0.9,
+  },
+  featureArrow: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  disabledButton: {
+    opacity: 0.6,
+  },
+  disabledText: {
+    opacity: 0.8,
   },
 });
