@@ -183,7 +183,12 @@ export default function Progress() {
 
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    const today = new Date().toISOString().split('T')[0];
+    
+    // Create today's date in local timezone to avoid timezone issues
+    const todayLocal = new Date();
+    const todayYear = todayLocal.getFullYear();
+    const todayMonth = todayLocal.getMonth();
+    const todayDay = todayLocal.getDate();
     
     // Get first day of month
     const firstDay = new Date(year, month, 1);
@@ -195,15 +200,27 @@ export default function Progress() {
     
     // Generate 6 weeks (42 days) to ensure full calendar
     for (let i = 0; i < 42; i++) {
-      const dateStr = currentDateIterator.toISOString().split('T')[0];
-      const isCurrentMonth = currentDateIterator.getMonth() === month;
-      const isToday = dateStr === today;
+      // Create date string using local date components to avoid timezone issues
+      const year = currentDateIterator.getFullYear();
+      const month = currentDateIterator.getMonth();
+      const day = currentDateIterator.getDate();
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      
+      const isCurrentMonth = month === currentDate.getMonth();
+      
+      // More reliable today check using local date components
+      const isToday = year === todayYear && month === todayMonth && day === todayDay;
+      
       const hasCheckIn = hasCheckInForDate(progressData.checkIns, selectedPlan.id, dateStr);
-      const isFuture = currentDateIterator > new Date();
+      
+      // Check if future using local date comparison to avoid timezone issues  
+      const isFuture = year > todayYear ||
+                      (year === todayYear && month > todayMonth) ||
+                      (year === todayYear && month === todayMonth && day > todayDay);
       
       days.push({
         date: dateStr,
-        day: currentDateIterator.getDate(),
+        day: day,
         isCurrentMonth,
         isToday,
         hasCheckIn,

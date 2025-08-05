@@ -34,7 +34,10 @@ export async function saveProgressData(data: ProgressData): Promise<void> {
  * Record a check-in for a vitamin plan
  */
 export async function recordCheckIn(vitaminPlanId: string, date?: string): Promise<{ newBadges: Badge[] }> {
-  const checkInDate = date || new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  // Create local date string to avoid timezone issues
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const checkInDate = date || todayStr; // YYYY-MM-DD
   const timestamp = Date.now();
 
   const progressData = await getProgressData();
