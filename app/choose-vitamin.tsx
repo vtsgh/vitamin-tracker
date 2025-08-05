@@ -1,10 +1,29 @@
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { useRef, useState, useCallback } from 'react';
 import { VITAMINS } from '../constants/vitamins';
 
 export default function ChooseVitamin() {
+  const [isNavigating, setIsNavigating] = useState(false);
+  const lastTapTime = useRef(0);
+
+  // Reset navigation state when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      setIsNavigating(false);
+    }, [])
+  );
+
   const handleVitaminPress = (vitaminId: string, vitaminLabel: string) => {
-    console.log(vitaminLabel);
+    const now = Date.now();
+    if (now - lastTapTime.current < 1000 || isNavigating) { // 1 second debounce
+      console.log('🚫 Blocked rapid tap - too soon');
+      return;
+    }
+    lastTapTime.current = now;
+    setIsNavigating(true);
+    
+    console.log('✅ Selected vitamin:', vitaminLabel);
     router.push({
       pathname: '/timing',
       params: { vitamin: vitaminLabel }
@@ -12,6 +31,12 @@ export default function ChooseVitamin() {
   };
 
   const handleBack = () => {
+    const now = Date.now();
+    if (now - lastTapTime.current < 500 || isNavigating) { // 500ms debounce for back
+      return;
+    }
+    lastTapTime.current = now;
+    setIsNavigating(true);
     router.back();
   };
 
@@ -22,14 +47,21 @@ export default function ChooseVitamin() {
         {VITAMINS.map((vitamin) => (
           <TouchableOpacity
             key={vitamin.id}
-            style={styles.vitaminButton}
+            style={[styles.vitaminButton, isNavigating && styles.disabledButton]}
             onPress={() => handleVitaminPress(vitamin.id, vitamin.label)}
+            disabled={isNavigating}
+            activeOpacity={isNavigating ? 1 : 0.8}
           >
             <Text style={styles.vitaminButtonText}>{vitamin.label}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
-      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+      <TouchableOpacity 
+        style={[styles.backButton, isNavigating && styles.disabledButton]} 
+        onPress={handleBack}
+        disabled={isNavigating}
+        activeOpacity={isNavigating ? 1 : 0.8}
+      >
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
     </View>
@@ -100,5 +132,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  disabledButton: {
+    opacity: 0.6,
+    backgroundColor: '#cccccc',
   },
 });

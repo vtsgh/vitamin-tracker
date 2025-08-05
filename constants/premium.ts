@@ -64,14 +64,14 @@ export const FEATURE_CATEGORY_MAP: Record<string, keyof typeof FEATURE_CATEGORIE
 export const FREE_LIMITS = {
   MAX_PLANS: 4,
   MAX_BADGES: 7, // Current AVAILABLE_BADGES length
-  MAX_STREAK_RECOVERY: 0,
+  MAX_STREAK_RECOVERIES_PER_MONTH: 0,
   MAX_EXPORT_MONTHS: 1
 } as const;
 
 export const PREMIUM_LIMITS = {
   MAX_PLANS: -1, // unlimited
   MAX_BADGES: -1, // unlimited
-  MAX_STREAK_RECOVERY: -1, // unlimited
+  MAX_STREAK_RECOVERIES_PER_MONTH: 3, // 3 per month
   MAX_EXPORT_MONTHS: -1 // unlimited
 } as const;
 
@@ -163,6 +163,7 @@ export const UPGRADE_TRIGGER_CONTEXTS = {
   PLAN_LIMIT_REACHED: 'plan_limit_reached',
   BADGE_LIMIT_REACHED: 'badge_limit_reached',
   STREAK_ABOUT_TO_BREAK: 'streak_about_to_break',
+  STREAK_RECOVERY_LIMIT_REACHED: 'streak_recovery_limit_reached',
   MILESTONE_ACHIEVED: 'milestone_achieved',
   FEATURE_DISCOVERY: 'feature_discovery',
   HOMEPAGE_CTA: 'homepage_cta'

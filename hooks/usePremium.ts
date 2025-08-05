@@ -146,6 +146,22 @@ export const usePremium = () => {
     await savePremiumStatus(newStatus);
   }, [premiumStatus]);
 
+  // Development helper to reset premium status
+  const resetPremiumForTesting = useCallback(async () => {
+    try {
+      await AsyncStorage.removeItem(PREMIUM_STORAGE_KEY);
+      console.log('🔄 Premium status cleared from AsyncStorage');
+      const newStatus: PremiumStatus = {
+        isPremium: false,
+        trialUsed: false
+      };
+      setPremiumStatus(newStatus);
+      console.log('🔄 Premium status reset to:', newStatus);
+    } catch (error) {
+      console.error('Error resetting premium status:', error);
+    }
+  }, []);
+
   return {
     // Premium status
     isPremium: premiumStatus.isPremium && !isSubscriptionExpired(),
@@ -171,6 +187,7 @@ export const usePremium = () => {
     isSubscriptionExpired,
     
     // Development
-    togglePremiumForTesting
+    togglePremiumForTesting,
+    resetPremiumForTesting
   };
 };

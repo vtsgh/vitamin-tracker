@@ -28,6 +28,9 @@ export default function Summary() {
       const vitaminName = vitamin || 'Unknown Vitamin';
 
       // Create the complete vitamin plan first
+      const now = new Date();
+      const createdDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      
       const vitaminPlan: VitaminPlan = {
         id: Date.now().toString(),
         vitamin: vitaminName,
@@ -36,6 +39,7 @@ export default function Summary() {
         customDays: planCustomDays,
         reminderTime: planReminderTime,
         notificationIds: [], // Will be updated after scheduling
+        createdDate: createdDate, // Today's date in YYYY-MM-DD format
       };
 
       // Schedule comprehensive notification reminders

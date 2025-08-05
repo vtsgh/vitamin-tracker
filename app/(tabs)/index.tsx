@@ -38,6 +38,15 @@ const FEATURES: FeatureButton[] = [
     enabled: true
   },
   {
+    id: 'premium',
+    title: 'Upgrade to Premium',
+    subtitle: 'Unlock all features',
+    icon: '✨',
+    color: '#FFD700', // Gold
+    route: null, // Special handling
+    enabled: true
+  },
+  {
     id: 'reminders',
     title: 'Smart Reminders',
     subtitle: 'Customize notifications',
@@ -72,15 +81,6 @@ const FEATURES: FeatureButton[] = [
     color: '#6B7280', // Gray
     route: '/settings',
     enabled: false
-  },
-  {
-    id: 'premium',
-    title: 'Upgrade to Premium',
-    subtitle: 'Unlock all features',
-    icon: '✨',
-    color: '#FFD700', // Gold
-    route: null, // Special handling
-    enabled: true
   }
 ];
 
@@ -89,7 +89,7 @@ export default function Home() {
   const [isNavigating, setIsNavigating] = useState(false);
   const lastTapTime = useRef(0);
   
-  const { isPremium, triggerUpgrade, showUpgradeModal, closeUpgradeModal, upgradeContext } = usePremium();
+  const { isPremium, triggerUpgrade, showUpgradeModal, closeUpgradeModal, upgradeContext, resetPremiumForTesting } = usePremium();
   
   // Animation values
   const titleOpacity = useSharedValue(0);
@@ -184,7 +184,7 @@ export default function Home() {
 
   const handleFeaturePress = (feature: FeatureButton) => {
     const now = Date.now();
-    if (now - lastTapTime.current < 1000) { // 1 second debounce
+    if (now - lastTapTime.current < 500 || isNavigating) { // 500ms debounce
       console.log('🚫 Blocked rapid tap - too soon');
       return;
     }
@@ -268,13 +268,13 @@ export default function Home() {
         {/* Feature Buttons Grid */}
         <Animated.View style={[styles.featuresSection, animatedButtonsStyle]}>
           <View style={styles.featuresGrid}>
-            {FEATURES.filter(feature => {
-              // Hide premium button if user is already premium
+            {FEATURES.map((feature, index) => {
+              // Don't render premium button if user is already premium
               if (feature.id === 'premium' && isPremium) {
-                return false;
+                return null;
               }
-              return true;
-            }).map((feature, index) => renderFeatureButton(feature, index))}
+              return renderFeatureButton(feature, index);
+            })}
           </View>
         </Animated.View>
       </ScrollView>
@@ -282,7 +282,7 @@ export default function Home() {
       <PremiumUpgradeModal
         visible={showUpgradeModal}
         onClose={closeUpgradeModal}
-        context={upgradeContext}
+        context={upgradeContext || undefined}
       />
     </SafeAreaView>
   );

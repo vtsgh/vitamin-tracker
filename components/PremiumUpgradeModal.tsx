@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  Dimensions,
   Alert
 } from 'react-native';
 import { UpgradeModalProps, CategoryBenefits } from '../types/Premium';

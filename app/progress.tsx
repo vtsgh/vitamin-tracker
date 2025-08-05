@@ -20,22 +20,28 @@ import {
   getProgressData,
   getStreakForPlan,
   hasCheckInForDate,
-  recordCheckIn
+  recordCheckIn,
+  wouldStreakBreak,
+  calculateStreakWithRecoveries
 } from '../utils/progress';
 import { usePremium } from '../hooks/usePremium';
 import { PremiumFeatureGate } from '../components/PremiumFeatureGate';
 import { PremiumUpgradeModal } from '../components/PremiumUpgradeModal';
+import { StreakRecoveryModal } from '../components/StreakRecoveryModal';
 import { PREMIUM_FEATURES, UPGRADE_TRIGGER_CONTEXTS } from '../constants/premium';
 
 export default function Progress() {
   const [vitaminPlans, setVitaminPlans] = useState<VitaminPlan[]>([]);
-  const [progressData, setProgressData] = useState<ProgressData>({ checkIns: [], streaks: [], badges: [] });
+  const [progressData, setProgressData] = useState<ProgressData>({ checkIns: [], streaks: [], badges: [], streakRecoveries: [] });
   const [selectedPlan, setSelectedPlan] = useState<VitaminPlan | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
+  const [showStreakRecoveryModal, setShowStreakRecoveryModal] = useState(false);
+  const [streakBreakInfo, setStreakBreakInfo] = useState<{ vitaminPlanId: string; missedDate: string; currentStreak: number } | null>(null);
   
   const confettiRef = useRef<ConfettiCannon>(null);
   const { isPremium, showUpgradeModal, closeUpgradeModal, upgradeContext } = usePremium();
+
 
   const loadData = useCallback(async () => {
     try {
@@ -52,8 +58,40 @@ export default function Progress() {
       // Load progress data
       const progress = await getProgressData();
       setProgressData(progress);
+      
+      // Check for streak recovery opportunity
+      checkForStreakRecoveryOpportunity(plans, progress);
     } catch (error) {
       console.error('Error loading progress data:', error);
+    }
+  }, [selectedPlan]);
+
+  const checkForStreakRecoveryOpportunity = useCallback((plans: VitaminPlan[], progress: ProgressData) => {
+    // Only check for the selected plan or first plan
+    const planToCheck = selectedPlan || plans[0];
+    if (!planToCheck) return;
+    
+    // Check if streak would break
+    const streakCheck = wouldStreakBreak(progress.checkIns, progress.streakRecoveries || [], planToCheck.id);
+    
+    if (streakCheck.wouldBreak && streakCheck.missedDate) {
+      // Calculate current streak using enhanced calculation
+      const currentStreak = calculateStreakWithRecoveries(
+        progress.checkIns, 
+        progress.streakRecoveries || [], 
+        planToCheck.id
+      );
+      
+      // Only show modal if there's actually a meaningful streak to save (> 1 day)
+      // 1 day isn't worth a recovery since they can just start fresh easily
+      if (currentStreak > 1) {
+        setStreakBreakInfo({
+          vitaminPlanId: planToCheck.id,
+          missedDate: streakCheck.missedDate,
+          currentStreak
+        });
+        setShowStreakRecoveryModal(true);
+      }
     }
   }, [selectedPlan]);
 
@@ -74,6 +112,21 @@ export default function Progress() {
 
   const handleCheckIn = async (date: string) => {
     if (!selectedPlan || isLoading) return;
+
+    // Check if date is before plan creation
+    if (selectedPlan.createdDate && date < selectedPlan.createdDate) {
+      const planCreatedDate = new Date(selectedPlan.createdDate).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      });
+      Alert.alert(
+        '📅 Date Not Available',
+        `You can only track vitamins from ${planCreatedDate} onwards, when you created this plan!`,
+        [{ text: 'Got it!', style: 'default' }]
+      );
+      return;
+    }
 
     // Check if this day is already checked in
     const isAlreadyCheckedIn = hasCheckInForDate(progressData.checkIns, selectedPlan.id, date);
@@ -142,7 +195,7 @@ export default function Progress() {
     return (
       <View style={styles.calendarInstructions}>
         <Text style={styles.calendarInstructionsText}>
-          ✨ Gently tap the days you took your vitamin
+          ✨ Gently tap the days you took your vitamin, then scroll to admire your growing trophy case 🏆
         </Text>
       </View>
     );
@@ -223,6 +276,9 @@ export default function Progress() {
                       (year === todayYear && month > todayMonth) ||
                       (year === todayYear && month === todayMonth && day > todayDay);
       
+      // Check if date is before plan creation (prevent checking past dates)
+      const isBeforePlanCreation = selectedPlan.createdDate ? dateStr < selectedPlan.createdDate : false;
+      
       days.push({
         date: dateStr,
         day: day,
@@ -230,6 +286,7 @@ export default function Progress() {
         isToday,
         hasCheckIn,
         isFuture,
+        isBeforePlanCreation,
       });
       
       currentDateIterator.setDate(currentDateIterator.getDate() + 1);
@@ -251,7 +308,7 @@ export default function Progress() {
               key={`${day.date}-${index}`}
               day={day}
               onPress={() => handleCheckIn(day.date)}
-              disabled={day.isFuture || !day.isCurrentMonth || isLoading}
+              disabled={day.isFuture || !day.isCurrentMonth || day.isBeforePlanCreation || isLoading}
             />
           ))}
         </View>
@@ -291,6 +348,7 @@ export default function Progress() {
   const renderStreakInfo = () => {
     if (!selectedPlan) return null;
 
+    // Use the same method as handleCheckIn for consistency
     const streak = getStreakForPlan(progressData.streaks, selectedPlan.id);
     const message = getMotivationalMessage(streak.currentStreak);
 
@@ -377,8 +435,6 @@ export default function Progress() {
           </PremiumFeatureGate>
         </View>
         
-        {/* Scroll Hint */}
-        <ScrollHint />
       </View>
     );
   };
@@ -409,16 +465,17 @@ export default function Progress() {
         <Text style={styles.homeButtonIcon}>🏠</Text>
       </TouchableOpacity>
 
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <Text style={styles.pageTitle}>Progress Tracking</Text>
         <Text style={styles.pageSubtitle}>Your Gentle Streak Garden 🌿</Text>
         
         {renderPlanSelector()}
         {renderStreakInfo()}
-        {renderBadgeShelf()}
         {renderCalendarInstructions()}
         {renderCalendarHeader()}
         {renderCalendarGrid()}
+        {renderBadgeShelf()}
       </ScrollView>
 
       <ConfettiCannon
@@ -435,8 +492,25 @@ export default function Progress() {
       <PremiumUpgradeModal
         visible={showUpgradeModal}
         onClose={closeUpgradeModal}
-        context={upgradeContext}
+        context={upgradeContext || undefined}
       />
+      
+      {streakBreakInfo && (
+        <StreakRecoveryModal
+          visible={showStreakRecoveryModal}
+          onClose={() => {
+            setShowStreakRecoveryModal(false);
+            setStreakBreakInfo(null);
+          }}
+          vitaminPlanId={streakBreakInfo.vitaminPlanId}
+          missedDate={streakBreakInfo.missedDate}
+          currentStreak={streakBreakInfo.currentStreak}
+          onRecoveryUsed={() => {
+            // Reload data to reflect the recovery
+            loadData();
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -450,6 +524,7 @@ interface CalendarDayProps {
     isToday: boolean;
     hasCheckIn: boolean;
     isFuture: boolean;
+    isBeforePlanCreation: boolean;
   };
   onPress: () => void;
   disabled: boolean;
@@ -515,11 +590,13 @@ function CalendarDay({ day, onPress, disabled }: CalendarDayProps) {
         animatedStyle,
         day.isToday && !day.hasCheckIn && styles.calendarDayTodayInner,
         day.hasCheckIn && styles.calendarDayCompletedInner,
+        day.isBeforePlanCreation && styles.calendarDayBeforePlan,
       ]}>
         <Text style={[
           styles.calendarDayText,
           !day.isCurrentMonth && styles.calendarDayTextInactive,
           day.hasCheckIn && styles.calendarDayTextCompleted,
+          day.isBeforePlanCreation && styles.calendarDayTextBeforePlan,
         ]}>
           {day.day}
         </Text>
@@ -533,52 +610,6 @@ function CalendarDay({ day, onPress, disabled }: CalendarDayProps) {
   );
 }
 
-// Scroll Hint Component
-function ScrollHint() {
-  const bounceAnimation = useSharedValue(0);
-  const opacityAnimation = useSharedValue(0.7);
-
-  React.useEffect(() => {
-    // Gentle bouncing animation
-    bounceAnimation.value = withSpring(1, {
-      damping: 8,
-      stiffness: 100,
-    });
-
-    // Subtle opacity pulse
-    const pulseAnimation = () => {
-      opacityAnimation.value = withTiming(1, { duration: 1000 }, () => {
-        opacityAnimation.value = withTiming(0.7, { duration: 1000 }, () => {
-          // Continue pulsing
-          runOnJS(pulseAnimation)();
-        });
-      });
-    };
-    pulseAnimation();
-  }, [bounceAnimation, opacityAnimation]);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { 
-          translateY: withTiming(
-            Math.sin(bounceAnimation.value * Math.PI * 2) * 3,
-            { duration: 2000 }
-          )
-        }
-      ],
-      opacity: opacityAnimation.value,
-    };
-  });
-
-  return (
-    <Animated.View style={[styles.scrollHint, animatedStyle]}>
-      <Text style={styles.scrollHintText}>Scroll for Calendar</Text>
-      <Text style={styles.scrollHintIcon}>📅</Text>
-      <Text style={styles.scrollHintArrow}>↓</Text>
-    </Animated.View>
-  );
-}
 
 // Badge Item Component
 interface BadgeItemProps {
@@ -867,6 +898,14 @@ const styles = StyleSheet.create({
   calendarDayTextCompleted: {
     color: '#fff',
   },
+  calendarDayBeforePlan: {
+    backgroundColor: '#f0f0f0',
+    borderColor: '#ddd',
+    opacity: 0.4,
+  },
+  calendarDayTextBeforePlan: {
+    color: '#bbb',
+  },
   checkMark: {
     position: 'absolute',
     top: -2,
@@ -1052,26 +1091,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     lineHeight: 22,
-  },
-  // Scroll Hint Styles
-  scrollHint: {
-    alignItems: 'center',
-    paddingVertical: 15,
-    paddingTop: 20,
-  },
-  scrollHintText: {
-    fontSize: 14,
-    color: '#888',
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  scrollHintIcon: {
-    fontSize: 16,
-    marginBottom: 2,
-  },
-  scrollHintArrow: {
-    fontSize: 18,
-    color: '#FF7F50',
-    fontWeight: 'bold',
   },
 });

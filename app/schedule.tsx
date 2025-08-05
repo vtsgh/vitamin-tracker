@@ -146,26 +146,27 @@ export default function Schedule() {
 
   const handleGetStarted = () => {
     const now = Date.now();
-    if (now - lastTapTime.current < 3000) { // 3 second debounce
+    if (now - lastTapTime.current < 1000 || isNavigating) { // 1 second debounce
       console.log('🚫 Blocked rapid tap - too soon');
       return;
     }
     lastTapTime.current = now;
-    console.log('✅ Processing tap');
+    console.log('✅ Getting started');
     setIsNavigating(true);
     
     // Reset hasAnimated to trigger intro animations when user returns after creating a plan
     setHasAnimated(false);
     
-    buttonScale.value = withSpring(0.95, { duration: 150 });
+    // Button animation with proper confetti timing
+    buttonScale.value = withSpring(0.95, { duration: 100 });
     setTimeout(() => {
-      buttonScale.value = withSpring(1, { duration: 200 });
+      buttonScale.value = withSpring(1, { duration: 150 });
       triggerConfetti();
-      // Wait for confetti to fall before navigating
+      // Wait for confetti to finish nicely
       setTimeout(() => {
         router.push('/choose-vitamin');
-      }, 1800); // Increased delay to let confetti finish
-    }, 150);
+      }, 1200); // Enough time for confetti to complete
+    }, 100);
   };
 
   const handleAddAnother = () => {
@@ -184,26 +185,27 @@ export default function Schedule() {
     }
 
     const now = Date.now();
-    if (now - lastTapTime.current < 3000) { // 3 second debounce
+    if (now - lastTapTime.current < 1000 || isNavigating) { // 1 second debounce
       console.log('🚫 Blocked rapid tap - too soon');
       return;
     }
     lastTapTime.current = now;
-    console.log('✅ Processing tap');
+    console.log('✅ Adding another plan');
     setIsNavigating(true);
     
     // Reset hasAnimated to trigger intro animations when user returns after creating a plan
     setHasAnimated(false);
     
-    addButtonScale.value = withSpring(0.95, { duration: 150 });
+    // Button animation with proper confetti timing
+    addButtonScale.value = withSpring(0.95, { duration: 100 });
     setTimeout(() => {
-      addButtonScale.value = withSpring(1, { duration: 200 });
+      addButtonScale.value = withSpring(1, { duration: 150 });
       triggerConfetti();
-      // Wait for confetti to fall before navigating
+      // Wait for confetti to finish nicely
       setTimeout(() => {
         router.push('/choose-vitamin');
-      }, 1800); // Increased delay to let confetti finish
-    }, 150);
+      }, 1200); // Enough time for confetti to complete
+    }, 100);
   };
 
   const handleDeletePlan = (plan: VitaminPlan) => {
@@ -301,11 +303,12 @@ export default function Schedule() {
 
   const handleGoHome = () => {
     const now = Date.now();
-    if (now - lastTapTime.current < 1000) { // 1 second debounce
+    if (now - lastTapTime.current < 500 || isNavigating) { // 500ms debounce for home
       console.log('🚫 Blocked rapid tap - too soon');
       return;
     }
     lastTapTime.current = now;
+    setIsNavigating(true);
     console.log('✅ Navigating to home');
     router.push('/(tabs)/');
   };
@@ -419,7 +422,7 @@ export default function Schedule() {
       <PremiumUpgradeModal
         visible={showUpgradeModal}
         onClose={closeUpgradeModal}
-        context={upgradeContext}
+        context={upgradeContext || undefined}
       />
     </SafeAreaView>
   );

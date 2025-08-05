@@ -21,10 +21,19 @@ export interface Badge {
   earnedDate?: string; // ISO date when earned
 }
 
+export interface StreakRecovery {
+  id: string;
+  vitaminPlanId: string;
+  missedDate: string; // The date that was missed (YYYY-MM-DD)
+  recoveryDate: string; // When the recovery was used (ISO string)
+  recoveryMonth: string; // YYYY-MM for monthly limit tracking
+}
+
 export interface ProgressData {
   checkIns: CheckIn[];
   streaks: Streak[];
   badges: Badge[];
+  streakRecoveries: StreakRecovery[];
 }
 
 // Free badges available to all users
