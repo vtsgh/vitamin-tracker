@@ -27,8 +27,8 @@ export interface ProgressData {
   badges: Badge[];
 }
 
-// Predefined badges users can earn
-export const AVAILABLE_BADGES: Omit<Badge, 'earnedDate'>[] = [
+// Free badges available to all users
+export const FREE_BADGES: Omit<Badge, 'earnedDate'>[] = [
   {
     id: 'first-checkin',
     name: 'First Steps',
@@ -86,3 +86,17 @@ export const AVAILABLE_BADGES: Omit<Badge, 'earnedDate'>[] = [
     requirement: 5,
   },
 ];
+
+// All badges (free + premium) - computed at runtime
+export const getAllAvailableBadges = (includePremium: boolean = false): Omit<Badge, 'earnedDate'>[] => {
+  if (!includePremium) {
+    return FREE_BADGES;
+  }
+  
+  // Import premium badges to avoid circular dependency
+  const { PREMIUM_BADGES } = require('../constants/premium');
+  return [...FREE_BADGES, ...PREMIUM_BADGES];
+};
+
+// Backward compatibility
+export const AVAILABLE_BADGES = FREE_BADGES;

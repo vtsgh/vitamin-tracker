@@ -13,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AVAILABLE_BADGES, Badge, ProgressData } from '../types/Progress';
+import { getAllAvailableBadges, Badge, ProgressData } from '../types/Progress';
 import { VitaminPlan } from '../types/VitaminPlan';
 import {
   getMotivationalMessage,
@@ -22,6 +22,10 @@ import {
   hasCheckInForDate,
   recordCheckIn
 } from '../utils/progress';
+import { usePremium } from '../hooks/usePremium';
+import { PremiumFeatureGate } from '../components/PremiumFeatureGate';
+import { PremiumUpgradeModal } from '../components/PremiumUpgradeModal';
+import { PREMIUM_FEATURES, UPGRADE_TRIGGER_CONTEXTS } from '../constants/premium';
 
 export default function Progress() {
   const [vitaminPlans, setVitaminPlans] = useState<VitaminPlan[]>([]);
@@ -31,6 +35,7 @@ export default function Progress() {
   const [isLoading, setIsLoading] = useState(false);
   
   const confettiRef = useRef<ConfettiCannon>(null);
+  const { isPremium, showUpgradeModal, closeUpgradeModal, upgradeContext } = usePremium();
 
   const loadData = useCallback(async () => {
     try {
@@ -88,7 +93,7 @@ export default function Progress() {
     setIsLoading(true);
     
     try {
-      const { newBadges } = await recordCheckIn(selectedPlan.id, date);
+      const { newBadges } = await recordCheckIn(selectedPlan.id, date, isPremium);
       
       // Reload progress data
       const updatedProgress = await getProgressData();
@@ -302,7 +307,9 @@ export default function Progress() {
 
   const renderBadgeShelf = () => {
     const earnedBadges = progressData.badges;
-    const totalBadges = AVAILABLE_BADGES.length;
+    const availableBadges = getAllAvailableBadges(isPremium);
+    const freeBadges = getAllAvailableBadges(false);
+    const totalBadges = availableBadges.length;
     const completionPercentage = totalBadges > 0 ? (earnedBadges.length / totalBadges) * 100 : 0;
 
     return (
@@ -330,7 +337,8 @@ export default function Progress() {
         </View>
         
         <View style={styles.badgeGrid}>
-          {AVAILABLE_BADGES.map(availableBadge => {
+          {/* Free badges */}
+          {freeBadges.map(availableBadge => {
             const earnedBadge = earnedBadges.find(b => b.id === availableBadge.id);
             const isEarned = !!earnedBadge;
             
@@ -343,6 +351,30 @@ export default function Progress() {
               />
             );
           })}
+          
+          {/* Premium badges with feature gate */}
+          <PremiumFeatureGate
+            feature={PREMIUM_FEATURES.UNLIMITED_BADGES}
+            upgradePrompt={{
+              title: "🏆 Unlock 43+ More Badges!",
+              message: "Earn exclusive achievements like 'Year Long Legend' and 'Perfect Month'",
+              trigger: UPGRADE_TRIGGER_CONTEXTS.BADGE_LIMIT_REACHED
+            }}
+          >
+            {getAllAvailableBadges(true).slice(freeBadges.length).map(availableBadge => {
+              const earnedBadge = earnedBadges.find(b => b.id === availableBadge.id);
+              const isEarned = !!earnedBadge;
+              
+              return (
+                <BadgeItem
+                  key={availableBadge.id}
+                  badge={availableBadge}
+                  isEarned={isEarned}
+                  earnedDate={earnedBadge?.earnedDate}
+                />
+              );
+            })}
+          </PremiumFeatureGate>
         </View>
         
         {/* Scroll Hint */}
@@ -398,6 +430,12 @@ export default function Progress() {
         explosionSpeed={350}
         fallSpeed={1500}
         colors={['#FF7F50', '#98FB98', '#87CEEB', '#DDA0DD', '#FFB347']}
+      />
+
+      <PremiumUpgradeModal
+        visible={showUpgradeModal}
+        onClose={closeUpgradeModal}
+        context={upgradeContext}
       />
     </SafeAreaView>
   );

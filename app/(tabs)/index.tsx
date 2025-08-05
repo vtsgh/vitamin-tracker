@@ -4,6 +4,9 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import VitaminCapsule from '../../components/VitaminCapsule';
+import { usePremium } from '../../hooks/usePremium';
+import { PremiumUpgradeModal } from '../../components/PremiumUpgradeModal';
+import { UPGRADE_TRIGGER_CONTEXTS } from '../../constants/premium';
 
 interface FeatureButton {
   id: string;
@@ -69,6 +72,15 @@ const FEATURES: FeatureButton[] = [
     color: '#6B7280', // Gray
     route: '/settings',
     enabled: false
+  },
+  {
+    id: 'premium',
+    title: 'Upgrade to Premium',
+    subtitle: 'Unlock all features',
+    icon: '✨',
+    color: '#FFD700', // Gold
+    route: null, // Special handling
+    enabled: true
   }
 ];
 
@@ -76,6 +88,8 @@ export default function Home() {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const lastTapTime = useRef(0);
+  
+  const { isPremium, triggerUpgrade, showUpgradeModal, closeUpgradeModal, upgradeContext } = usePremium();
   
   // Animation values
   const titleOpacity = useSharedValue(0);
@@ -176,6 +190,15 @@ export default function Home() {
     }
     lastTapTime.current = now;
 
+    // Handle premium upgrade specially
+    if (feature.id === 'premium') {
+      triggerUpgrade(
+        'unlimited_plans' as any,
+        UPGRADE_TRIGGER_CONTEXTS.HOMEPAGE_CTA
+      );
+      return;
+    }
+
     if (!feature.enabled) {
       // Show coming soon message for disabled features
       console.log(`🚧 ${feature.title} is coming soon!`);
@@ -245,10 +268,22 @@ export default function Home() {
         {/* Feature Buttons Grid */}
         <Animated.View style={[styles.featuresSection, animatedButtonsStyle]}>
           <View style={styles.featuresGrid}>
-            {FEATURES.map((feature, index) => renderFeatureButton(feature, index))}
+            {FEATURES.filter(feature => {
+              // Hide premium button if user is already premium
+              if (feature.id === 'premium' && isPremium) {
+                return false;
+              }
+              return true;
+            }).map((feature, index) => renderFeatureButton(feature, index))}
           </View>
         </Animated.View>
       </ScrollView>
+
+      <PremiumUpgradeModal
+        visible={showUpgradeModal}
+        onClose={closeUpgradeModal}
+        context={upgradeContext}
+      />
     </SafeAreaView>
   );
 }

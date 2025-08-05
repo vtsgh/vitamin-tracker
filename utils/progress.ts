@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CheckIn, Streak, Badge, ProgressData, AVAILABLE_BADGES } from '../types/Progress';
+import { CheckIn, Streak, Badge, ProgressData, getAllAvailableBadges } from '../types/Progress';
 
 const PROGRESS_STORAGE_KEY = 'vitaminProgress';
 
@@ -33,7 +33,7 @@ export async function saveProgressData(data: ProgressData): Promise<void> {
 /**
  * Record a check-in for a vitamin plan
  */
-export async function recordCheckIn(vitaminPlanId: string, date?: string): Promise<{ newBadges: Badge[] }> {
+export async function recordCheckIn(vitaminPlanId: string, date?: string, isPremium: boolean = false): Promise<{ newBadges: Badge[] }> {
   // Create local date string to avoid timezone issues
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -63,8 +63,8 @@ export async function recordCheckIn(vitaminPlanId: string, date?: string): Promi
   // Update streak
   const streak = await updateStreak(progressData, vitaminPlanId, checkInDate);
   
-  // Check for new badges
-  const newBadges = await checkForNewBadges(progressData, vitaminPlanId, streak);
+  // Check for new badges with premium status
+  const newBadges = await checkForNewBadges(progressData, vitaminPlanId, streak, isPremium);
 
   // Save updated data
   await saveProgressData(progressData);
@@ -116,11 +116,12 @@ async function updateStreak(progressData: ProgressData, vitaminPlanId: string, c
 /**
  * Check for new badges earned
  */
-async function checkForNewBadges(progressData: ProgressData, vitaminPlanId: string, streak: Streak): Promise<Badge[]> {
+async function checkForNewBadges(progressData: ProgressData, vitaminPlanId: string, streak: Streak, isPremium: boolean = false): Promise<Badge[]> {
   const newBadges: Badge[] = [];
   const earnedBadgeIds = progressData.badges.map(b => b.id);
+  const availableBadges = getAllAvailableBadges(isPremium);
 
-  for (const availableBadge of AVAILABLE_BADGES) {
+  for (const availableBadge of availableBadges) {
     // Skip if already earned
     if (earnedBadgeIds.includes(availableBadge.id)) continue;
 

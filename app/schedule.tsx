@@ -8,7 +8,10 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import { VitaminPlan } from '../types/VitaminPlan';
 import { cancelNotifications, formatDisplayTime } from '../utils/notifications';
 import VitaminCapsule from '../components/VitaminCapsule';
-import { MAX_VITAMIN_PLANS } from '../constants/limits';
+// import { MAX_VITAMIN_PLANS } from '../constants/limits'; // Now using premium limits
+import { usePremium } from '../hooks/usePremium';
+import { PremiumUpgradeModal } from '../components/PremiumUpgradeModal';
+import { PREMIUM_FEATURES, UPGRADE_TRIGGER_CONTEXTS } from '../constants/premium';
 
 export default function Schedule() {
   const [vitaminPlans, setVitaminPlans] = useState<VitaminPlan[]>([]);
@@ -18,6 +21,8 @@ export default function Schedule() {
   const lastTapTime = useRef(0);
   const buttonScale = useSharedValue(1);
   const addButtonScale = useSharedValue(1);
+  
+  const { getLimit, isLimitReached, triggerUpgrade, showUpgradeModal, closeUpgradeModal, upgradeContext } = usePremium();
   
   // Intro animation values
   const titleOpacity = useSharedValue(0);
@@ -165,11 +170,15 @@ export default function Schedule() {
 
   const handleAddAnother = () => {
     // Check if user has reached the plan limit
-    if (vitaminPlans.length >= MAX_VITAMIN_PLANS) {
-      Alert.alert(
-        'Plan Limit Reached',
-        `You can only have up to ${MAX_VITAMIN_PLANS} vitamin plans. Delete an existing plan to create a new one.`,
-        [{ text: 'OK', style: 'default' }]
+    if (isLimitReached('MAX_PLANS', vitaminPlans.length)) {
+      // Trigger premium upgrade for plan limit
+      triggerUpgrade(
+        PREMIUM_FEATURES.UNLIMITED_PLANS,
+        UPGRADE_TRIGGER_CONTEXTS.PLAN_LIMIT_REACHED,
+        {
+          plansCount: vitaminPlans.length,
+          customMessage: `You've created ${vitaminPlans.length} plans! Upgrade to Premium for unlimited vitamin plans.`
+        }
       );
       return;
     }
@@ -377,16 +386,16 @@ export default function Schedule() {
                 <TouchableOpacity 
                   style={[
                     styles.addButton, 
-                    (isNavigating || vitaminPlans.length >= MAX_VITAMIN_PLANS) && styles.disabledButton
+                    isNavigating && styles.disabledButton
                   ]} 
                   onPress={handleAddAnother}
-                  disabled={isNavigating || vitaminPlans.length >= MAX_VITAMIN_PLANS}
+                  disabled={isNavigating}
                 >
                   <Text style={styles.buttonText}>
                     {isNavigating 
                       ? 'Loading...' 
-                      : vitaminPlans.length >= MAX_VITAMIN_PLANS 
-                        ? `Plan Limit Reached (${vitaminPlans.length}/${MAX_VITAMIN_PLANS})`
+                      : isLimitReached('MAX_PLANS', vitaminPlans.length)
+                        ? `✨ Upgrade for Unlimited Plans (${vitaminPlans.length}/${getLimit('MAX_PLANS')})`
                         : 'Add Another Plan'
                     }
                   </Text>
@@ -405,6 +414,12 @@ export default function Schedule() {
         explosionSpeed={450}
         fallSpeed={2200}
         colors={['#FF7F50', '#FFB347', '#98FB98', '#87CEEB', '#DDA0DD']}
+      />
+
+      <PremiumUpgradeModal
+        visible={showUpgradeModal}
+        onClose={closeUpgradeModal}
+        context={upgradeContext}
       />
     </SafeAreaView>
   );
