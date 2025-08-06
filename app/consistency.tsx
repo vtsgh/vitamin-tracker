@@ -9,19 +9,25 @@ const consistencyOptions = [
 ];
 
 export default function Consistency() {
-  const { vitamin, reminderTime } = useLocalSearchParams<{ vitamin: string; reminderTime: string }>();
+  const { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime } = useLocalSearchParams<{ 
+    vitamin: string; 
+    dosageAmount: string;
+    dosageUnit: string;
+    dosageDisplay: string;
+    reminderTime: string;
+  }>();
 
   const handleConsistencyPress = (optionId: string, optionLabel: string) => {
     console.log(`Selected: ${optionLabel} (${optionId})`);
     if (optionId === 'daily' || optionId === 'every-other-day' || optionId === 'weekly') {
       router.push({
         pathname: '/end-date',
-        params: { vitamin, reminderTime, frequency: optionId }
+        params: { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime, frequency: optionId }
       });
     } else if (optionId === 'custom-days') {
       router.push({
         pathname: '/custom-days',
-        params: { vitamin, reminderTime }
+        params: { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime }
       });
     }
   };

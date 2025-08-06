@@ -4,8 +4,11 @@ import { router, useLocalSearchParams } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function CustomEndDate() {
-  const { vitamin, reminderTime, frequency, customDays } = useLocalSearchParams<{ 
+  const { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime, frequency, customDays } = useLocalSearchParams<{ 
     vitamin: string; 
+    dosageAmount: string;
+    dosageUnit: string;
+    dosageDisplay: string;
     reminderTime: string;
     frequency: string; 
     customDays?: string 
@@ -26,7 +29,7 @@ export default function CustomEndDate() {
   const handleContinue = () => {
     router.push({
       pathname: '/summary',
-      params: { vitamin, reminderTime, frequency, endDate: date.toISOString(), customDays }
+      params: { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime, frequency, endDate: date.toISOString(), customDays }
     });
   };
 

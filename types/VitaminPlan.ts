@@ -1,6 +1,13 @@
+export interface VitaminDosage {
+  amount: number;
+  unit: string;
+  displayText: string; // formatted display text (e.g., "1,000 IU (25 mcg)")
+}
+
 export interface VitaminPlan {
   id: string; // unique ID (e.g. UUID)
   vitamin: string;
+  dosage?: VitaminDosage; // optional for backward compatibility
   frequency: 'daily' | 'every-other-day' | 'weekly' | 'custom';
   customDays?: string[]; // if frequency is custom
   endDate: string; // ISO date

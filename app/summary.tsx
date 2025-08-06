@@ -4,10 +4,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { VitaminPlan } from '../types/VitaminPlan';
 import { scheduleVitaminReminders, formatDisplayTime } from '../utils/notifications';
 import { MAX_VITAMIN_PLANS } from '../constants/limits';
+import VitaminCapsule from '../components/VitaminCapsule';
 
 export default function Summary() {
-  const { vitamin, reminderTime, frequency, endDate, customDays } = useLocalSearchParams<{ 
+  const { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime, frequency, endDate, customDays } = useLocalSearchParams<{ 
     vitamin: string; 
+    dosageAmount: string;
+    dosageUnit: string;
+    dosageDisplay: string;
     reminderTime: string;
     frequency: string; 
     endDate: string; 
@@ -34,6 +38,11 @@ export default function Summary() {
       const vitaminPlan: VitaminPlan = {
         id: Date.now().toString(),
         vitamin: vitaminName,
+        dosage: dosageAmount && dosageUnit && dosageDisplay ? {
+          amount: parseFloat(dosageAmount),
+          unit: dosageUnit,
+          displayText: dosageDisplay
+        } : undefined,
         frequency: planFrequency,
         endDate: planEndDate,
         customDays: planCustomDays,
@@ -120,6 +129,12 @@ export default function Summary() {
         <View style={styles.summaryCard}>
           <Text style={styles.summaryTitle}>Your Plan Summary</Text>
           <Text style={styles.summaryVitamin}>{vitamin}</Text>
+          {dosageDisplay && (
+            <View style={styles.summaryDosageContainer}>
+              <VitaminCapsule size={16} style={styles.vitaminIcon} />
+              <Text style={styles.summaryDosage}>{dosageDisplay}</Text>
+            </View>
+          )}
           <Text style={styles.summaryDetail}>
             {formatFrequency(frequency, customDays ? JSON.parse(customDays) : undefined)}
           </Text>
@@ -218,6 +233,20 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'center',
     marginBottom: 15,
+  },
+  summaryDosageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  vitaminIcon: {
+    marginRight: 6,
+  },
+  summaryDosage: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FF7F50',
   },
   summaryDetail: {
     fontSize: 16,

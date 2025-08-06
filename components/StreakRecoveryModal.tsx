@@ -10,10 +10,10 @@ import {
 } from 'react-native';
 import { usePremium } from '../hooks/usePremium';
 import { 
-  useStreakRecovery, 
-  getStreakRecoveriesThisMonth
+  applyStreakRecovery, 
+  getStreakRecoveriesThisMonth,
+  getProgressData
 } from '../utils/progress';
-import { getProgressData } from '../utils/progress';
 import { PREMIUM_FEATURES, UPGRADE_TRIGGER_CONTEXTS } from '../constants/premium';
 
 interface StreakRecoveryModalProps {
@@ -86,7 +86,7 @@ export function StreakRecoveryModal({
       }
 
       // Use the recovery
-      const result = await useStreakRecovery(vitaminPlanId, missedDate);
+      const result = await applyStreakRecovery(vitaminPlanId, missedDate);
       
       if (result.success) {
         const remainingRecoveries = monthlyLimit - currentUsage - 1;

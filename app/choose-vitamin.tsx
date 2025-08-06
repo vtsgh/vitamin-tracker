@@ -25,7 +25,7 @@ export default function ChooseVitamin() {
     
     console.log('✅ Selected vitamin:', vitaminLabel);
     router.push({
-      pathname: '/timing',
+      pathname: '/select-dosage',
       params: { vitamin: vitaminLabel }
     });
   };

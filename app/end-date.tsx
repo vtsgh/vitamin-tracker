@@ -10,8 +10,11 @@ const endDateOptions = [
 ];
 
 export default function EndDate() {
-  const { vitamin, reminderTime, frequency, customDays } = useLocalSearchParams<{ 
+  const { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime, frequency, customDays } = useLocalSearchParams<{ 
     vitamin: string; 
+    dosageAmount: string;
+    dosageUnit: string;
+    dosageDisplay: string;
     reminderTime: string;
     frequency: string; 
     customDays?: string 
@@ -38,14 +41,14 @@ export default function EndDate() {
     if (optionId === 'custom-date') {
       router.push({
         pathname: '/custom-end-date',
-        params: { vitamin, reminderTime, frequency, customDays }
+        params: { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime, frequency, customDays }
       });
     } else {
       // Navigate directly to summary with calculated end date
       const endDate = calculateEndDate(optionId);
       router.push({
         pathname: '/summary',
-        params: { vitamin, reminderTime, frequency, endDate, customDays }
+        params: { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime, frequency, endDate, customDays }
       });
     }
   };

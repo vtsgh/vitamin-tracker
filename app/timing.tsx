@@ -5,7 +5,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { formatDisplayTime } from '../utils/notifications';
 
 export default function Timing() {
-  const { vitamin } = useLocalSearchParams<{ vitamin: string }>();
+  const { vitamin, dosageAmount, dosageUnit, dosageDisplay } = useLocalSearchParams<{ 
+    vitamin: string;
+    dosageAmount: string;
+    dosageUnit: string;
+    dosageDisplay: string;
+  }>();
   
   // Default to 9:00 AM
   const [reminderTime, setReminderTime] = useState(new Date(2024, 0, 1, 9, 0, 0));
@@ -26,6 +31,9 @@ export default function Timing() {
       pathname: '/consistency',
       params: { 
         vitamin,
+        dosageAmount,
+        dosageUnit,
+        dosageDisplay,
         reminderTime: timeString
       }
     });

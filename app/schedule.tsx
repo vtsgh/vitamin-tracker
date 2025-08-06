@@ -267,6 +267,9 @@ export default function Schedule() {
       params: {
         id: plan.id,
         vitamin: plan.vitamin,
+        dosageAmount: plan.dosage?.amount?.toString() || undefined,
+        dosageUnit: plan.dosage?.unit || undefined,
+        dosageDisplay: plan.dosage?.displayText || undefined,
         frequency: plan.frequency,
         endDate: plan.endDate,
         customDays: plan.customDays ? JSON.stringify(plan.customDays) : undefined,
@@ -358,6 +361,12 @@ export default function Schedule() {
                   <View key={plan.id} style={[styles.planCard, vitaminPlans.length === 1 && styles.singlePlanCard]}>
                     <View style={styles.planInfo}>
                       <Text style={styles.planVitamin}>{plan.vitamin}</Text>
+                      {plan.dosage && (
+                        <View style={styles.planDosageContainer}>
+                          <VitaminCapsule size={12} style={styles.vitaminIcon} />
+                          <Text style={styles.planDosage}>{plan.dosage.displayText}</Text>
+                        </View>
+                      )}
                       <Text style={styles.planFrequency}>{formatFrequency(plan.frequency, plan.customDays)}</Text>
                       {plan.reminderTime && (
                         <Text style={styles.planReminderTime}>Reminder at {formatDisplayTime(plan.reminderTime)}</Text>
@@ -534,6 +543,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FF7F50',
     marginBottom: 6,
+  },
+  planDosageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  vitaminIcon: {
+    marginRight: 4,
+  },
+  planDosage: {
+    fontSize: 12,
+    color: '#87CEEB',
+    fontWeight: '600',
   },
   planFrequency: {
     fontSize: 13,

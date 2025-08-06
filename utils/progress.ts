@@ -274,7 +274,7 @@ export function getStreakRecoveriesThisMonth(recoveries: StreakRecovery[], vitam
 /**
  * Use a streak recovery to save a broken streak
  */
-export async function useStreakRecovery(vitaminPlanId: string, missedDate: string): Promise<{ success: boolean; newRecovery?: StreakRecovery }> {
+export async function applyStreakRecovery(vitaminPlanId: string, missedDate: string): Promise<{ success: boolean; newRecovery?: StreakRecovery }> {
   try {
     const progressData = await getProgressData();
     

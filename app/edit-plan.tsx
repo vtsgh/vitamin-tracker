@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Platform, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Platform, Alert, TextInput, KeyboardAvoidingView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -6,6 +6,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { VitaminPlan } from '../types/VitaminPlan';
 import { VITAMINS } from '../constants/vitamins';
 import { scheduleVitaminReminders, cancelNotifications, formatDisplayTime } from '../utils/notifications';
+import { getDosageOptions, formatDosageDisplay } from '../constants/dosages';
+import VitaminCapsule from '../components/VitaminCapsule';
 
 const frequencyOptions = [
   { id: 'daily', label: 'Daily' },
@@ -25,17 +27,20 @@ const daysOfWeek = [
 ];
 
 export default function EditPlan() {
-  const { id, vitamin, frequency, endDate, customDays, reminderTime } = useLocalSearchParams<{
+  const { id, vitamin, dosageAmount, dosageUnit, dosageDisplay, frequency, endDate, customDays, reminderTime } = useLocalSearchParams<{
     id: string;
     vitamin: string;
+    dosageAmount?: string;
+    dosageUnit?: string;
+    dosageDisplay?: string;
     frequency: string;
     endDate: string;
     customDays?: string;
     reminderTime?: string;
   }>();
 
-  // Initialize state with current values
-  const [editedVitamin, setEditedVitamin] = useState(vitamin || '');
+  // Initialize state with current values (vitamin is read-only)
+  const editedVitamin = vitamin || '';
   const [editedFrequency, setEditedFrequency] = useState(frequency || 'daily');
   const [editedCustomDays, setEditedCustomDays] = useState<string[]>(
     customDays ? JSON.parse(customDays) : []
@@ -48,9 +53,78 @@ export default function EditPlan() {
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  
+  // Dosage editing state
+  const [showDosageEditor, setShowDosageEditor] = useState(false);
+  const [editedDosageAmount, setEditedDosageAmount] = useState(dosageAmount || '');
+  const [editedDosageUnit, setEditedDosageUnit] = useState(dosageUnit || '');
+  const [editedDosageDisplay, setEditedDosageDisplay] = useState(dosageDisplay || '');
+  const [customDosageAmount, setCustomDosageAmount] = useState('');
+  const [customDosageUnit, setCustomDosageUnit] = useState('');
 
   const handleBack = () => {
     router.back();
+  };
+
+  // Get vitamin ID for dosage options
+  const vitaminObj = VITAMINS.find(v => v.label === editedVitamin);
+  const vitaminId = vitaminObj?.id || '';
+  const dosageOptions = getDosageOptions(vitaminId);
+
+  const getCommonUnits = (vitaminId: string): string[] => {
+    if (['vitamin-a', 'vitamin-d', 'vitamin-e'].includes(vitaminId)) {
+      return ['IU', 'mcg'];
+    }
+    if (['vitamin-b12', 'vitamin-k', 'folate', 'biotin'].includes(vitaminId)) {
+      return ['mcg'];
+    }
+    if (['calcium', 'magnesium', 'vitamin-c', 'iron', 'zinc'].includes(vitaminId)) {
+      return ['mg'];
+    }
+    if (vitaminId === 'omega-3') {
+      return ['mg', 'g'];
+    }
+    if (vitaminId === 'multivitamin') {
+      return ['tablet', 'capsule', 'gummy'];
+    }
+    return ['mg', 'mcg'];
+  };
+
+  const handleDosageSelection = (amount: number, unit: string, displayText: string) => {
+    setEditedDosageAmount(amount.toString());
+    setEditedDosageUnit(unit);
+    setEditedDosageDisplay(displayText);
+    setShowDosageEditor(false);
+  };
+
+  const handleCustomDosage = () => {
+    if (!customDosageAmount.trim()) {
+      Alert.alert('Missing Amount', 'Please enter a dosage amount.');
+      return;
+    }
+
+    const amount = parseFloat(customDosageAmount);
+    if (isNaN(amount) || amount <= 0) {
+      Alert.alert('Invalid Amount', 'Please enter a valid positive number.');
+      return;
+    }
+
+    if (!customDosageUnit.trim()) {
+      Alert.alert('Missing Unit', 'Please select a unit for your dosage.');
+      return;
+    }
+
+    const displayText = formatDosageDisplay(amount, customDosageUnit);
+    handleDosageSelection(amount, customDosageUnit, displayText);
+    setCustomDosageAmount('');
+    setCustomDosageUnit('');
+  };
+
+  const handleRemoveDosage = () => {
+    setEditedDosageAmount('');
+    setEditedDosageUnit('');
+    setEditedDosageDisplay('');
+    setShowDosageEditor(false);
   };
 
   const toggleCustomDay = (dayId: string) => {
@@ -115,6 +189,11 @@ export default function EditPlan() {
       const updatedPlan: VitaminPlan = {
         id: id,
         vitamin: editedVitamin.trim(),
+        dosage: editedDosageAmount && editedDosageUnit && editedDosageDisplay ? {
+          amount: parseFloat(editedDosageAmount),
+          unit: editedDosageUnit,
+          displayText: editedDosageDisplay
+        } : undefined,
         frequency: editedFrequency as VitaminPlan['frequency'],
         customDays: editedFrequency === 'custom' ? editedCustomDays : undefined,
         endDate: editedEndDate.toISOString(),
@@ -168,30 +247,51 @@ export default function EditPlan() {
     <View style={styles.container}>
       <Text style={styles.title}>Edit Vitamin Plan</Text>
       
+      {/* Read-only Vitamin Header */}
+      <View style={styles.vitaminHeader}>
+        <View style={styles.vitaminHeaderContent}>
+          <VitaminCapsule size={24} style={styles.headerVitaminIcon} />
+          <Text style={styles.vitaminHeaderTitle}>{editedVitamin}</Text>
+        </View>
+        <Text style={styles.vitaminHeaderSubtitle}>
+          Fine-tune your health journey! Adjust your schedule, dosage, or timing to keep your wellness routine perfectly balanced. 🌿
+        </Text>
+      </View>
+
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.card}>
-          {/* Vitamin Selection */}
+          {/* Dosage Selection */}
           <View style={styles.field}>
-            <Text style={styles.label}>Vitamin:</Text>
-            <View style={styles.vitaminContainer}>
-              {VITAMINS.map((vitamin) => (
-                <TouchableOpacity
-                  key={vitamin.id}
-                  style={[
-                    styles.vitaminButton,
-                    editedVitamin === vitamin.label && styles.vitaminButtonSelected
-                  ]}
-                  onPress={() => setEditedVitamin(vitamin.label)}
-                >
-                  <Text style={[
-                    styles.vitaminButtonText,
-                    editedVitamin === vitamin.label && styles.vitaminButtonTextSelected
-                  ]}>
-                    {vitamin.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <Text style={styles.label}>Dosage:</Text>
+            {editedDosageDisplay ? (
+              <View style={styles.currentDosageContainer}>
+                <View style={styles.currentDosageDisplay}>
+                  <VitaminCapsule size={16} style={styles.vitaminIcon} />
+                  <Text style={styles.currentDosageText}>{editedDosageDisplay}</Text>
+                </View>
+                <View style={styles.dosageActions}>
+                  <TouchableOpacity 
+                    style={styles.changeDosageButton}
+                    onPress={() => setShowDosageEditor(true)}
+                  >
+                    <Text style={styles.changeDosageButtonText}>Change</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={styles.removeDosageButton}
+                    onPress={handleRemoveDosage}
+                  >
+                    <Text style={styles.removeDosageButtonText}>Remove</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <TouchableOpacity 
+                style={styles.addDosageButton}
+                onPress={() => setShowDosageEditor(true)}
+              >
+                <Text style={styles.addDosageButtonText}>+ Add Dosage</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Frequency Selection */}
@@ -349,6 +449,96 @@ export default function EditPlan() {
         </TouchableOpacity>
       </ScrollView>
 
+      {/* Dosage Editor Modal */}
+      {showDosageEditor && (
+        <View style={styles.dosageEditorOverlay}>
+          <KeyboardAvoidingView 
+            style={styles.dosageEditorModal}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          >
+            <View style={styles.dosageEditorHeader}>
+              <Text style={styles.dosageEditorTitle}>Select Dosage</Text>
+              <TouchableOpacity 
+                style={styles.dosageEditorClose}
+                onPress={() => setShowDosageEditor(false)}
+              >
+                <Text style={styles.dosageEditorCloseText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView 
+              style={styles.dosageEditorScroll}
+              contentContainerStyle={styles.dosageEditorContent}
+              keyboardShouldPersistTaps="handled"
+            >
+              {/* Predefined dosage options */}
+              {dosageOptions.map((option, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.dosageOption}
+                  onPress={() => handleDosageSelection(
+                    option.amount,
+                    option.unit,
+                    option.alternativeDisplay || formatDosageDisplay(option.amount, option.unit)
+                  )}
+                >
+                  <View style={styles.dosageOptionContent}>
+                    <VitaminCapsule size={16} style={styles.vitaminIcon} />
+                    <Text style={styles.dosageOptionText}>
+                      {option.alternativeDisplay || formatDosageDisplay(option.amount, option.unit)}
+                    </Text>
+                    <Text style={styles.dosageOptionLabel}>{option.label}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+
+              {/* Custom dosage input */}
+              <View style={styles.customDosageSection}>
+                <Text style={styles.customDosageTitle}>Custom Dosage</Text>
+                <View style={styles.customDosageInputRow}>
+                  <TextInput
+                    style={styles.customDosageAmountInput}
+                    placeholder="Amount"
+                    value={customDosageAmount}
+                    onChangeText={setCustomDosageAmount}
+                    keyboardType="numeric"
+                    placeholderTextColor="#999"
+                  />
+                  <View style={styles.customDosageUnitSelector}>
+                    <Text style={styles.unitSelectorLabel}>Unit:</Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                      {getCommonUnits(vitaminId).map((unit) => (
+                        <TouchableOpacity
+                          key={unit}
+                          style={[
+                            styles.unitButton,
+                            customDosageUnit === unit && styles.unitButtonSelected
+                          ]}
+                          onPress={() => setCustomDosageUnit(unit)}
+                        >
+                          <Text style={[
+                            styles.unitButtonText,
+                            customDosageUnit === unit && styles.unitButtonTextSelected
+                          ]}>
+                            {unit}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={styles.confirmCustomButton}
+                  onPress={handleCustomDosage}
+                >
+                  <Text style={styles.confirmCustomButtonText}>Use This Dosage</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </View>
+      )}
+
       <TouchableOpacity style={styles.backButton} onPress={handleBack}>
         <Text style={styles.backButtonText}>← Back</Text>
       </TouchableOpacity>
@@ -398,32 +588,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FF7F50',
     marginBottom: 10,
-  },
-  vitaminContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  vitaminButton: {
-    backgroundColor: '#f8f8f8',
-    borderWidth: 2,
-    borderColor: '#FF7F50',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 5,
-  },
-  vitaminButtonSelected: {
-    backgroundColor: '#FF7F50',
-  },
-  vitaminButtonText: {
-    fontSize: 12,
-    color: '#FF7F50',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  vitaminButtonTextSelected: {
-    color: '#fff',
   },
   frequencyContainer: {
     flexDirection: 'row',
@@ -658,6 +822,276 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   backButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  // Vitamin header styles
+  vitaminHeader: {
+    backgroundColor: '#fff',
+    marginHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 15,
+    borderRadius: 15,
+    padding: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  vitaminHeaderContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  headerVitaminIcon: {
+    marginRight: 12,
+  },
+  vitaminHeaderTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#FF7F50',
+    flex: 1,
+  },
+  vitaminHeaderSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+
+  // Dosage editing styles
+  currentDosageContainer: {
+    backgroundColor: '#f8f8f8',
+    borderRadius: 10,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  currentDosageDisplay: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  vitaminIcon: {
+    marginRight: 8,
+  },
+  currentDosageText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '600',
+  },
+  dosageActions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  changeDosageButton: {
+    backgroundColor: '#FF7F50',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    flex: 1,
+  },
+  changeDosageButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  removeDosageButton: {
+    backgroundColor: '#666',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    flex: 1,
+  },
+  removeDosageButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  addDosageButton: {
+    backgroundColor: '#E8F4FD',
+    borderRadius: 10,
+    padding: 15,
+    borderWidth: 2,
+    borderColor: '#87CEEB',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+  },
+  addDosageButtonText: {
+    color: '#87CEEB',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  // Dosage editor modal styles
+  dosageEditorOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  dosageEditorModal: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    margin: 20,
+    maxHeight: '80%',
+    width: '90%',
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  dosageEditorHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+  },
+  dosageEditorTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FF7F50',
+  },
+  dosageEditorClose: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#E5E5E5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dosageEditorCloseText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  dosageEditorScroll: {
+    flex: 1,
+  },
+  dosageEditorContent: {
+    padding: 20,
+  },
+  dosageOption: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    marginBottom: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+  },
+  dosageOptionContent: {
+    padding: 15,
+    alignItems: 'center',
+  },
+  dosageOptionText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 5,
+    marginBottom: 3,
+  },
+  dosageOptionLabel: {
+    fontSize: 14,
+    color: '#FF7F50',
+    fontWeight: '600',
+  },
+  customDosageSection: {
+    backgroundColor: '#F8F9FF',
+    borderRadius: 15,
+    padding: 20,
+    marginTop: 10,
+    borderWidth: 2,
+    borderColor: '#E8EAFF',
+  },
+  customDosageTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  customDosageInputRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 15,
+    gap: 10,
+  },
+  customDosageAmountInput: {
+    flex: 1,
+    borderWidth: 2,
+    borderColor: '#E5E5E5',
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#fff',
+  },
+  customDosageUnitSelector: {
+    flex: 1,
+  },
+  unitSelectorLabel: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  unitButton: {
+    backgroundColor: '#F5F5F5',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginRight: 8,
+    borderWidth: 2,
+    borderColor: '#E5E5E5',
+    minWidth: 50,
+    alignItems: 'center',
+  },
+  unitButtonSelected: {
+    backgroundColor: '#FF7F50',
+    borderColor: '#FF7F50',
+  },
+  unitButtonText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  unitButtonTextSelected: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  confirmCustomButton: {
+    backgroundColor: '#FF7F50',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  confirmCustomButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',

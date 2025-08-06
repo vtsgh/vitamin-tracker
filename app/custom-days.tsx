@@ -13,7 +13,13 @@ const daysOfWeek = [
 ];
 
 export default function CustomDays() {
-  const { vitamin, reminderTime } = useLocalSearchParams<{ vitamin: string; reminderTime: string }>();
+  const { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime } = useLocalSearchParams<{ 
+    vitamin: string; 
+    dosageAmount: string;
+    dosageUnit: string;
+    dosageDisplay: string;
+    reminderTime: string;
+  }>();
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
   const toggleDay = (dayId: string) => {
@@ -28,7 +34,7 @@ export default function CustomDays() {
     console.log('Selected days:', selectedDays);
     router.push({
       pathname: '/end-date',
-      params: { vitamin, reminderTime, frequency: 'custom', customDays: JSON.stringify(selectedDays) }
+      params: { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime, frequency: 'custom', customDays: JSON.stringify(selectedDays) }
     });
   };
 
