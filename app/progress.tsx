@@ -24,10 +24,13 @@ import {
   wouldStreakBreak,
   calculateStreakWithRecoveries
 } from '../utils/progress';
+import { SmartNotificationEngine } from '../utils/smart-notifications';
+import { useSmartReminders } from '../hooks/useSmartReminders';
 import { usePremium } from '../hooks/usePremium';
 import { PremiumFeatureGate } from '../components/PremiumFeatureGate';
 import { PremiumUpgradeModal } from '../components/PremiumUpgradeModal';
 import { StreakRecoveryModal } from '../components/StreakRecoveryModal';
+import { SmartSnoozeModal } from '../components/SmartSnoozeModal';
 import { PREMIUM_FEATURES, UPGRADE_TRIGGER_CONTEXTS } from '../constants/premium';
 
 export default function Progress() {
@@ -38,9 +41,12 @@ export default function Progress() {
   const [isLoading, setIsLoading] = useState(false);
   const [showStreakRecoveryModal, setShowStreakRecoveryModal] = useState(false);
   const [streakBreakInfo, setStreakBreakInfo] = useState<{ vitaminPlanId: string; missedDate: string; currentStreak: number } | null>(null);
+  const [showSmartSnoozeModal, setShowSmartSnoozeModal] = useState(false);
+  const [snoozeInfo, setSnoozeInfo] = useState<{ vitaminName: string; planId: string; originalTime: string } | null>(null);
   
   const confettiRef = useRef<ConfettiCannon>(null);
   const { isPremium, showUpgradeModal, closeUpgradeModal, upgradeContext } = usePremium();
+  const { settings: smartSettings, recordNotificationResponse } = useSmartReminders();
 
 
   const loadData = useCallback(async () => {
@@ -147,6 +153,20 @@ export default function Progress() {
     
     try {
       const { newBadges } = await recordCheckIn(selectedPlan.id, date, isPremium);
+      
+      // Record successful check-in for behavioral learning
+      if (smartSettings.behaviorLearning) {
+        console.log('📊 Recording check-in for behavioral learning');
+        await recordNotificationResponse('taken', new Date());
+        
+        // Also record with SmartNotificationEngine for advanced analytics
+        await SmartNotificationEngine.recordNotificationResponse(selectedPlan.id, {
+          type: 'taken',
+          timestamp: new Date(),
+          originalTime: selectedPlan.reminderTime || '09:00',
+          actualTime: new Date().toTimeString().slice(0, 5) // HH:MM format
+        });
+      }
       
       // Reload progress data
       const updatedProgress = await getProgressData();
@@ -352,6 +372,23 @@ export default function Progress() {
     const streak = getStreakForPlan(progressData.streaks, selectedPlan.id);
     const message = getMotivationalMessage(streak.currentStreak);
 
+    const handleSmartSnooze = () => {
+      if (isPremium && smartSettings.enabled) {
+        setSnoozeInfo({
+          vitaminName: selectedPlan.vitamin,
+          planId: selectedPlan.id,
+          originalTime: selectedPlan.reminderTime || '09:00'
+        });
+        setShowSmartSnoozeModal(true);
+      } else {
+        Alert.alert(
+          '✨ Premium Feature',
+          'Smart Snooze is available with Premium! Get AI-powered snooze suggestions based on your habits.',
+          [{ text: 'OK', style: 'default' }]
+        );
+      }
+    };
+
     return (
       <View style={styles.streakInfo}>
         <View style={styles.streakBadge}>
@@ -359,6 +396,15 @@ export default function Progress() {
           <Text style={styles.streakLabel}>Day Streak</Text>
         </View>
         <Text style={styles.motivationalMessage}>{message}</Text>
+        
+        {/* Smart Snooze Button */}
+        <TouchableOpacity 
+          style={styles.smartSnoozeButton}
+          onPress={handleSmartSnooze}
+        >
+          <Text style={styles.smartSnoozeIcon}>🧠</Text>
+          <Text style={styles.smartSnoozeText}>Smart Snooze</Text>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -508,6 +554,24 @@ export default function Progress() {
           onRecoveryUsed={() => {
             // Reload data to reflect the recovery
             loadData();
+          }}
+        />
+      )}
+
+      {snoozeInfo && (
+        <SmartSnoozeModal
+          visible={showSmartSnoozeModal}
+          onClose={() => {
+            setShowSmartSnoozeModal(false);
+            setSnoozeInfo(null);
+          }}
+          vitaminName={snoozeInfo.vitaminName}
+          planId={snoozeInfo.planId}
+          originalTime={snoozeInfo.originalTime}
+          onSnoozeApplied={(snoozeMinutes) => {
+            console.log(`📱 Snooze applied: ${snoozeMinutes} minutes`);
+            // Here you could schedule a new notification for the snoozed time
+            // For now, we just close the modal
           }}
         />
       )}
@@ -798,6 +862,30 @@ const styles = StyleSheet.create({
     color: '#555',
     textAlign: 'center',
     lineHeight: 22,
+    marginBottom: 15,
+  },
+  smartSnoozeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#6366F1',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    alignSelf: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  smartSnoozeIcon: {
+    fontSize: 16,
+    marginRight: 6,
+  },
+  smartSnoozeText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   calendarHeader: {
     flexDirection: 'row',

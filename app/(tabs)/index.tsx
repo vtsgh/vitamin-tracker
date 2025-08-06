@@ -47,13 +47,13 @@ const FEATURES: FeatureButton[] = [
     enabled: true
   },
   {
-    id: 'reminders',
+    id: 'smart-reminders',
     title: 'Smart Reminders',
-    subtitle: 'Customize notifications',
+    subtitle: 'AI-powered timing & settings',
     icon: '🔔',
-    color: '#87CEEB', // Soft blue
-    route: '/reminders',
-    enabled: false
+    color: '#67E8F9', // Light cyan
+    route: '/smart-reminders',
+    enabled: true
   },
   {
     id: 'health',
@@ -62,7 +62,7 @@ const FEATURES: FeatureButton[] = [
     icon: '💡',
     color: '#DDA0DD', // Light purple
     route: '/health',
-    enabled: false
+    enabled: true
   },
   {
     id: 'community',
@@ -80,7 +80,7 @@ const FEATURES: FeatureButton[] = [
     icon: '⚙️',
     color: '#6B7280', // Gray
     route: '/settings',
-    enabled: false
+    enabled: true
   }
 ];
 

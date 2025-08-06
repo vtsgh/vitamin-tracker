@@ -3,8 +3,11 @@ import { router, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { VitaminPlan } from '../types/VitaminPlan';
 import { scheduleVitaminReminders, formatDisplayTime } from '../utils/notifications';
+import { SmartNotificationEngine } from '../utils/smart-notifications';
 import { MAX_VITAMIN_PLANS } from '../constants/limits';
 import VitaminCapsule from '../components/VitaminCapsule';
+import { useSmartReminders } from '../hooks/useSmartReminders';
+import { usePremium } from '../hooks/usePremium';
 
 export default function Summary() {
   const { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime, frequency, endDate, customDays } = useLocalSearchParams<{ 
@@ -17,6 +20,9 @@ export default function Summary() {
     endDate: string; 
     customDays?: string 
   }>();
+
+  const { settings, behaviorProfile, timingProfile } = useSmartReminders();
+  const { isPremium } = usePremium();
 
   const handleBack = () => {
     router.back();
@@ -51,15 +57,43 @@ export default function Summary() {
         createdDate: createdDate, // Today's date in YYYY-MM-DD format
       };
 
-      // Schedule comprehensive notification reminders
-      console.log('🔔 Scheduling comprehensive notifications for:', vitaminName);
+      // Schedule comprehensive notification reminders with smart features
+      console.log('🔔 Scheduling notifications for:', vitaminName);
       console.log('📋 Plan details:', { frequency: planFrequency, time: planReminderTime, endDate: planEndDate });
+      console.log('🧠 Smart features enabled:', settings.enabled);
       
-      const notificationIds = await scheduleVitaminReminders(vitaminPlan);
+      let notificationIds: string[] = [];
+      let smartResult = null;
+
+      // Use smart notification system if enabled, otherwise fall back to basic
+      if (isPremium && settings.enabled) {
+        console.log('🧠 Using smart notification system');
+        smartResult = await SmartNotificationEngine.scheduleSmartReminders(
+          vitaminPlan,
+          settings,
+          behaviorProfile,
+          timingProfile
+        );
+        notificationIds = smartResult.scheduledIds;
+        
+        // Log smart features used
+        if (smartResult.adaptedFromOriginal) {
+          console.log(`✨ Smart timing applied: ${smartResult.reason}`);
+          console.log(`🕐 Optimized from ${planReminderTime} to ${smartResult.recommendedTime}`);
+        }
+      } else {
+        console.log('📱 Using basic notification system');
+        notificationIds = await scheduleVitaminReminders(vitaminPlan);
+      }
 
       if (notificationIds && notificationIds.length > 0) {
         console.log(`✅ Successfully scheduled ${notificationIds.length} notifications`);
-        vitaminPlan.notificationIds = notificationIds; // Update the plan with notification IDs
+        vitaminPlan.notificationIds = notificationIds;
+        
+        // If smart timing was used, update the reminder time in the plan
+        if (smartResult?.recommendedTime && smartResult.adaptedFromOriginal) {
+          vitaminPlan.reminderTime = smartResult.recommendedTime;
+        }
       } else {
         console.log('⚠️ Failed to schedule notifications, but continuing with plan creation');
       }
