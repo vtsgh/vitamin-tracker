@@ -3,6 +3,8 @@ import React, { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import VitaminCapsule from '../components/VitaminCapsule';
+import { PremiumFeatureGate } from '../components/PremiumFeatureGate';
+import { PREMIUM_FEATURES, UPGRADE_TRIGGER_CONTEXTS } from '../constants/premium';
 import { VITAMIN_EDUCATION_CARDS, HEALTH_ARTICLES, INSIGHT_CATEGORIES, FEATURED_CONTENT, VitaminEducationCard, HealthArticle } from '../constants/health-insights';
 
 export default function HealthInsights() {
@@ -243,12 +245,37 @@ export default function HealthInsights() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>📚 Deep Dive Articles</Text>
           <Text style={styles.sectionSubtitle}>
-            Evidence-based insights to boost your health knowledge
+            Evidence-based insights to boost your health knowledge (Premium feature)
           </Text>
           
-          <View style={styles.articlesContainer}>
-            {HEALTH_ARTICLES.map(renderArticleCard)}
-          </View>
+          <PremiumFeatureGate
+            feature={PREMIUM_FEATURES.CUSTOM_SCHEDULES}
+            upgradePrompt={{
+              title: "📚 Unlock Deep Dive Articles",
+              message: "Get access to expert health insights, vitamin timing guides, and evidence-based nutrition science",
+              trigger: UPGRADE_TRIGGER_CONTEXTS.FEATURE_DISCOVERY
+            }}
+            fallback={
+              <View style={styles.premiumArticlesPrompt}>
+                <Text style={styles.premiumArticlesIcon}>🔒</Text>
+                <Text style={styles.premiumArticlesTitle}>Premium Health Articles</Text>
+                <Text style={styles.premiumArticlesText}>
+                  Unlock in-depth articles covering vitamin science, timing strategies, and expert health insights.
+                  {'\n\n'}Current articles include:
+                  {'\n'}• Why Iron Matters More for Women
+                  {'\n'}• The Sunshine Vitamin and Your Mood  
+                  {'\n'}• Vitamin Timing: When and Why It Matters
+                </Text>
+                <Text style={styles.premiumArticlesUpgrade}>
+                  ✨ Upgrade to Premium for unlimited access
+                </Text>
+              </View>
+            }
+          >
+            <View style={styles.articlesContainer}>
+              {HEALTH_ARTICLES.map(renderArticleCard)}
+            </View>
+          </PremiumFeatureGate>
         </View>
 
         {/* Coming Soon Section */}
@@ -583,6 +610,41 @@ const styles = StyleSheet.create({
   relatedTagText: {
     fontSize: 12,
     color: '#2563EB',
+  },
+
+  // Premium Articles Styles
+  premiumArticlesPrompt: {
+    backgroundColor: '#FFF8DC',
+    borderRadius: 20,
+    padding: 25,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFD700',
+    borderStyle: 'dashed',
+  },
+  premiumArticlesIcon: {
+    fontSize: 40,
+    marginBottom: 15,
+  },
+  premiumArticlesTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#8B5A00',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  premiumArticlesText: {
+    fontSize: 14,
+    color: '#8B5A00',
+    lineHeight: 22,
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  premiumArticlesUpgrade: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#FF7F50',
+    textAlign: 'center',
   },
 
   // Coming Soon Styles

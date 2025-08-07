@@ -107,24 +107,24 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
     subtitle: 'Deep insights into your vitamin journey and health patterns',
     benefits: [
       {
-        icon: '🔬',
-        title: 'Vitamin Analysis',
-        description: 'Track nutrient interactions and optimal timing'
+        icon: '📚',
+        title: 'Deep Dive Health Articles',
+        description: 'Access expert content on vitamin science and timing strategies'
       },
       {
-        icon: '📈',
-        title: 'Health Reports',
-        description: 'Monthly summaries of your consistency and progress'
+        icon: '🧠',
+        title: 'Smart Timing Recommendations',
+        description: 'AI-powered suggestions for optimal vitamin scheduling'
       },
       {
-        icon: '🎯',
-        title: 'Nutrient Tracking',
-        description: 'Monitor your complete nutritional supplement intake'
+        icon: '📊',
+        title: 'Behavioral Learning Insights',
+        description: 'See patterns in your habits and get personalized tips'
       },
       {
         icon: '⚡',
-        title: 'Trend Analysis',
-        description: 'Spot patterns in your health routine over time'
+        title: 'Advanced Analytics',
+        description: 'Track your consistency trends and improvement over time'
       }
     ]
   });
@@ -135,19 +135,19 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
     subtitle: 'Join a community of health-conscious individuals',
     benefits: [
       {
-        icon: '🤝',
-        title: 'Community Access',
-        description: 'Connect with others on similar health journeys'
+        icon: '✨',
+        title: 'Unlimited Encouragement Posts',
+        description: 'Share your vitamin journey moments without monthly limits'
       },
       {
-        icon: '📱',
-        title: 'Social Sharing',
-        description: 'Share milestones and celebrate achievements together'
+        icon: '👑',
+        title: 'Premium Community Badge',
+        description: 'Stand out with an exclusive crown badge on your posts'
       },
       {
-        icon: '🏆',
-        title: 'Progress Sharing',
-        description: 'Show off your streaks and badge collections'
+        icon: '🗳️',
+        title: 'Feature Polls & Voting',
+        description: 'Help shape the future of Takeamin with exclusive polls'
       },
       {
         icon: '💌',
@@ -168,9 +168,9 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
         description: 'Create unlimited vitamin plans and earn all badges'
       },
       {
-        icon: '🎨',
-        title: 'Custom Themes',
-        description: 'Personalize your app with beautiful color schemes'
+        icon: '❤️',
+        title: 'Support Independent Developer',
+        description: 'Help a solo developer keep building amazing health tools'
       },
       {
         icon: '🚀',

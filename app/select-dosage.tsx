@@ -96,7 +96,7 @@ export default function SelectDosage() {
       return ['mg', 'g'];
     }
     if (vitaminId === 'multivitamin') {
-      return ['tablet', 'capsule', 'gummy'];
+      return ['tablet', 'tablets', 'capsule', 'capsules', 'gummy', 'gummies'];
     }
     return ['mg', 'mcg']; // default
   };

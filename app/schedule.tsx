@@ -154,18 +154,18 @@ export default function Schedule() {
     console.log('✅ Getting started');
     setIsNavigating(true);
     
-    // Reset hasAnimated to trigger intro animations when user returns after creating a plan
-    setHasAnimated(false);
-    
     // Button animation with proper confetti timing
     buttonScale.value = withSpring(0.95, { duration: 100 });
     setTimeout(() => {
       buttonScale.value = withSpring(1, { duration: 150 });
+      // Reset hasAnimated AFTER animation to avoid conflicts
+      setHasAnimated(false);
       triggerConfetti();
-      // Wait for confetti to finish nicely
+      
+      // Wait for confetti to finish properly - keep original timing
       setTimeout(() => {
         router.push('/choose-vitamin');
-      }, 1200); // Enough time for confetti to complete
+      }, 1200); // Original timing to let confetti complete
     }, 100);
   };
 
@@ -193,18 +193,18 @@ export default function Schedule() {
     console.log('✅ Adding another plan');
     setIsNavigating(true);
     
-    // Reset hasAnimated to trigger intro animations when user returns after creating a plan
-    setHasAnimated(false);
-    
     // Button animation with proper confetti timing
     addButtonScale.value = withSpring(0.95, { duration: 100 });
     setTimeout(() => {
       addButtonScale.value = withSpring(1, { duration: 150 });
+      // Reset hasAnimated AFTER animation to avoid conflicts
+      setHasAnimated(false);
       triggerConfetti();
-      // Wait for confetti to finish nicely
+      
+      // Wait for confetti to finish properly - keep original timing
       setTimeout(() => {
         router.push('/choose-vitamin');
-      }, 1200); // Enough time for confetti to complete
+      }, 1200); // Original timing to let confetti complete
     }, 100);
   };
 
@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingHorizontal: 20,
-    backgroundColor: '#FAF3E0',
+    backgroundColor: 'transparent', // Remove background to prevent flashing
     alignItems: 'center',
   },
   addButton: {
@@ -650,8 +650,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   disabledButton: {
-    backgroundColor: '#cccccc',
     opacity: 0.6,
+    // Keep original background color to prevent flashing, just reduce opacity
   },
   homeButton: {
     position: 'absolute',

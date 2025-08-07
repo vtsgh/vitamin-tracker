@@ -16,7 +16,7 @@ export default function ChooseVitamin() {
 
   const handleVitaminPress = (vitaminId: string, vitaminLabel: string) => {
     const now = Date.now();
-    if (now - lastTapTime.current < 1000 || isNavigating) { // 1 second debounce
+    if (now - lastTapTime.current < 1000 || isNavigating) { // 1 second debounce for proper protection
       console.log('🚫 Blocked rapid tap - too soon');
       return;
     }
@@ -135,6 +135,6 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.6,
-    backgroundColor: '#cccccc',
+    // Keep original background color to prevent flashing, just reduce opacity
   },
 });

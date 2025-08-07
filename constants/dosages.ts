@@ -96,8 +96,8 @@ export const VITAMIN_DOSAGES: Record<string, DosageOption[]> = {
   'multivitamin': [
     { amount: 1, unit: 'tablet', label: '1 Tablet' },
     { amount: 2, unit: 'tablets', label: '2 Tablets' },
-    { amount: 1, unit: 'capsule', label: '1 Capsule' },
-    { amount: 2, unit: 'capsules', label: '2 Capsules' },
+    { amount: 1, unit: 'gummy', label: '1 Gummy' },
+    { amount: 2, unit: 'gummies', label: '2 Gummies' },
   ],
 };
 

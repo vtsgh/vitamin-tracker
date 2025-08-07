@@ -53,6 +53,7 @@ export default function EditPlan() {
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+
   
   // Dosage editing state
   const [showDosageEditor, setShowDosageEditor] = useState(false);
@@ -354,27 +355,14 @@ export default function EditPlan() {
               <TouchableOpacity 
                 style={styles.changeTimeButton}
                 onPress={() => setShowTimePicker(true)}
+                activeOpacity={0.7}
               >
                 <Text style={styles.changeTimeButtonText}>Change Time</Text>
               </TouchableOpacity>
             </View>
           </View>
 
-          {/* End Date */}
-          <View style={styles.field}>
-            <Text style={styles.label}>End Date:</Text>
-            <View style={styles.dateContainer}>
-              <Text style={styles.dateText}>{formatDate(editedEndDate)}</Text>
-              <TouchableOpacity 
-                style={styles.changeDateButton}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <Text style={styles.changeDateButtonText}>Change Date</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Time Picker */}
+          {/* Time Picker - positioned right after reminder time */}
           {showTimePicker && (
             <View style={styles.timePickerSection}>
               {Platform.OS === 'ios' ? (
@@ -407,7 +395,22 @@ export default function EditPlan() {
             </View>
           )}
 
-          {/* Date Picker */}
+          {/* End Date */}
+          <View style={styles.field}>
+            <Text style={styles.label}>End Date:</Text>
+            <View style={styles.dateContainer}>
+              <Text style={styles.dateText}>{formatDate(editedEndDate)}</Text>
+              <TouchableOpacity 
+                style={styles.changeDateButton}
+                onPress={() => setShowDatePicker(true)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.changeDateButtonText}>Change Date</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Date Picker - positioned right after end date */}
           {showDatePicker && (
             <View style={styles.datePickerSection}>
               {Platform.OS === 'ios' ? (

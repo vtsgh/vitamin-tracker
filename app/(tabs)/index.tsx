@@ -71,7 +71,7 @@ const FEATURES: FeatureButton[] = [
     icon: '👥',
     color: '#FFB347', // Secondary orange
     route: '/community',
-    enabled: false
+    enabled: true
   },
   {
     id: 'settings',
