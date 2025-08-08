@@ -13,6 +13,8 @@ import {
   PremiumFeature, 
   UpgradeTriggerContext 
 } from '../types/Premium';
+import { revenueCatService } from '../services/RevenueCatService';
+import { getRevenueCatAPIKey } from '../constants/revenuecat';
 
 const PREMIUM_STORAGE_KEY = 'premiumStatus';
 
@@ -24,13 +26,37 @@ export const usePremium = () => {
   const [upgradeContext, setUpgradeContext] = useState<UpgradeContext | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-  // Load premium status from storage
+  // Load premium status from RevenueCat and storage
   useEffect(() => {
-    loadPremiumStatus();
+    initializeAndLoadPremiumStatus();
   }, []);
 
-  const loadPremiumStatus = async () => {
+  const initializeAndLoadPremiumStatus = async () => {
     try {
+      // Initialize RevenueCat
+      const apiKey = getRevenueCatAPIKey();
+      if (apiKey !== 'appl_YOUR_DEV_API_KEY_HERE' && apiKey !== 'appl_YOUR_IOS_API_KEY_HERE') {
+        await revenueCatService.initialize(apiKey);
+        
+        // Check premium status from RevenueCat
+        const isPremiumFromRC = await revenueCatService.isPremium();
+        
+        if (isPremiumFromRC) {
+          const customerInfo = await revenueCatService.getCustomerInfo();
+          const newStatus: PremiumStatus = {
+            isPremium: true,
+            subscriptionType: 'monthly', // You can determine this from product identifier
+            subscriptionDate: new Date().toISOString(),
+            expirationDate: customerInfo.expirationDate ? new Date(customerInfo.expirationDate).toISOString() : undefined,
+            trialUsed: true // Assume trial is used if they have a subscription
+          };
+          setPremiumStatus(newStatus);
+          await AsyncStorage.setItem(PREMIUM_STORAGE_KEY, JSON.stringify(newStatus));
+          return;
+        }
+      }
+      
+      // Fallback to local storage if RevenueCat isn't configured or user isn't premium
       const stored = await AsyncStorage.getItem(PREMIUM_STORAGE_KEY);
       if (stored) {
         const status: PremiumStatus = JSON.parse(stored);
@@ -38,6 +64,16 @@ export const usePremium = () => {
       }
     } catch (error) {
       console.error('Error loading premium status:', error);
+      // Fallback to local storage on error
+      try {
+        const stored = await AsyncStorage.getItem(PREMIUM_STORAGE_KEY);
+        if (stored) {
+          const status: PremiumStatus = JSON.parse(stored);
+          setPremiumStatus(status);
+        }
+      } catch (fallbackError) {
+        console.error('Error loading fallback premium status:', fallbackError);
+      }
     }
   };
 
@@ -90,20 +126,65 @@ export const usePremium = () => {
     setUpgradeContext(null);
   }, []);
 
-  // Simulate premium upgrade (for testing - replace with actual payment logic)
+  // Upgrade to premium using RevenueCat
   const upgradeToPremium = useCallback(async (subscriptionType: 'monthly' | 'yearly' = 'monthly') => {
-    const newStatus: PremiumStatus = {
-      isPremium: true,
-      subscriptionType,
-      subscriptionDate: new Date().toISOString(),
-      expirationDate: subscriptionType === 'monthly' 
-        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-        : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-      trialUsed: premiumStatus.trialUsed
-    };
-    
-    await savePremiumStatus(newStatus);
-    closeUpgradeModal();
+    try {
+      const offerings = await revenueCatService.getOfferings();
+      
+      if (offerings.length === 0) {
+        console.log('⚠️ No offerings available, falling back to mock upgrade');
+        // Fallback to mock upgrade for development
+        const newStatus: PremiumStatus = {
+          isPremium: true,
+          subscriptionType,
+          subscriptionDate: new Date().toISOString(),
+          expirationDate: subscriptionType === 'monthly' 
+            ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          trialUsed: premiumStatus.trialUsed
+        };
+        
+        await savePremiumStatus(newStatus);
+        closeUpgradeModal();
+        return;
+      }
+
+      // Find the appropriate package
+      const currentOffering = offerings[0];
+      const packageToPurchase = subscriptionType === 'yearly' 
+        ? currentOffering.availablePackages.find(pkg => pkg.packageType === 'ANNUAL' || pkg.identifier.includes('yearly') || pkg.identifier.includes('annual'))
+        : currentOffering.availablePackages.find(pkg => pkg.packageType === 'MONTHLY' || pkg.identifier.includes('monthly'));
+
+      if (!packageToPurchase) {
+        throw new Error(`No ${subscriptionType} package available`);
+      }
+
+      // Attempt purchase
+      const { customerInfo, cancelled } = await revenueCatService.purchasePackage(packageToPurchase);
+      
+      if (cancelled) {
+        console.log('🚫 Purchase cancelled by user');
+        return;
+      }
+
+      // Update premium status based on purchase
+      const newStatus: PremiumStatus = {
+        isPremium: true,
+        subscriptionType,
+        subscriptionDate: new Date().toISOString(),
+        expirationDate: customerInfo.expirationDate ? new Date(customerInfo.expirationDate).toISOString() : undefined,
+        trialUsed: true
+      };
+      
+      await savePremiumStatus(newStatus);
+      closeUpgradeModal();
+      
+      console.log('✅ Premium upgrade successful!');
+    } catch (error) {
+      console.error('❌ Premium upgrade failed:', error);
+      // You might want to show an error message to the user
+      throw error;
+    }
   }, [premiumStatus.trialUsed, closeUpgradeModal]);
 
   // Start free trial (if not used)
@@ -162,6 +243,36 @@ export const usePremium = () => {
     }
   }, []);
 
+  // Restore purchases from RevenueCat
+  const restorePurchases = useCallback(async () => {
+    try {
+      console.log('🔄 Restoring purchases...');
+      const customerInfo = await revenueCatService.restorePurchases();
+      
+      const isPremiumFromRC = await revenueCatService.isPremium();
+      
+      if (isPremiumFromRC) {
+        const newStatus: PremiumStatus = {
+          isPremium: true,
+          subscriptionType: 'monthly', // You can determine this from product identifier
+          subscriptionDate: new Date().toISOString(),
+          expirationDate: customerInfo.expirationDate ? new Date(customerInfo.expirationDate).toISOString() : undefined,
+          trialUsed: true
+        };
+        
+        await savePremiumStatus(newStatus);
+        console.log('✅ Purchases restored successfully');
+        return true;
+      } else {
+        console.log('ℹ️ No active subscriptions found');
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Failed to restore purchases:', error);
+      return false;
+    }
+  }, []);
+
   return {
     // Premium status
     isPremium: premiumStatus.isPremium && !isSubscriptionExpired(),
@@ -181,6 +292,7 @@ export const usePremium = () => {
     // Premium actions
     upgradeToPremium,
     startFreeTrial,
+    restorePurchases,
     
     // Utilities
     getPremiumStatusText,
