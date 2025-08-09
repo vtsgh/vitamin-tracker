@@ -382,10 +382,11 @@ export async function scheduleVitaminReminders(plan: VitaminPlan): Promise<strin
     if (Platform.OS === 'ios') {
       // iOS: Use calendar trigger for exact time  
       trigger = {
+        type: 'calendar',
         hour,
         minute,
         repeats: true,
-      } as any;
+      };
     } else {
       // Android: Use separate notification handler
       return await scheduleAndroidNotifications(plan, hour, minute, notificationContent);
