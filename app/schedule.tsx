@@ -225,13 +225,13 @@ export default function Schedule() {
               // Cancel all notifications for this plan
               if (plan.notificationIds && plan.notificationIds.length > 0) {
                 console.log('🔔 Cancelling notifications for:', plan.vitamin, 'IDs:', plan.notificationIds);
-                await cancelNotifications(plan.notificationIds);
-                console.log('✅ Notifications cancelled successfully');
+                const result = await cancelNotifications(plan.notificationIds);
+                console.log(`✅ Notifications cancellation result: ${result.cancelled} cancelled, ${result.failed} failed`);
               } else if (plan.notificationId) {
                 // Handle legacy single notification ID (backward compatibility)
                 console.log('🔔 Cancelling legacy notification for:', plan.vitamin, 'ID:', plan.notificationId);
-                await cancelNotifications([plan.notificationId]);
-                console.log('✅ Legacy notification cancelled successfully');
+                const result = await cancelNotifications([plan.notificationId]);
+                console.log(`✅ Legacy notification cancellation result: ${result.cancelled} cancelled, ${result.failed} failed`);
               } else {
                 console.log('ℹ️ No notification IDs found for this plan');
               }

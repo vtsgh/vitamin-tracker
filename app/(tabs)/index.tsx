@@ -7,6 +7,8 @@ import VitaminCapsule from '../../components/VitaminCapsule';
 import { usePremium } from '../../hooks/usePremium';
 import { PremiumUpgradeModal } from '../../components/PremiumUpgradeModal';
 import { UPGRADE_TRIGGER_CONTEXTS } from '../../constants/premium';
+import { showNotificationTestMenu } from '../../utils/notification-debug';
+import { debugStorageNotificationMismatch } from '../../utils/storage-debug';
 
 interface FeatureButton {
   id: string;
@@ -83,6 +85,17 @@ const FEATURES: FeatureButton[] = [
     enabled: true
   }
 ];
+
+// Development-only debug feature
+const DEV_FEATURES: FeatureButton[] = __DEV__ ? [{
+  id: 'notification-debug',
+  title: '🧪 Debug Notifications',
+  subtitle: 'Test & audit notifications',
+  icon: '🔧',
+  color: '#8B5CF6', // Purple for debug
+  route: null, // Special handling
+  enabled: true
+}] : [];
 
 export default function Home() {
   const [hasAnimated, setHasAnimated] = useState(false);
@@ -199,6 +212,12 @@ export default function Home() {
       return;
     }
 
+    // Handle debug notifications (dev only)
+    if (feature.id === 'notification-debug') {
+      showNotificationTestMenu();
+      return;
+    }
+
     if (!feature.enabled) {
       // Show coming soon message for disabled features
       console.log(`🚧 ${feature.title} is coming soon!`);
@@ -275,6 +294,8 @@ export default function Home() {
               }
               return renderFeatureButton(feature, index);
             })}
+            {/* Development debug features */}
+            {DEV_FEATURES.map((feature, index) => renderFeatureButton(feature, FEATURES.length + index))}
           </View>
         </Animated.View>
       </ScrollView>

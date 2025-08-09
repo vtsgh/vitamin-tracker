@@ -36,9 +36,9 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "your-apple-id@email.com",
-        "ascAppId": "your-app-store-connect-app-id",
-        "appleTeamId": "your-team-id"
+        "appleId": "takeaminvitamintracker@gmail.com",
+        "ascAppId": "6749783966",
+        "appleTeamId": "6N5NR2C37C"
       },
       "android": {
         "serviceAccountKeyPath": "path/to/api-key.json",

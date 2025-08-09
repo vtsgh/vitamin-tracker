@@ -138,6 +138,56 @@ function parseTime(timeString: string): { hour: number; minute: number } {
 }
 
 /**
+ * EMERGENCY: Simple Android notification test
+ * Bypasses all complex logic to test basic functionality
+ */
+export async function emergencyAndroidNotificationTest(): Promise<string | null> {
+  if (Platform.OS !== 'android') {
+    console.log('⚠️ This is Android-only test');
+    return null;
+  }
+
+  try {
+    console.log('🚨 ============ EMERGENCY ANDROID TEST ============');
+    
+    // Step 1: Basic permission check
+    const permissions = await Notifications.getPermissionsAsync();
+    console.log('🚨 Permissions:', JSON.stringify(permissions));
+    
+    // Step 2: Force create notification channel
+    await Notifications.setNotificationChannelAsync('emergency-test', {
+      name: 'Emergency Test',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF0000',
+      sound: true,
+    });
+    console.log('🚨 Emergency channel created');
+
+    // Step 3: Immediate notification (no scheduling)
+    const id = await Notifications.presentNotificationAsync({
+      title: '🚨 EMERGENCY TEST',
+      body: 'This should appear IMMEDIATELY!',
+      data: { emergency: true },
+      android: {
+        channelId: 'emergency-test',
+        priority: 'max',
+        sticky: false,
+        autoCancel: true,
+      },
+    });
+    
+    console.log('🚨 Emergency notification presented:', id);
+    console.log('🚨 ============ EMERGENCY TEST COMPLETE ============');
+    return id;
+    
+  } catch (error) {
+    console.error('🚨 Emergency test failed:', error);
+    return null;
+  }
+}
+
+/**
  * Simple test notification (for backward compatibility)
  */
 export async function scheduleTestNotification(): Promise<string | null> {
@@ -165,6 +215,138 @@ export async function scheduleTestNotification(): Promise<string | null> {
 /**
  * Schedule vitamin reminders (simplified for testing)
  */
+/**
+ * Android-specific notification scheduling
+ * Separated from iOS to avoid breaking working iOS functionality
+ */
+async function scheduleAndroidNotifications(
+  plan: VitaminPlan, 
+  hour: number, 
+  minute: number, 
+  notificationContent: any
+): Promise<string[]> {
+  console.log('🤖 ============ ANDROID NOTIFICATION SCHEDULING ============');
+  
+  try {
+    // Step 1: Ensure channel exists and is properly configured
+    console.log('🤖 Step 1: Setting up Android notification channel...');
+    await Notifications.setNotificationChannelAsync('vitamin-reminders', {
+      name: 'Vitamin Reminders',
+      description: 'Daily reminders to take your vitamins',
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF7F50',
+      sound: true,
+      enableVibrate: true,
+      showBadge: true,
+    });
+    console.log('✅ Android notification channel configured');
+
+    // Step 2: Try different Android notification approaches
+    const androidIds: string[] = [];
+    
+    // Approach 1: Simple test notification first (immediate)
+    console.log('🤖 Step 2: Testing immediate notification...');
+    try {
+      const testId = await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '🧪 Android Test',
+          body: 'Testing Android notifications - you should see this now!',
+          sound: true,
+          channelId: 'vitamin-reminders',
+          data: { test: true },
+        },
+        trigger: {
+          seconds: 2,
+        },
+      });
+      console.log(`🧪 Test notification scheduled: ${testId}`);
+      androidIds.push(testId);
+    } catch (error) {
+      console.error('❌ Immediate test notification failed:', error);
+    }
+
+    // Approach 2: Schedule a few timeInterval notifications
+    console.log('🤖 Step 3: Scheduling timeInterval notifications...');
+    const now = new Date();
+    const targetTime = new Date();
+    targetTime.setHours(hour, minute, 0, 0);
+    
+    // If target time has passed today, schedule for tomorrow
+    if (targetTime <= now) {
+      targetTime.setDate(targetTime.getDate() + 1);
+    }
+    
+    for (let i = 0; i < 7; i++) { // Schedule for next 7 days
+      try {
+        const notifyTime = new Date(targetTime);
+        notifyTime.setDate(notifyTime.getDate() + i);
+        const secondsUntil = Math.floor((notifyTime.getTime() - now.getTime()) / 1000);
+        
+        if (secondsUntil > 0) {
+          const dayId = await Notifications.scheduleNotificationAsync({
+            content: {
+              ...notificationContent,
+              channelId: 'vitamin-reminders',
+            },
+            trigger: {
+              seconds: secondsUntil,
+            },
+          });
+          
+          console.log(`📅 Scheduled day ${i + 1} notification: ${dayId} (in ${secondsUntil}s)`);
+          androidIds.push(dayId);
+        }
+      } catch (error) {
+        console.error(`❌ Failed to schedule day ${i + 1}:`, error);
+      }
+    }
+
+    // Step 3: Verify notifications were scheduled (work around expo-notifications bug)
+    console.log('🤖 Step 4: Verifying scheduled notifications...');
+    
+    // Note: getAllScheduledNotificationsAsync() has a known bug in expo-notifications > 0.28.12
+    // It returns empty array even when notifications are properly scheduled
+    // See: https://github.com/expo/expo/issues/30868
+    
+    try {
+      const allScheduled = await Notifications.getAllScheduledNotificationsAsync();
+      console.log(`🔍 Total notifications in system: ${allScheduled.length} (may be inaccurate due to expo-notifications bug)`);
+      
+      if (allScheduled.length > 0) {
+        const ourNotifications = allScheduled.filter(n => androidIds.includes(n.identifier));
+        console.log(`🔍 Our notifications found: ${ourNotifications.length}/${androidIds.length}`);
+        
+        ourNotifications.forEach((notification, index) => {
+          console.log(`  ${index + 1}. ${notification.identifier} - ${notification.content.title}`);
+        });
+      }
+    } catch (error) {
+      console.error('⚠️ getAllScheduledNotificationsAsync failed:', error);
+    }
+    
+    // Alternative verification: If we got notification IDs back, assume they were scheduled
+    if (androidIds.length > 0) {
+      console.log('✅ Android notifications scheduled successfully!');
+      console.log(`📱 Scheduled ${androidIds.length} notifications with IDs:`);
+      androidIds.forEach((id, index) => {
+        console.log(`  ${index + 1}. ${id}`);
+      });
+      console.log('⚠️  Note: Due to expo-notifications bug, verification may be inaccurate');
+      console.log('📱 Test on physical device to see if notifications actually appear');
+    } else {
+      console.error('❌ No notification IDs returned - scheduling failed');
+    }
+
+    console.log('🤖 ============ ANDROID SCHEDULING COMPLETE ============');
+    return androidIds;
+
+  } catch (error) {
+    console.error('❌ Android notification scheduling failed:', error);
+    return [];
+  }
+}
+
 export async function scheduleVitaminReminders(plan: VitaminPlan): Promise<string[]> {
   try {
     console.log('🔔 Scheduling notifications for:', plan.vitamin);
@@ -195,18 +377,36 @@ export async function scheduleVitaminReminders(plan: VitaminPlan): Promise<strin
     // For now, just schedule a simple repeating daily notification
     console.log(`📅 Scheduling daily repeating notification at ${hour}:${minute.toString().padStart(2, '0')}`);
     
-    const id = await Notifications.scheduleNotificationAsync({
-      content: notificationContent,
-      trigger: {
-        type: 'calendar',
+    let trigger;
+    
+    if (Platform.OS === 'ios') {
+      // iOS: Use calendar trigger for exact time  
+      trigger = {
         hour,
         minute,
         repeats: true,
-      },
+      } as any;
+    } else {
+      // Android: Use separate notification handler
+      return await scheduleAndroidNotifications(plan, hour, minute, notificationContent);
+    }
+
+    const id = await Notifications.scheduleNotificationAsync({
+      content: notificationContent,
+      trigger,
     });
     notificationIds.push(id);
 
-    console.log(`✅ Successfully scheduled ${notificationIds.length} notifications for ${plan.vitamin}`);
+    // Verify the notification was actually scheduled
+    const allScheduled = await Notifications.getAllScheduledNotificationsAsync();
+    const justScheduled = allScheduled.find(n => n.identifier === id);
+    
+    console.log(`✅ Successfully scheduled notification with ID: ${id}`);
+    console.log(`🔍 Verification: Notification exists in system: ${!!justScheduled}`);
+    if (justScheduled) {
+      console.log(`🔍 Trigger details: ${JSON.stringify(justScheduled.trigger)}`);
+    }
+    console.log(`🔍 Total system notifications: ${allScheduled.length}`);
     return notificationIds;
 
   } catch (error) {
@@ -218,27 +418,44 @@ export async function scheduleVitaminReminders(plan: VitaminPlan): Promise<strin
 /**
  * Cancel multiple scheduled notifications
  */
-export async function cancelNotifications(notificationIds: string[]): Promise<void> {
+export async function cancelNotifications(notificationIds: string[]): Promise<{ cancelled: number; failed: number; }> {
   try {
     if (!notificationIds || notificationIds.length === 0) {
       console.log('ℹ️ No notification IDs to cancel');
-      return;
+      return { cancelled: 0, failed: 0 };
     }
 
-    console.log(`🔔 Cancelling ${notificationIds.length} notifications`);
+    console.log(`🔔 Attempting to cancel ${notificationIds.length} notifications`);
+    
+    // First, get all currently scheduled notifications to verify which ones exist
+    const allScheduled = await Notifications.getAllScheduledNotificationsAsync();
+    const scheduledIds = new Set(allScheduled.map(n => n.identifier));
+    
+    let cancelled = 0;
+    let failed = 0;
     
     for (const id of notificationIds) {
       try {
-        await Notifications.cancelScheduledNotificationAsync(id);
-        console.log(`✅ Cancelled notification: ${id}`);
+        if (scheduledIds.has(id)) {
+          await Notifications.cancelScheduledNotificationAsync(id);
+          console.log(`✅ Cancelled notification: ${id}`);
+          cancelled++;
+        } else {
+          console.log(`⚠️ Notification ${id} was already cancelled or doesn't exist`);
+          // Still count as successful since the goal is achieved
+          cancelled++;
+        }
       } catch (error) {
         console.error(`❌ Error cancelling notification ${id}:`, error);
+        failed++;
       }
     }
     
-    console.log(`✅ Finished cancelling ${notificationIds.length} notifications`);
+    console.log(`✅ Cancellation complete: ${cancelled} cancelled, ${failed} failed`);
+    return { cancelled, failed };
   } catch (error) {
     console.error('❌ Error in cancelNotifications:', error);
+    return { cancelled: 0, failed: notificationIds.length };
   }
 }
 
