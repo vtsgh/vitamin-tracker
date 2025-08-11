@@ -2,22 +2,36 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { requestNotificationPermissions } from '@/utils/notifications';
+import { hasAcceptedMedicalDisclaimer } from '@/utils/medical-disclaimer';
+import { router } from 'expo-router';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+  const [disclaimerChecked, setDisclaimerChecked] = useState(false);
 
-  // Request notification permissions when the app starts
+  // Check medical disclaimer and setup notifications when the app starts
   useEffect(() => {
-    async function setupNotifications() {
+    async function setupApp() {
       try {
+        // Check if user has accepted medical disclaimer
+        const hasAccepted = await hasAcceptedMedicalDisclaimer();
+        if (!hasAccepted) {
+          // Navigate to disclaimer screen
+          setTimeout(() => {
+            router.push('/medical-disclaimer');
+          }, 100);
+        }
+        setDisclaimerChecked(true);
+        
+        // Request notification permissions
         const granted = await requestNotificationPermissions();
         if (granted) {
           console.log('✅ Notification permissions granted');
@@ -25,12 +39,15 @@ export default function RootLayout() {
           console.log('❌ Notification permissions denied');
         }
       } catch (error) {
-        console.error('Error setting up notifications:', error);
+        console.error('Error setting up app:', error);
+        setDisclaimerChecked(true);
       }
     }
 
-    setupNotifications();
-  }, []);
+    if (loaded) {
+      setupApp();
+    }
+  }, [loaded]);
 
   if (!loaded) {
     // Async font loading only occurs in development.
@@ -41,6 +58,23 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="schedule" options={{ headerShown: false }} />
+        <Stack.Screen name="notification-debug" options={{ headerShown: false }} />
+        <Stack.Screen name="choose-vitamin" options={{ headerShown: false }} />
+        <Stack.Screen name="select-dosage" options={{ headerShown: false }} />
+        <Stack.Screen name="timing" options={{ headerShown: false }} />
+        <Stack.Screen name="custom-days" options={{ headerShown: false }} />
+        <Stack.Screen name="end-date" options={{ headerShown: false }} />
+        <Stack.Screen name="custom-end-date" options={{ headerShown: false }} />
+        <Stack.Screen name="summary" options={{ headerShown: false }} />
+        <Stack.Screen name="edit-plan" options={{ headerShown: false }} />
+        <Stack.Screen name="progress" options={{ headerShown: false }} />
+        <Stack.Screen name="settings" options={{ headerShown: false }} />
+        <Stack.Screen name="health" options={{ headerShown: false }} />
+        <Stack.Screen name="community" options={{ headerShown: false }} />
+        <Stack.Screen name="consistency" options={{ headerShown: false }} />
+        <Stack.Screen name="smart-reminders" options={{ headerShown: false }} />
+        <Stack.Screen name="medical-disclaimer" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

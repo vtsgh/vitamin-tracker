@@ -65,14 +65,16 @@ export const FREE_LIMITS = {
   MAX_PLANS: 4,
   MAX_BADGES: 7, // Current AVAILABLE_BADGES length
   MAX_STREAK_RECOVERIES_PER_MONTH: 0,
-  MAX_EXPORT_MONTHS: 1
+  MAX_EXPORT_MONTHS: 1,
+  MAX_SMART_SNOOZES_PER_DAY: 0
 } as const;
 
 export const PREMIUM_LIMITS = {
   MAX_PLANS: -1, // unlimited
   MAX_BADGES: -1, // unlimited
   MAX_STREAK_RECOVERIES_PER_MONTH: 3, // 3 per month
-  MAX_EXPORT_MONTHS: -1 // unlimited
+  MAX_EXPORT_MONTHS: -1, // unlimited
+  MAX_SMART_SNOOZES_PER_DAY: 5 // 5 smart snoozes per day
 } as const;
 
 // Premium badge definitions (additional badges beyond free ones)

@@ -5,9 +5,12 @@
 
 // RevenueCat API Keys (get these from your RevenueCat dashboard)
 export const REVENUECAT_CONFIG = {
-  // You'll need to replace these with your actual API keys from RevenueCat dashboard
-  API_KEY_IOS: 'appl_YOUR_IOS_API_KEY_HERE', // Replace with your iOS API key
-  API_KEY_ANDROID: 'goog_YOUR_ANDROID_API_KEY_HERE', // Replace with your Android API key
+  // RevenueCat PUBLIC API Keys - NEVER use secret keys (sk_) in mobile apps!
+  API_KEY_IOS: 'appl_YOUR_IOS_PUBLIC_KEY_HERE', // Get from RevenueCat Dashboard → Settings → API Keys
+  API_KEY_ANDROID: 'goog_YOUR_ANDROID_PUBLIC_KEY_HERE', // Get from RevenueCat Dashboard → Settings → API Keys
+  
+  // Development key for testing (also should be public key)
+  API_KEY_DEV: 'appl_YOUR_DEV_PUBLIC_KEY_HERE', // Your development public API key
   
   // Entitlement identifier (configure this in RevenueCat dashboard)
   PREMIUM_ENTITLEMENT_ID: 'premium',
@@ -27,11 +30,20 @@ export const REVENUECAT_CONFIG = {
 
 // Get the correct API key based on platform
 export const getRevenueCatAPIKey = (): string => {
-  // Note: In a real app, you'd detect platform properly
-  // For now, we'll use a placeholder that you'll need to replace
-  return __DEV__ 
-    ? 'appl_YOUR_DEV_API_KEY_HERE' // Development key
-    : REVENUECAT_CONFIG.API_KEY_IOS; // Production key
+  // Import Platform here to avoid circular dependencies
+  const { Platform } = require('react-native');
+  
+  // In development, use the dev key for testing
+  if (__DEV__) {
+    return REVENUECAT_CONFIG.API_KEY_DEV;
+  }
+  
+  // In production, detect platform and use appropriate key
+  if (Platform.OS === 'android') {
+    return REVENUECAT_CONFIG.API_KEY_ANDROID;
+  } else {
+    return REVENUECAT_CONFIG.API_KEY_IOS;
+  }
 };
 
 // Premium feature configuration

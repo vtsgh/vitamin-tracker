@@ -35,7 +35,16 @@ export const usePremium = () => {
     try {
       // Initialize RevenueCat
       const apiKey = getRevenueCatAPIKey();
-      if (apiKey !== 'appl_YOUR_DEV_API_KEY_HERE' && apiKey !== 'appl_YOUR_IOS_API_KEY_HERE') {
+      
+      // Check if we have a valid API key (not placeholder)
+      const hasValidKey = apiKey !== 'appl_YOUR_DEV_API_KEY_HERE' && 
+                         apiKey !== 'appl_YOUR_IOS_API_KEY_HERE' && 
+                         apiKey !== 'goog_YOUR_ANDROID_PUBLIC_KEY_HERE' &&
+                         !apiKey.includes('YOUR_') && 
+                         !apiKey.startsWith('sk_');
+      
+      if (hasValidKey) {
+        console.log('🔑 Initializing RevenueCat with valid key');
         await revenueCatService.initialize(apiKey);
         
         // Check premium status from RevenueCat
@@ -54,6 +63,10 @@ export const usePremium = () => {
           await AsyncStorage.setItem(PREMIUM_STORAGE_KEY, JSON.stringify(newStatus));
           return;
         }
+      } else {
+        console.log('⚠️ RevenueCat not configured - using local premium status only');
+        console.log('   API key:', apiKey);
+        console.log('   Set up App Store Connect and get real public API keys to enable RevenueCat');
       }
       
       // Fallback to local storage if RevenueCat isn't configured or user isn't premium

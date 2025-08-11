@@ -15,6 +15,43 @@ Notifications.setNotificationHandler({
 /**
  * COMPREHENSIVE NOTIFICATION TEST - Logs everything to console
  */
+/**
+ * Create a debug vitamin plan with 2-minute delay
+ */
+export async function createDebugVitaminPlan(): Promise<string | null> {
+  try {
+    const now = new Date();
+    const testTime = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes from now
+    const timeString = `${testTime.getHours().toString().padStart(2, '0')}:${testTime.getMinutes().toString().padStart(2, '0')}`;
+    
+    console.log('🧪 ============ DEBUG VITAMIN PLAN CREATION ============');
+    console.log(`🧪 Current time: ${now.toLocaleTimeString()}`);
+    console.log(`🧪 Scheduled time: ${testTime.toLocaleTimeString()} (${timeString})`);
+    
+    const testPlan = {
+      id: `debug-test-${Date.now()}`,
+      vitamin: 'Debug Test Vitamin',
+      frequency: 'daily' as const,
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week
+      reminderTime: timeString,
+      notificationIds: [] as string[],
+      createdDate: new Date().toISOString()
+    };
+    
+    // Schedule the notification
+    const notificationIds = await scheduleVitaminReminders(testPlan);
+    testPlan.notificationIds = notificationIds;
+    
+    console.log('🧪 Debug plan created:', JSON.stringify(testPlan, null, 2));
+    console.log(`🧪 ⏰ WATCH FOR NOTIFICATION AT ${testTime.toLocaleTimeString()}!`);
+    
+    return testPlan.id;
+  } catch (error) {
+    console.error('🧪 Failed to create debug plan:', error);
+    return null;
+  }
+}
+
 export async function runNotificationTest(): Promise<void> {
   console.log('🧪 ============ NOTIFICATION TEST STARTING ============');
   
@@ -40,33 +77,38 @@ export async function runNotificationTest(): Promise<void> {
     const existingNotifications = await Notifications.getAllScheduledNotificationsAsync();
     console.log('🧪 Existing notifications count:', existingNotifications.length);
 
-    // Step 4: Test immediate notification (3 seconds)
-    console.log('🧪 Step 4: Scheduling immediate test notification (3 seconds)...');
+    // Step 4: Test immediate notification (3 seconds) with unique content
+    const timestamp = new Date().toLocaleTimeString();
+    console.log(`🧪 Step 4: Scheduling immediate test notification (3 seconds)... at ${timestamp}`);
     const immediateId = await Notifications.scheduleNotificationAsync({
       content: {
-        title: '🧪 Immediate Test',
-        body: 'This should appear in 3 seconds!',
+        title: `🧪 Immediate Test ${timestamp}`,
+        body: `This should appear in 3 seconds! Scheduled at ${timestamp}`,
         sound: true,
         ...(Platform.OS === 'android' && { channelId: 'vitamin-reminders' }),
+        data: { testType: 'immediate', scheduledAt: timestamp, testId: Date.now() }
       },
       trigger: {
+        type: 'timeInterval', 
         seconds: 3,
-      },
+      } as Notifications.TimeIntervalTriggerInput,
     });
     console.log('🧪 Immediate notification scheduled with ID:', immediateId);
 
-    // Step 5: Test delayed notification (10 seconds)
-    console.log('🧪 Step 5: Scheduling delayed test notification (10 seconds)...');
+    // Step 5: Test delayed notification (10 seconds) with unique content
+    console.log(`🧪 Step 5: Scheduling delayed test notification (10 seconds)... at ${timestamp}`);
     const delayedId = await Notifications.scheduleNotificationAsync({
       content: {
-        title: '🧪 Delayed Test',
-        body: 'This should appear in 10 seconds!',
+        title: `🧪 Delayed Test ${timestamp}`,
+        body: `This should appear in 10 seconds! Scheduled at ${timestamp}`,
         sound: true,
         ...(Platform.OS === 'android' && { channelId: 'vitamin-reminders' }),
+        data: { testType: 'delayed', scheduledAt: timestamp, testId: Date.now() + 1 }
       },
       trigger: {
+        type: 'timeInterval',
         seconds: 10,
-      },
+      } as Notifications.TimeIntervalTriggerInput,
     });
     console.log('🧪 Delayed notification scheduled with ID:', delayedId);
 
@@ -155,26 +197,29 @@ export async function emergencyAndroidNotificationTest(): Promise<string | null>
     console.log('🚨 Permissions:', JSON.stringify(permissions));
     
     // Step 2: Force create notification channel
-    await Notifications.setNotificationChannelAsync('emergency-test', {
+    const uniqueChannelId = `emergency-test-${Date.now()}`;
+    await Notifications.setNotificationChannelAsync(uniqueChannelId, {
       name: 'Emergency Test',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF0000',
       sound: true,
     });
-    console.log('🚨 Emergency channel created');
+    console.log(`🚨 Emergency channel created: ${uniqueChannelId}`);
 
-    // Step 3: Immediate notification (no scheduling)
-    const id = await Notifications.presentNotificationAsync({
-      title: '🚨 EMERGENCY TEST',
-      body: 'This should appear IMMEDIATELY!',
-      data: { emergency: true },
-      android: {
-        channelId: 'emergency-test',
-        priority: 'max',
-        sticky: false,
-        autoCancel: true,
+    // Step 3: Immediate notification (no scheduling) - with unique content
+    const timestamp = new Date().toLocaleTimeString();
+    const id = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `🚨 EMERGENCY TEST ${timestamp}`,
+        body: `This should appear IMMEDIATELY! Test at ${timestamp}`,
+        data: { emergency: true, timestamp, testId: Date.now() },
+        ...(Platform.OS === 'android' && { channelId: uniqueChannelId }),
       },
+      trigger: {
+        type: 'timeInterval',
+        seconds: 1,
+      } as Notifications.TimeIntervalTriggerInput,
     });
     
     console.log('🚨 Emergency notification presented:', id);
@@ -192,17 +237,35 @@ export async function emergencyAndroidNotificationTest(): Promise<string | null>
  */
 export async function scheduleTestNotification(): Promise<string | null> {
   try {
-    console.log('🧪 Scheduling simple test notification in 5 seconds...');
+    const timestamp = new Date().toLocaleTimeString();
+    console.log(`🧪 Scheduling simple test notification in 5 seconds... (${timestamp})`);
+    
+    // Create unique channel for test to avoid conflicts
+    const testChannelId = Platform.OS === 'android' ? `test-channel-${Date.now()}` : 'vitamin-reminders';
+    
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync(testChannelId, {
+        name: 'Test Notifications',
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF7F50',
+        sound: true,
+      });
+      console.log(`📱 Created unique test channel: ${testChannelId}`);
+    }
+    
     const id = await Notifications.scheduleNotificationAsync({
       content: {
-        title: '🧪 Simple Test',
-        body: 'This is a simple test notification!',
+        title: `🧪 Simple Test ${timestamp}`,
+        body: `This is a test notification scheduled at ${timestamp}!`,
         sound: true,
-        ...(Platform.OS === 'android' && { channelId: 'vitamin-reminders' }),
+        ...(Platform.OS === 'android' && { channelId: testChannelId }),
+        data: { testId: Date.now(), timestamp }
       },
       trigger: {
+        type: 'timeInterval',
         seconds: 5,
-      },
+      } as Notifications.TimeIntervalTriggerInput,
     });
     console.log('✅ Simple test notification scheduled with ID:', id);
     return id;
@@ -228,11 +291,12 @@ async function scheduleAndroidNotifications(
   console.log('🤖 ============ ANDROID NOTIFICATION SCHEDULING ============');
   
   try {
-    // Step 1: Ensure channel exists and is properly configured
-    console.log('🤖 Step 1: Setting up Android notification channel...');
-    await Notifications.setNotificationChannelAsync('vitamin-reminders', {
-      name: 'Vitamin Reminders',
-      description: 'Daily reminders to take your vitamins',
+    // Step 1: Create unique channel for each plan to avoid conflicts
+    const channelId = `vitamin-reminders-${plan.id}`;
+    console.log(`🤖 Step 1: Setting up Android notification channel: ${channelId}`);
+    await Notifications.setNotificationChannelAsync(channelId, {
+      name: `${plan.vitamin} Reminders`,
+      description: `Daily reminders to take your ${plan.vitamin}`,
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF7F50',
@@ -240,31 +304,13 @@ async function scheduleAndroidNotifications(
       enableVibrate: true,
       showBadge: true,
     });
-    console.log('✅ Android notification channel configured');
+    console.log(`✅ Android notification channel configured: ${channelId}`);
 
     // Step 2: Try different Android notification approaches
     const androidIds: string[] = [];
     
-    // Approach 1: Simple test notification first (immediate)
-    console.log('🤖 Step 2: Testing immediate notification...');
-    try {
-      const testId = await Notifications.scheduleNotificationAsync({
-        content: {
-          title: '🧪 Android Test',
-          body: 'Testing Android notifications - you should see this now!',
-          sound: true,
-          channelId: 'vitamin-reminders',
-          data: { test: true },
-        },
-        trigger: {
-          seconds: 2,
-        },
-      });
-      console.log(`🧪 Test notification scheduled: ${testId}`);
-      androidIds.push(testId);
-    } catch (error) {
-      console.error('❌ Immediate test notification failed:', error);
-    }
+    // Skip immediate test notification for real vitamin plans
+    console.log('🤖 Step 2: Skipping test notification for production use...');
 
     // Approach 2: Schedule a few timeInterval notifications
     console.log('🤖 Step 3: Scheduling timeInterval notifications...');
@@ -277,29 +323,34 @@ async function scheduleAndroidNotifications(
       targetTime.setDate(targetTime.getDate() + 1);
     }
     
-    for (let i = 0; i < 7; i++) { // Schedule for next 7 days
+    // Schedule just ONE notification for the next occurrence
+    const secondsUntil = Math.floor((targetTime.getTime() - now.getTime()) / 1000);
+    
+    console.log(`🤖 Step 3: Scheduling single notification in ${secondsUntil} seconds (${Math.floor(secondsUntil/60)} minutes)`);
+    console.log(`   Target time: ${targetTime.toLocaleString()}`);
+    console.log(`   Current time: ${now.toLocaleString()}`);
+    
+    if (secondsUntil > 0) {
       try {
-        const notifyTime = new Date(targetTime);
-        notifyTime.setDate(notifyTime.getDate() + i);
-        const secondsUntil = Math.floor((notifyTime.getTime() - now.getTime()) / 1000);
+        const notificationId = await Notifications.scheduleNotificationAsync({
+          content: {
+            ...notificationContent,
+            channelId: channelId,
+          },
+          trigger: {
+            type: 'timeInterval',
+            seconds: secondsUntil,
+          } as Notifications.TimeIntervalTriggerInput,
+        });
         
-        if (secondsUntil > 0) {
-          const dayId = await Notifications.scheduleNotificationAsync({
-            content: {
-              ...notificationContent,
-              channelId: 'vitamin-reminders',
-            },
-            trigger: {
-              seconds: secondsUntil,
-            },
-          });
-          
-          console.log(`📅 Scheduled day ${i + 1} notification: ${dayId} (in ${secondsUntil}s)`);
-          androidIds.push(dayId);
-        }
+        console.log(`✅ Scheduled notification: ${notificationId}`);
+        console.log(`   Will fire in: ${Math.floor(secondsUntil/60)} minutes and ${secondsUntil%60} seconds`);
+        androidIds.push(notificationId);
       } catch (error) {
-        console.error(`❌ Failed to schedule day ${i + 1}:`, error);
+        console.error(`❌ Failed to schedule notification:`, error);
       }
+    } else {
+      console.log('⚠️ Target time is in the past, cannot schedule');
     }
 
     // Step 3: Verify notifications were scheduled (work around expo-notifications bug)
@@ -361,12 +412,12 @@ export async function scheduleVitaminReminders(plan: VitaminPlan): Promise<strin
     const { hour, minute } = parseTime(plan.reminderTime);
     const notificationIds: string[] = [];
 
-    // Create notification content
+    // Create notification content with unique title for each vitamin
     const notificationContent = {
-      title: '💊 Time for your vitamins!',
+      title: `💊 ${plan.vitamin} Reminder!`,
       body: `Don't forget to take your ${plan.vitamin} today. You've got this! 🌟`,
       sound: true,
-      ...(Platform.OS === 'android' && { channelId: 'vitamin-reminders' }),
+      ...(Platform.OS === 'android' && { channelId: `vitamin-reminders-${plan.id}` }),
       data: {
         vitaminName: plan.vitamin,
         planId: plan.id,

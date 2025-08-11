@@ -21,7 +21,7 @@ import {
 } from '../constants/community';
 
 export default function Community() {
-  const [posts, setPosts] = useState<EncouragementPost[]>(SAMPLE_ENCOURAGEMENT_POSTS);
+  const [posts, setPosts] = useState<EncouragementPost[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [showPostModal, setShowPostModal] = useState(false);
   const [poll, setPoll] = useState<FeaturePoll>(CURRENT_FEATURE_POLL);
@@ -29,7 +29,13 @@ export default function Community() {
   const [userPostsThisMonth, setUserPostsThisMonth] = useState(0); // In production, get from AsyncStorage
   
   const { isPremium, triggerUpgrade } = usePremium();
-  const communityStats = getCommunityStats();
+  // Update stats to be more realistic for preview
+  const communityStats = {
+    encouragementsThisWeek: 0,
+    totalHearts: 0,
+    activeUsers: 847, // Keep some realistic preview numbers
+    weeklyGrowth: '+12%'
+  };
   
   // Check if user can post this month
   const canPost = canUserPost(userPostsThisMonth, isPremium);
@@ -85,25 +91,11 @@ export default function Community() {
   };
 
   const handleShareButtonPress = () => {
-    if (!canPost) {
-      Alert.alert(
-        '📝 Posting Limit Reached',
-        `Free users can share 1 encouragement per month. Your next post will be available in ${daysUntilNextPost} days.\n\nUpgrade to Premium for unlimited sharing!`,
-        [
-          { text: 'Maybe Later', style: 'cancel' },
-          { 
-            text: 'Upgrade Now', 
-            style: 'default',
-            onPress: () => triggerUpgrade(
-              'unlimited_plans' as any,
-              UPGRADE_TRIGGER_CONTEXTS.FEATURE_LIMIT
-            )
-          }
-        ]
-      );
-      return;
-    }
-    setShowPostModal(true);
+    Alert.alert(
+      '🚀 Coming Soon!',
+      'The Encouragement Wall is launching in a future update! We\'re building a safe, positive space for vitamin journey sharing.\n\nFor now, Premium users can vote in feature polls to help shape what we build next!',
+      [{ text: 'Got it!', style: 'default' }]
+    );
   };
 
   const handleVotePoll = (option: string) => {
@@ -497,17 +489,20 @@ export default function Community() {
 
         {/* Community Stats */}
         <View style={styles.statsCard}>
-          <Text style={styles.statsTitle}>📊 This Week</Text>
+          <Text style={styles.statsTitle}>📊 Community Preview</Text>
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{communityStats.encouragementsThisWeek.toLocaleString()}</Text>
-              <Text style={styles.statLabel}>Encouragements</Text>
+              <Text style={styles.statValue}>{communityStats.activeUsers.toLocaleString()}</Text>
+              <Text style={styles.statLabel}>Takeamin Users</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{communityStats.totalHearts.toLocaleString()}</Text>
-              <Text style={styles.statLabel}>Hearts Given</Text>
+              <Text style={styles.statValue}>Soon!</Text>
+              <Text style={styles.statLabel}>Community Posts</Text>
             </View>
           </View>
+          <Text style={styles.statsNote}>
+            💚 Building our community of vitamin enthusiasts
+          </Text>
         </View>
 
         {/* Encouragement Wall */}
@@ -530,7 +525,28 @@ export default function Community() {
           </Text>
 
           <View style={styles.postsContainer}>
-            {posts.map(renderEncouragementPost)}
+            {posts.length === 0 ? (
+              <View style={styles.emptyWallState}>
+                <Text style={styles.emptyWallIcon}>💬</Text>
+                <Text style={styles.emptyWallTitle}>Encouragement Wall Coming Soon!</Text>
+                <Text style={styles.emptyWallText}>
+                  We're building a beautiful space for sharing vitamin journey moments and positive encouragement.
+                  {'\n\n'}
+                  Coming in a future update:
+                  {'\n'}• Anonymous encouragement sharing
+                  {'\n'}• Heart reactions and community support  
+                  {'\n'}• Safe, moderated positive space
+                  {'\n'}• Weekly community highlights
+                </Text>
+                <View style={styles.emptyWallCta}>
+                  <Text style={styles.emptyWallCtaText}>
+                    🗳️ Premium users can vote in feature polls below to help us prioritize!
+                  </Text>
+                </View>
+              </View>
+            ) : (
+              posts.map(renderEncouragementPost)
+            )}
           </View>
         </View>
 
@@ -644,6 +660,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#1E40AF',
   },
+  statsNote: {
+    fontSize: 12,
+    color: '#2563EB',
+    textAlign: 'center',
+    marginTop: 10,
+    fontStyle: 'italic',
+  },
 
   // Section Styles
   section: {
@@ -691,6 +714,47 @@ const styles = StyleSheet.create({
   },
   postsContainer: {
     gap: 12,
+  },
+  emptyWallState: {
+    backgroundColor: '#F0F9FF',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#E0E7FF',
+    borderStyle: 'dashed',
+  },
+  emptyWallIcon: {
+    fontSize: 48,
+    marginBottom: 15,
+  },
+  emptyWallTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#4C4C4C',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  emptyWallText: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 22,
+    textAlign: 'left',
+    marginBottom: 20,
+  },
+  emptyWallCta: {
+    backgroundColor: '#E8F4FD',
+    borderRadius: 15,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: '#87CEEB',
+    alignItems: 'center',
+  },
+  emptyWallCtaText: {
+    fontSize: 13,
+    color: '#2563EB',
+    fontWeight: '600',
+    textAlign: 'center',
   },
   postCard: {
     backgroundColor: '#fff',

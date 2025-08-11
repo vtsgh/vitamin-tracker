@@ -7,7 +7,6 @@ import VitaminCapsule from '../../components/VitaminCapsule';
 import { usePremium } from '../../hooks/usePremium';
 import { PremiumUpgradeModal } from '../../components/PremiumUpgradeModal';
 import { UPGRADE_TRIGGER_CONTEXTS } from '../../constants/premium';
-import { showNotificationTestMenu } from '../../utils/notification-debug';
 import { debugStorageNotificationMismatch } from '../../utils/storage-debug';
 
 interface FeatureButton {
@@ -214,7 +213,7 @@ export default function Home() {
 
     // Handle debug notifications (dev only)
     if (feature.id === 'notification-debug') {
-      showNotificationTestMenu();
+      router.push('/notification-debug');
       return;
     }
 

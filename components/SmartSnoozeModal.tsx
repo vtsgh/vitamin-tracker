@@ -7,9 +7,12 @@ import {
   StyleSheet,
   Alert
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SmartNotificationEngine } from '../utils/smart-notifications';
 import { useSmartReminders } from '../hooks/useSmartReminders';
 import { formatDisplayTime } from '../utils/notifications';
+import { usePremium } from '../hooks/usePremium';
+import { FREE_LIMITS, PREMIUM_LIMITS } from '../constants/premium';
 
 interface SmartSnoozeModalProps {
   visible: boolean;
@@ -17,6 +20,7 @@ interface SmartSnoozeModalProps {
   vitaminName: string;
   planId: string;
   originalTime: string;
+  isTodayCompleted: boolean;
   onSnoozeApplied: (snoozeMinutes: number) => void;
 }
 
@@ -33,18 +37,47 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
   vitaminName,
   planId,
   originalTime,
+  isTodayCompleted,
   onSnoozeApplied
 }) => {
   const [snoozeOptions, setSnoozeOptions] = useState<SnoozeOption[]>([]);
   const [isApplying, setIsApplying] = useState(false);
+  const [snoozesUsedToday, setSnoozesUsedToday] = useState(0);
   
   const { settings, behaviorProfile, recordNotificationResponse } = useSmartReminders();
+  const { isPremium, getLimit } = usePremium();
 
   useEffect(() => {
     if (visible) {
+      loadSnoozesUsedToday();
       generateSmartSnoozeOptions();
     }
   }, [visible]);
+
+  const loadSnoozesUsedToday = async () => {
+    try {
+      const today = new Date().toDateString();
+      const key = `smartSnoozes_${today}`;
+      const stored = await AsyncStorage.getItem(key);
+      const used = stored ? parseInt(stored, 10) : 0;
+      setSnoozesUsedToday(used);
+    } catch (error) {
+      console.error('Error loading snooze usage:', error);
+      setSnoozesUsedToday(0);
+    }
+  };
+
+  const incrementSnoozeUsage = async () => {
+    try {
+      const today = new Date().toDateString();
+      const key = `smartSnoozes_${today}`;
+      const newCount = snoozesUsedToday + 1;
+      await AsyncStorage.setItem(key, newCount.toString());
+      setSnoozesUsedToday(newCount);
+    } catch (error) {
+      console.error('Error updating snooze usage:', error);
+    }
+  };
 
   const generateSmartSnoozeOptions = () => {
     const currentTime = new Date();
@@ -58,6 +91,18 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
   const handleSnoozeSelect = async (option: SnoozeOption) => {
     try {
       setIsApplying(true);
+      
+      // Check snooze limits
+      const maxSnoozes = getLimit('MAX_SMART_SNOOZES_PER_DAY');
+      if (maxSnoozes !== -1 && snoozesUsedToday >= maxSnoozes) {
+        console.log(`⚠️ Snooze limit reached: ${snoozesUsedToday}/${maxSnoozes}`);
+        Alert.alert(
+          '🚫 Snooze Limit Reached',
+          `You've used all ${maxSnoozes} snoozes for today. Try again tomorrow or upgrade to Premium for more!`,
+          [{ text: 'Got it', style: 'default' }]
+        );
+        return;
+      }
       
       // Calculate the new reminder time
       const newTime = new Date();
@@ -93,6 +138,9 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
 
   const applySnooze = async (option: SnoozeOption) => {
     try {
+      // Increment snooze usage counter
+      await incrementSnoozeUsage();
+      
       // Record the snooze behavior for learning
       if (settings.behaviorLearning) {
         console.log('📊 Recording snooze for behavioral learning');
@@ -129,6 +177,17 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
 
 
   const handleSkip = async () => {
+    // Check if today is already completed
+    if (isTodayCompleted) {
+      console.log('⚠️ Skip attempted on already completed day');
+      Alert.alert(
+        '✅ Already Taken!',
+        `You've already taken your ${vitaminName} today! No need to skip.`,
+        [{ text: 'Got it!', style: 'default', onPress: onClose }]
+      );
+      return;
+    }
+
     Alert.alert(
       '⏭️ Skip This Dose?',
       `Are you sure you want to skip your ${vitaminName} today? This will affect your streak tracking.`,
@@ -138,6 +197,8 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
           text: 'Skip',
           style: 'destructive',
           onPress: async () => {
+            console.log(`📝 User skipped ${vitaminName} for today`);
+            
             // Record skip for learning
             if (settings.behaviorLearning) {
               console.log('📊 Recording skip for behavioral learning');
@@ -180,15 +241,45 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
             <Text style={styles.subtitle}>What would you like to do?</Text>
           </View>
 
+          {/* Status and Limits */}
+          <View style={styles.statusSection}>
+            {isTodayCompleted && (
+              <View style={styles.completedBadge}>
+                <Text style={styles.completedBadgeText}>✅ Already taken today!</Text>
+              </View>
+            )}
+            
+            {(() => {
+              const maxSnoozes = getLimit('MAX_SMART_SNOOZES_PER_DAY');
+              const remaining = maxSnoozes === -1 ? '∞' : Math.max(0, maxSnoozes - snoozesUsedToday);
+              return (
+                <View style={styles.snoozeCounter}>
+                  <Text style={styles.snoozeCounterText}>
+                    📱 Smart Snoozes: {remaining === '∞' ? 'Unlimited' : `${remaining} remaining`}
+                  </Text>
+                </View>
+              );
+            })()}
+          </View>
+
           {/* Quick Actions */}
           <View style={styles.quickActions}>
             <TouchableOpacity
-              style={[styles.quickActionButton, styles.skipButton]}
+              style={[
+                styles.quickActionButton, 
+                styles.skipButton,
+                isTodayCompleted && styles.quickActionDisabled
+              ]}
               onPress={handleSkip}
-              disabled={isApplying}
+              disabled={isApplying || isTodayCompleted}
             >
               <Text style={styles.quickActionIcon}>⏭️</Text>
-              <Text style={styles.quickActionText}>Skip Today</Text>
+              <Text style={[
+                styles.quickActionText,
+                isTodayCompleted && styles.quickActionTextDisabled
+              ]}>
+                {isTodayCompleted ? 'Already Taken' : 'Skip Today'}
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -281,6 +372,35 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
+  statusSection: {
+    alignItems: 'center',
+    marginBottom: 20,
+    gap: 10,
+  },
+  completedBadge: {
+    backgroundColor: '#D1FAE5',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#34D399',
+  },
+  completedBadgeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#059669',
+  },
+  snoozeCounter: {
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+  },
+  snoozeCounterText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6B7280',
+  },
   quickActions: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -300,6 +420,10 @@ const styles = StyleSheet.create({
   skipButton: {
     backgroundColor: '#6B7280',
   },
+  quickActionDisabled: {
+    backgroundColor: '#D1D5DB',
+    opacity: 0.6,
+  },
   quickActionIcon: {
     fontSize: 24,
     marginBottom: 8,
@@ -308,6 +432,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  quickActionTextDisabled: {
+    color: '#9CA3AF',
   },
   snoozeSection: {
     flex: 1,

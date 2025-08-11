@@ -376,14 +376,7 @@ export default function Settings() {
           </>
         )}
 
-        {/* Legal & Safety */}
-        {renderSectionHeader('Legal & Safety', '\u2696\ufe0f')}
-        <TouchableOpacity style={styles.settingButton} onPress={() => router.push('/medical-disclaimer')}>
-          <Text style={styles.medicalDisclaimerText}>Medical Disclaimer</Text>
-          <Text style={styles.medicalDisclaimerSubtext}>Review important health information</Text>
-        </TouchableOpacity>
-
-        {/* Danger Zone */}
+        {/* Legal & Safety */}\n        {renderSectionHeader('Legal & Safety', '\u2696\ufe0f')}\n        <TouchableOpacity style={styles.settingButton} onPress={() => router.push('/medical-disclaimer')}>\n          <Text style={styles.settingButtonText}>\u2695\ufe0f Medical Disclaimer</Text>\n          <Text style={styles.settingButtonSubtext}>Review important health information</Text>\n        </TouchableOpacity>\n\n        {/* Danger Zone */}
         {renderSectionHeader('Data Management', '⚠️')}
         <TouchableOpacity style={styles.dangerButton} onPress={handleClearData}>
           <Text style={styles.dangerButtonText}>Clear All Data</Text>
@@ -391,7 +384,9 @@ export default function Settings() {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Takeamin • Version 1.0.0{'\n'}Made with ❤️ for your health journey          </Text>
+            Takeamin • Version 1.0.0{'\n'}
+            Made with ❤️ for your health journey
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -594,36 +589,5 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'center',
     lineHeight: 20,
-  },
-  settingButton: {
-    backgroundColor: "#fff",
-    borderRadius: 15,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    padding: 20,
-  },
-  settingButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 4,
-  },
-  settingButtonSubtext: {
-    fontSize: 14,
-    color: "#666",
-  },
-  medicalDisclaimerText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000", // Black color for better visibility
-    marginBottom: 4,
-  },
-  medicalDisclaimerSubtext: {
-    fontSize: 14,
-    color: "#000", // Black color for consistency
   },
 });

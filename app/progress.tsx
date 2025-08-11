@@ -42,7 +42,7 @@ export default function Progress() {
   const [showStreakRecoveryModal, setShowStreakRecoveryModal] = useState(false);
   const [streakBreakInfo, setStreakBreakInfo] = useState<{ vitaminPlanId: string; missedDate: string; currentStreak: number } | null>(null);
   const [showSmartSnoozeModal, setShowSmartSnoozeModal] = useState(false);
-  const [snoozeInfo, setSnoozeInfo] = useState<{ vitaminName: string; planId: string; originalTime: string } | null>(null);
+  const [snoozeInfo, setSnoozeInfo] = useState<{ vitaminName: string; planId: string; originalTime: string; isTodayCompleted: boolean } | null>(null);
   
   const confettiRef = useRef<ConfettiCannon>(null);
   const { isPremium, showUpgradeModal, closeUpgradeModal, upgradeContext } = usePremium();
@@ -373,11 +373,17 @@ export default function Progress() {
     const message = getMotivationalMessage(streak.currentStreak);
 
     const handleSmartSnooze = () => {
-      if (isPremium && smartSettings.enabled) {
+      if (isPremium) {
+        // Check if today is already completed
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const isTodayCompleted = hasCheckInForDate(progressData.checkIns, selectedPlan.id, todayStr);
+        
         setSnoozeInfo({
           vitaminName: selectedPlan.vitamin,
           planId: selectedPlan.id,
-          originalTime: selectedPlan.reminderTime || '09:00'
+          originalTime: selectedPlan.reminderTime || '09:00',
+          isTodayCompleted
         });
         setShowSmartSnoozeModal(true);
       } else {
@@ -568,6 +574,7 @@ export default function Progress() {
           vitaminName={snoozeInfo.vitaminName}
           planId={snoozeInfo.planId}
           originalTime={snoozeInfo.originalTime}
+          isTodayCompleted={snoozeInfo.isTodayCompleted}
           onSnoozeApplied={(snoozeMinutes) => {
             console.log(`📱 Snooze applied: ${snoozeMinutes} minutes`);
             // Here you could schedule a new notification for the snoozed time
