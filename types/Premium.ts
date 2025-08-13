@@ -6,9 +6,9 @@ export type UpgradeTriggerContext = typeof UPGRADE_TRIGGER_CONTEXTS[keyof typeof
 
 export interface PremiumStatus {
   isPremium: boolean;
-  subscriptionType?: 'monthly' | 'yearly';
+  subscriptionType?: 'monthly' | 'yearly' | 'lifetime';
   subscriptionDate?: string;
-  expirationDate?: string;
+  expirationDate?: string; // undefined for lifetime purchases
   trialUsed?: boolean;
 }
 

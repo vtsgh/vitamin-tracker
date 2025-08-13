@@ -173,13 +173,18 @@ export const UPGRADE_TRIGGER_CONTEXTS = {
 
 export const PREMIUM_PRICING = {
   MONTHLY: {
-    price: '$4.99',
+    price: '$2.99',
     period: '/month',
     savings: null
   },
-  YEARLY: {
-    price: '$29.99', 
-    period: '/year',
-    savings: 'Save 50%'
-  }
+  LIFETIME: {
+    price: '$14.99',
+    period: ' once',
+    savings: 'Best Value!'
+  },
+  // YEARLY: {
+  //   price: '$29.99', 
+  //   period: '/year',
+  //   savings: 'Save 50%'
+  // }
 } as const;

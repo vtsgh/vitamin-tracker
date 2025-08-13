@@ -39,6 +39,15 @@ export class RevenueCatService {
       
       await Purchases.configure({ apiKey });
       
+      // Set up customer info update listener
+      Purchases.addCustomerInfoUpdateListener((customerInfo) => {
+        console.log('💳 Customer info updated:', {
+          isPremium: customerInfo.entitlements.active['premium'] !== undefined,
+          entitlements: Object.keys(customerInfo.entitlements.active),
+          originalAppUserId: customerInfo.originalAppUserId
+        });
+      });
+      
       // Set user ID if provided (useful for analytics)
       if (userId) {
         await Purchases.logIn(userId);
@@ -123,8 +132,31 @@ export class RevenueCatService {
 
       console.log('✅ Purchase successful:', productIdentifier);
       return { customerInfo, cancelled: false };
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Purchase failed:', error);
+      
+      // Handle specific RevenueCat error types
+      if (error.code) {
+        console.error('RevenueCat Error Code:', error.code);
+        console.error('RevenueCat Error Message:', error.message);
+        
+        switch (error.code) {
+          case 'USER_CANCELLED':
+            return { customerInfo: await this.getCustomerInfo(), cancelled: true };
+          case 'PAYMENT_PENDING':
+            console.log('Payment is pending');
+            break;
+          case 'PRODUCT_NOT_AVAILABLE':
+            console.error('Product not available for purchase');
+            break;
+          case 'PURCHASE_NOT_ALLOWED':
+            console.error('Purchase not allowed on this device');
+            break;
+          default:
+            console.error('Unknown RevenueCat error');
+        }
+      }
+      
       throw error;
     }
   }

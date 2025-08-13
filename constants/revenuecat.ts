@@ -6,25 +6,27 @@
 // RevenueCat API Keys (get these from your RevenueCat dashboard)
 export const REVENUECAT_CONFIG = {
   // RevenueCat PUBLIC API Keys - NEVER use secret keys (sk_) in mobile apps!
-  API_KEY_IOS: 'appl_YOUR_IOS_PUBLIC_KEY_HERE', // Get from RevenueCat Dashboard → Settings → API Keys
-  API_KEY_ANDROID: 'goog_YOUR_ANDROID_PUBLIC_KEY_HERE', // Get from RevenueCat Dashboard → Settings → API Keys
+  API_KEY_IOS: 'appl_ZilemRvbsAwFnKASmzpvuhvmIkX', // iOS App Store Connect integration
+  API_KEY_ANDROID: 'goog_TabMlEFHnVnIaFkGGbqQWGwzuOa', // Android Google Play Console integration
   
-  // Development key for testing (also should be public key)
-  API_KEY_DEV: 'appl_YOUR_DEV_PUBLIC_KEY_HERE', // Your development public API key
+  // Development key for testing (will auto-detect platform)
+  API_KEY_DEV: 'appl_ZilemRvbsAwFnKASmzpvuhvmIkX', // iOS key for iOS testing
   
   // Entitlement identifier (configure this in RevenueCat dashboard)
   PREMIUM_ENTITLEMENT_ID: 'premium',
   
   // Product identifiers (these should match your App Store Connect/Google Play Console product IDs)
   PRODUCTS: {
-    MONTHLY_PREMIUM: 'takeamin_premium_monthly', // $4.99/month
-    YEARLY_PREMIUM: 'takeamin_premium_yearly',   // $29.99/year
+    MONTHLY_PREMIUM: 'takeamin_monthly_premium', // $4.99/month subscription
+    LIFETIME_PREMIUM: 'takeamin_lifetime',       // One-time lifetime purchase
+    // YEARLY_PREMIUM: 'takeamin_yearly_premium', // Add later if needed
   },
   
   // Package identifiers (optional, used for A/B testing)
   PACKAGES: {
     MONTHLY: '$rc_monthly',
-    ANNUAL: '$rc_annual',
+    LIFETIME: '$rc_lifetime', // For lifetime purchase
+    // ANNUAL: '$rc_annual',   // Add later if needed
   }
 } as const;
 

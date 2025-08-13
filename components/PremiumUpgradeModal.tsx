@@ -23,7 +23,7 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
   context,
   onUpgrade
 }) => {
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'lifetime'>('lifetime');
   const { upgradeToPremium, startFreeTrial, premiumStatus } = usePremium();
 
   const getCategoryBenefits = (): CategoryBenefits => {
@@ -296,22 +296,22 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
           <View style={styles.pricingSection}>
             <Text style={styles.pricingTitle}>Choose Your Plan</Text>
             
-            {/* Yearly Plan */}
+            {/* Lifetime Plan */}
             <TouchableOpacity
-              style={[styles.planCard, selectedPlan === 'yearly' && styles.selectedPlan]}
-              onPress={() => setSelectedPlan('yearly')}
+              style={[styles.planCard, selectedPlan === 'lifetime' && styles.selectedPlan]}
+              onPress={() => setSelectedPlan('lifetime')}
             >
               <View style={styles.planHeader}>
                 <View>
-                  <Text style={styles.planTitle}>Yearly Plan</Text>
-                  <Text style={styles.planSavings}>{PREMIUM_PRICING.YEARLY.savings}</Text>
+                  <Text style={styles.planTitle}>Lifetime Access</Text>
+                  <Text style={styles.planSavings}>{PREMIUM_PRICING.LIFETIME.savings}</Text>
                 </View>
                 <Text style={styles.planPrice}>
-                  {PREMIUM_PRICING.YEARLY.price}
-                  <Text style={styles.planPeriod}>{PREMIUM_PRICING.YEARLY.period}</Text>
+                  {PREMIUM_PRICING.LIFETIME.price}
+                  <Text style={styles.planPeriod}>{PREMIUM_PRICING.LIFETIME.period}</Text>
                 </Text>
               </View>
-              <Text style={styles.planDescription}>Best value • Just $2.50/month</Text>
+              <Text style={styles.planDescription}>Pay once, use forever • No monthly fees</Text>
             </TouchableOpacity>
 
             {/* Monthly Plan */}
@@ -332,7 +332,8 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
 
           {/* Action Buttons */}
           <View style={styles.actionSection}>
-            {!premiumStatus.trialUsed && (
+            {/* Free trial temporarily disabled to prevent abuse */}
+            {false && !premiumStatus.trialUsed && (
               <TouchableOpacity style={styles.trialButton} onPress={handleFreeTrial}>
                 <Text style={styles.trialButtonText}>Start 7-Day Free Trial</Text>
               </TouchableOpacity>
@@ -340,7 +341,7 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
             
             <TouchableOpacity style={styles.upgradeButton} onPress={handleUpgrade}>
               <Text style={styles.upgradeButtonText}>
-                Upgrade to Premium {selectedPlan === 'yearly' ? '• Save 50%' : ''}
+                Upgrade to Premium {selectedPlan === 'lifetime' ? '• Best Value!' : ''}
               </Text>
             </TouchableOpacity>
           </View>

@@ -140,7 +140,7 @@ export const usePremium = () => {
   }, []);
 
   // Upgrade to premium using RevenueCat
-  const upgradeToPremium = useCallback(async (subscriptionType: 'monthly' | 'yearly' = 'monthly') => {
+  const upgradeToPremium = useCallback(async (subscriptionType: 'monthly' | 'lifetime' = 'monthly') => {
     try {
       const offerings = await revenueCatService.getOfferings();
       
@@ -153,7 +153,9 @@ export const usePremium = () => {
           subscriptionDate: new Date().toISOString(),
           expirationDate: subscriptionType === 'monthly' 
             ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-            : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+            : subscriptionType === 'lifetime' 
+              ? undefined // Lifetime never expires
+              : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
           trialUsed: premiumStatus.trialUsed
         };
         
@@ -164,13 +166,32 @@ export const usePremium = () => {
 
       // Find the appropriate package
       const currentOffering = offerings[0];
-      const packageToPurchase = subscriptionType === 'yearly' 
-        ? currentOffering.availablePackages.find(pkg => pkg.packageType === 'ANNUAL' || pkg.identifier.includes('yearly') || pkg.identifier.includes('annual'))
-        : currentOffering.availablePackages.find(pkg => pkg.packageType === 'MONTHLY' || pkg.identifier.includes('monthly'));
+      
+      console.log('🛒 Available packages:', currentOffering.availablePackages.map(pkg => ({
+        identifier: pkg.identifier,
+        packageType: pkg.packageType,
+        product: pkg.product.identifier
+      })));
+      
+      const packageToPurchase = subscriptionType === 'lifetime' 
+        ? currentOffering.availablePackages.find(pkg => 
+            pkg.identifier === '$rc_lifetime' || 
+            pkg.identifier.includes('lifetime') ||
+            pkg.packageType === 'LIFETIME'
+          )
+        : currentOffering.availablePackages.find(pkg => 
+            pkg.identifier === '$rc_monthly' || 
+            pkg.identifier.includes('monthly') ||
+            pkg.packageType === 'MONTHLY'
+          );
 
       if (!packageToPurchase) {
-        throw new Error(`No ${subscriptionType} package available`);
+        const availablePackages = currentOffering.availablePackages.map(pkg => pkg.identifier).join(', ');
+        console.error(`❌ No ${subscriptionType} package found. Available packages: ${availablePackages}`);
+        throw new Error(`No ${subscriptionType} package available. Available: ${availablePackages}`);
       }
+
+      console.log(`✅ Found ${subscriptionType} package:`, packageToPurchase.identifier);
 
       // Attempt purchase
       const { customerInfo, cancelled } = await revenueCatService.purchasePackage(packageToPurchase);
@@ -200,22 +221,56 @@ export const usePremium = () => {
     }
   }, [premiumStatus.trialUsed, closeUpgradeModal]);
 
-  // Start free trial (if not used)
+  // Start free trial through RevenueCat (prevents reinstall abuse)
   const startFreeTrial = useCallback(async () => {
-    if (premiumStatus.trialUsed) return false;
-    
-    const trialStatus: PremiumStatus = {
-      isPremium: true,
-      subscriptionType: 'monthly',
-      subscriptionDate: new Date().toISOString(),
-      expirationDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
-      trialUsed: true
-    };
-    
-    await savePremiumStatus(trialStatus);
-    closeUpgradeModal();
-    return true;
-  }, [premiumStatus.trialUsed, closeUpgradeModal]);
+    try {
+      console.log('🎯 Starting RevenueCat free trial...');
+      
+      // Check if user has already used trial via RevenueCat
+      const customerInfo = await revenueCatService.getCustomerInfo();
+      
+      // Check if user has any entitlements (including expired trials)
+      if (Object.keys(customerInfo.allEntitlements).length > 0) {
+        console.log('⚠️ User has already used trial via RevenueCat');
+        return false; // Trial already used
+      }
+      
+      // For now, disable free trial to prevent abuse
+      // Instead, redirect to purchase flow
+      console.log('⚠️ Free trial disabled - redirecting to purchase');
+      return false;
+      
+      /* TODO: Implement proper RevenueCat free trial
+      const offerings = await revenueCatService.getOfferings();
+      if (offerings.length > 0) {
+        const trialPackage = offerings[0].availablePackages.find(pkg => 
+          pkg.identifier === '$rc_monthly' && pkg.product.introPrice
+        );
+        
+        if (trialPackage) {
+          const { customerInfo, cancelled } = await revenueCatService.purchasePackage(trialPackage);
+          if (!cancelled) {
+            // Trial started successfully
+            const newStatus: PremiumStatus = {
+              isPremium: true,
+              subscriptionType: 'monthly',
+              subscriptionDate: new Date().toISOString(),
+              expirationDate: customerInfo.expirationDate ? new Date(customerInfo.expirationDate).toISOString() : undefined,
+              trialUsed: true
+            };
+            await savePremiumStatus(newStatus);
+            closeUpgradeModal();
+            return true;
+          }
+        }
+      }
+      */
+      
+    } catch (error) {
+      console.error('❌ Free trial failed:', error);
+      return false;
+    }
+  }, [closeUpgradeModal]);
 
   // Check if subscription is expired
   const isSubscriptionExpired = useCallback((): boolean => {
