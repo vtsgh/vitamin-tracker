@@ -17,8 +17,9 @@ export const REVENUECAT_CONFIG = {
   
   // Product identifiers (these should match your App Store Connect/Google Play Console product IDs)
   PRODUCTS: {
-    MONTHLY_PREMIUM: 'takeamin_monthly_premium', // $4.99/month subscription
-    LIFETIME_PREMIUM: 'takeamin_lifetime',       // One-time lifetime purchase
+    MONTHLY_PREMIUM: 'takeamin_monthly_premium', // $2.99/month subscription (both platforms)
+    LIFETIME_PREMIUM_IOS: 'takeamin_lifetime',   // iOS lifetime purchase  
+    LIFETIME_PREMIUM_ANDROID: 'lifetime_premium', // Android lifetime purchase
     // YEARLY_PREMIUM: 'takeamin_yearly_premium', // Add later if needed
   },
   

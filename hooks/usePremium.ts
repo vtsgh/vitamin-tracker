@@ -177,12 +177,15 @@ export const usePremium = () => {
         ? currentOffering.availablePackages.find(pkg => 
             pkg.identifier === '$rc_lifetime' || 
             pkg.identifier.includes('lifetime') ||
-            pkg.packageType === 'LIFETIME'
+            pkg.packageType === 'LIFETIME' ||
+            pkg.product.identifier === 'takeamin_lifetime' ||
+            pkg.product.identifier === 'lifetime_premium'
           )
         : currentOffering.availablePackages.find(pkg => 
             pkg.identifier === '$rc_monthly' || 
             pkg.identifier.includes('monthly') ||
-            pkg.packageType === 'MONTHLY'
+            pkg.packageType === 'MONTHLY' ||
+            pkg.product.identifier === 'takeamin_monthly_premium'
           );
 
       if (!packageToPurchase) {
