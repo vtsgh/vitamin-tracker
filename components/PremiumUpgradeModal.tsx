@@ -234,8 +234,13 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
         'You now have access to all premium features. Enjoy your enhanced vitamin journey!',
         [{ text: 'Awesome!', style: 'default' }]
       );
-    } catch {
-      Alert.alert('Error', 'Failed to upgrade. Please try again.');
+    } catch (error) {
+      console.error('🚨 Upgrade failed:', error);
+      console.error('🚨 Error details:', JSON.stringify(error, null, 2));
+      
+      // Show more detailed error message
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      Alert.alert('Upgrade Failed', `${errorMessage}\n\nPlease check the console for more details.`);
     }
   };
 

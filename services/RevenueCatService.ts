@@ -98,17 +98,29 @@ export class RevenueCatService {
    */
   async getOfferings(): Promise<PurchasesOffering[]> {
     try {
+      console.log('🔍 Fetching offerings from RevenueCat...');
       const offerings = await Purchases.getOfferings();
       
+      console.log('📋 Raw offerings response:', JSON.stringify({
+        current: offerings.current?.identifier,
+        all: Object.keys(offerings.all).length,
+        currentPackages: offerings.current?.availablePackages?.length || 0
+      }));
+      
       if (offerings.current !== null) {
-        console.log('📦 Available offerings:', offerings.current.availablePackages.length);
+        console.log('📦 Available packages in current offering:');
+        offerings.current.availablePackages.forEach((pkg, index) => {
+          console.log(`  ${index + 1}. ${pkg.identifier} (${pkg.packageType}) -> ${pkg.product.identifier} (${pkg.product.price})`);
+        });
         return [offerings.current];
       }
       
       console.log('⚠️ No current offerings available');
+      console.log('⚠️ Available offerings:', Object.keys(offerings.all));
       return [];
     } catch (error) {
       console.error('❌ Failed to get offerings:', error);
+      console.error('❌ Offerings error details:', JSON.stringify(error, null, 2));
       throw error;
     }
   }

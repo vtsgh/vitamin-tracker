@@ -146,6 +146,50 @@ export default function Settings() {
     router.push('/(tabs)/');
   };
 
+  const debugRevenueCat = async () => {
+    try {
+      console.log('🔍 ============ REVENUECAT DEBUG START ============');
+      
+      // Import RevenueCat service
+      const { revenueCatService } = await import('../services/RevenueCatService');
+      const { getRevenueCatAPIKey } = await import('../constants/revenuecat');
+      
+      const apiKey = getRevenueCatAPIKey();
+      console.log('🔑 API Key:', apiKey.substring(0, 20) + '...');
+      
+      // Get customer info
+      const customerInfo = await revenueCatService.getCustomerInfo();
+      console.log('👤 Customer Info:', {
+        originalAppUserId: customerInfo.originalAppUserId,
+        activeEntitlements: Object.keys(customerInfo.entitlements.active),
+        allEntitlements: Object.keys(customerInfo.entitlements.all),
+      });
+      
+      // Get offerings
+      const offerings = await revenueCatService.getOfferings();
+      console.log('📦 Offerings Count:', offerings.length);
+      
+      if (offerings.length > 0) {
+        offerings[0].availablePackages.forEach((pkg, index) => {
+          console.log(`📋 Package ${index + 1}:`, {
+            identifier: pkg.identifier,
+            packageType: pkg.packageType,
+            product: pkg.product.identifier,
+            price: pkg.product.price
+          });
+        });
+      }
+      
+      console.log('🔍 ============ REVENUECAT DEBUG END ============');
+      
+      Alert.alert('Debug Complete', 'Check the console for RevenueCat debug information.');
+      
+    } catch (error) {
+      console.error('🚨 Debug failed:', error);
+      Alert.alert('Debug Failed', `Error: ${error}`);
+    }
+  };
+
   const handleClearData = () => {
     Alert.alert(
       'Clear All Data',
@@ -372,6 +416,12 @@ export default function Settings() {
             {renderSectionHeader('Developer', '⚙️')}
             <TouchableOpacity style={styles.actionButton} onPress={resetPremiumForTesting}>
               <Text style={styles.actionButtonText}>Reset Premium Status (Dev)</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.actionButton, { backgroundColor: '#8B5CF6' }]} 
+              onPress={debugRevenueCat}
+            >
+              <Text style={styles.actionButtonText}>🔍 Debug RevenueCat (Dev)</Text>
             </TouchableOpacity>
           </>
         )}

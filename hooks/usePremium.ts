@@ -44,7 +44,7 @@ export const usePremium = () => {
                          !apiKey.startsWith('sk_');
       
       if (hasValidKey) {
-        console.log('🔑 Initializing RevenueCat with valid key');
+        console.log('🔑 Initializing RevenueCat with valid key:', apiKey.substring(0, 20) + '...');
         await revenueCatService.initialize(apiKey);
         
         // Check premium status from RevenueCat
