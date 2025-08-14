@@ -146,6 +146,8 @@ export const usePremium = () => {
       
       if (offerings.length === 0) {
         console.log('⚠️ No offerings available, falling back to mock upgrade');
+        console.log('💡 This is expected in emulator/preview builds without Play Store authentication');
+        console.log('💡 In production, users will have proper payment flows');
         // Fallback to mock upgrade for development
         const newStatus: PremiumStatus = {
           isPremium: true,

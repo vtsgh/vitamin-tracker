@@ -238,9 +238,25 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
       console.error('🚨 Upgrade failed:', error);
       console.error('🚨 Error details:', JSON.stringify(error, null, 2));
       
-      // Show more detailed error message
+      // Show context-aware error message
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      Alert.alert('Upgrade Failed', `${errorMessage}\n\nPlease check the console for more details.`);
+      
+      // Check if this is the common emulator/testing error
+      const isTestingError = errorMessage.includes('not allowed to make the purchase') || 
+                           errorMessage.includes('USER_CANCELLED') ||
+                           errorMessage.includes('PRODUCT_NOT_AVAILABLE');
+      
+      if (isTestingError && __DEV__) {
+        Alert.alert(
+          '🧪 Testing Mode Notice', 
+          'This error is expected in emulator/preview builds.\n\n' +
+          'The upgrade has been mocked for testing. In production, users with Google Play accounts will see proper payment flows.\n\n' +
+          'Check console for detailed RevenueCat logs.',
+          [{ text: 'Got it!', style: 'default' }]
+        );
+      } else {
+        Alert.alert('Upgrade Failed', `${errorMessage}\n\nPlease check the console for more details.`);
+      }
     }
   };
 

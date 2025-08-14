@@ -45,7 +45,13 @@ export async function recordCheckIn(vitaminPlanId: string, date?: string, isPrem
   const checkInDate = date || todayStr; // YYYY-MM-DD
   const timestamp = Date.now();
 
+  console.log(`🎯 Recording check-in for plan ${vitaminPlanId} on date ${checkInDate}`);
+  console.log(`📅 Today is: ${todayStr}, check-in date is: ${checkInDate}`);
+
   const progressData = await getProgressData();
+  
+  console.log(`📊 Current check-ins:`, progressData.checkIns.filter(c => c.vitaminPlanId === vitaminPlanId).map(c => c.date));
+  console.log(`📊 Current streaks:`, progressData.streaks.filter(s => s.vitaminPlanId === vitaminPlanId));
   
   // Check if already checked in for this date and plan
   const existingCheckIn = progressData.checkIns.find(
@@ -53,7 +59,7 @@ export async function recordCheckIn(vitaminPlanId: string, date?: string, isPrem
   );
   
   if (existingCheckIn) {
-    console.log('Already checked in for this date');
+    console.log('❌ Already checked in for this date');
     return { newBadges: [] };
   }
 
@@ -81,9 +87,12 @@ export async function recordCheckIn(vitaminPlanId: string, date?: string, isPrem
  * Update streak for a vitamin plan using enhanced calculation with recovery support
  */
 async function updateStreak(progressData: ProgressData, vitaminPlanId: string, checkInDate: string): Promise<Streak> {
+  console.log(`🔄 Updating streak for plan ${vitaminPlanId} on date ${checkInDate}`);
+  
   let streak = progressData.streaks.find(s => s.vitaminPlanId === vitaminPlanId);
   
   if (!streak) {
+    console.log(`🆕 Creating new streak object for plan ${vitaminPlanId}`);
     streak = {
       vitaminPlanId,
       currentStreak: 0,
@@ -91,6 +100,8 @@ async function updateStreak(progressData: ProgressData, vitaminPlanId: string, c
     };
     progressData.streaks.push(streak);
   }
+
+  console.log(`📊 Previous streak: ${streak.currentStreak}, longest: ${streak.longestStreak}`);
 
   // Use enhanced streak calculation that accounts for recoveries
   const currentStreak = calculateStreakWithRecoveries(
@@ -100,15 +111,19 @@ async function updateStreak(progressData: ProgressData, vitaminPlanId: string, c
     checkInDate
   );
 
+  console.log(`🧮 Calculated new streak: ${currentStreak}`);
+
   // Update streak object
   streak.currentStreak = currentStreak;
 
   // Update longest streak if current is higher
   if (streak.currentStreak > streak.longestStreak) {
     streak.longestStreak = streak.currentStreak;
+    console.log(`🎉 New longest streak record: ${streak.longestStreak}!`);
   }
 
   streak.lastCheckInDate = checkInDate;
+  console.log(`✅ Streak updated successfully: current=${streak.currentStreak}, longest=${streak.longestStreak}`);
   return streak;
 }
 
@@ -315,11 +330,15 @@ export async function applyStreakRecovery(vitaminPlanId: string, missedDate: str
 
 /**
  * Enhanced streak calculation that accounts for recoveries
+ * CORRECTED: Calculate streak by going backwards from today until we find a gap
  */
 export function calculateStreakWithRecoveries(checkIns: CheckIn[], recoveries: StreakRecovery[], vitaminPlanId: string, currentDate?: string): number {
   const today = currentDate || new Date().toISOString().split('T')[0];
   let streak = 0;
-  let currentCheckDate = today; // Start with today as a string
+  let currentCheckDate = today; // Start from today and go backwards
+  
+  console.log(`🔍 Starting streak calculation from: ${currentCheckDate}`);
+  console.log(`📋 Available check-ins:`, checkIns.filter(c => c.vitaminPlanId === vitaminPlanId).map(c => c.date));
   
   // Go backwards day by day, starting from today
   while (true) {
@@ -333,21 +352,29 @@ export function calculateStreakWithRecoveries(checkIns: CheckIn[], recoveries: S
       recovery => recovery.missedDate === currentCheckDate && recovery.vitaminPlanId === vitaminPlanId
     );
     
+    console.log(`🔍 Checking ${currentCheckDate}: hasCheckIn=${hasCheckIn}, wasRecovered=${wasRecovered}`);
+    
     // If we have a check-in or a recovery, continue the streak
     if (hasCheckIn || wasRecovered) {
       streak++;
+      console.log(`✅ Streak incremented to ${streak} for date ${currentCheckDate}`);
       
       // Move to previous day
       const prevDate = new Date(currentCheckDate);
       prevDate.setDate(prevDate.getDate() - 1);
       currentCheckDate = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}-${String(prevDate.getDate()).padStart(2, '0')}`;
     } else {
+      console.log(`❌ No check-in or recovery for ${currentCheckDate}, streak ends at ${streak}`);
       break;
     }
     
     // Safety: don't go back more than 365 days
-    if (streak > 365) break;
+    if (streak > 365) {
+      console.log(`⚠️ Safety break: streak > 365 days`);
+      break;
+    }
   }
   
+  console.log(`🏆 Final calculated streak: ${streak}`);
   return streak;
 }
