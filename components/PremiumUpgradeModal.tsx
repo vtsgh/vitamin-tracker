@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  Alert
+  Alert,
+  Linking
 } from 'react-native';
 import { UpgradeModalProps, CategoryBenefits } from '../types/Premium';
 import { 
@@ -274,6 +275,14 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
     }
   };
 
+  const openPrivacyPolicy = () => {
+    Linking.openURL('https://sites.google.com/view/takeaminbusiness/privacy-policy');
+  };
+
+  const openTermsOfUse = () => {
+    Linking.openURL('https://sites.google.com/view/takeaminbusiness/terms-of-use');
+  };
+
   return (
     <Modal
       visible={visible}
@@ -365,6 +374,19 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
                 Upgrade to Premium {selectedPlan === 'lifetime' ? '• Best Value!' : ''}
               </Text>
             </TouchableOpacity>
+          </View>
+
+          {/* Legal Links */}
+          <View style={styles.legalSection}>
+            <View style={styles.legalLinks}>
+              <TouchableOpacity onPress={openTermsOfUse}>
+                <Text style={styles.legalLinkText}>Terms of Use</Text>
+              </TouchableOpacity>
+              <Text style={styles.legalSeparator}>  •  </Text>
+              <TouchableOpacity onPress={openPrivacyPolicy}>
+                <Text style={styles.legalLinkText}>Privacy Policy</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Footer */}
@@ -554,6 +576,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  legalSection: {
+    alignItems: 'center',
+    paddingVertical: 15,
+  },
+  legalLinks: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  legalLinkText: {
+    fontSize: 14,
+    color: '#FF7F50',
+    textDecorationLine: 'underline',
+  },
+  legalSeparator: {
+    fontSize: 14,
+    color: '#999',
   },
   footer: {
     alignItems: 'center',
