@@ -174,6 +174,9 @@ export async function cleanupOrphanedNotifications(): Promise<number> {
       }
     }
     
+    console.log('ℹ️ Note: In Expo Go, notification cancellation may not work reliably.');
+    console.log('ℹ️ If notifications persist, delete and reinstall Expo Go app.');
+    
     console.log(`🧹 Cleanup complete! Removed ${audit.orphanedNotifications.length} orphaned notifications`);
     console.log('🧹 ============ CLEANUP COMPLETE ============\n');
     

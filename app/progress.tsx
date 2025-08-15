@@ -45,7 +45,7 @@ export default function Progress() {
   const [snoozeInfo, setSnoozeInfo] = useState<{ vitaminName: string; planId: string; originalTime: string; isTodayCompleted: boolean } | null>(null);
   
   const confettiRef = useRef<ConfettiCannon>(null);
-  const { isPremium, showUpgradeModal, closeUpgradeModal, upgradeContext } = usePremium();
+  const { isPremium, showUpgradeModal, closeUpgradeModal, upgradeContext, triggerUpgrade } = usePremium();
   const { settings: smartSettings, recordNotificationResponse } = useSmartReminders();
 
 
@@ -470,6 +470,38 @@ export default function Progress() {
               message: "Earn exclusive achievements like 'Year Long Legend' and 'Perfect Month'",
               trigger: UPGRADE_TRIGGER_CONTEXTS.BADGE_LIMIT_REACHED
             }}
+            fallback={
+              <TouchableOpacity 
+                style={styles.customUpgradeGate} 
+                onPress={() => {
+                  console.log('🎯 Manual upgrade trigger from progress badges');
+                  triggerUpgrade(
+                    PREMIUM_FEATURES.UNLIMITED_BADGES,
+                    UPGRADE_TRIGGER_CONTEXTS.BADGE_LIMIT_REACHED,
+                    { customMessage: "Earn exclusive achievements like 'Year Long Legend' and 'Perfect Month'" }
+                  );
+                }}
+                activeOpacity={0.7}
+              >
+                <View style={styles.customUpgradeContent}>
+                  <View style={styles.customPremiumBadge}>
+                    <Text style={styles.customPremiumBadgeText}>✨ PREMIUM</Text>
+                  </View>
+                  
+                  <Text style={styles.customUpgradeTitle}>
+                    🏆 Unlock 43+ More Badges!
+                  </Text>
+                  
+                  <Text style={styles.customUpgradeMessage}>
+                    Earn exclusive achievements like 'Year Long Legend' and 'Perfect Month'
+                  </Text>
+                  
+                  <View style={styles.customUpgradeButton}>
+                    <Text style={styles.customUpgradeButtonText}>Tap to Upgrade</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            }
           >
             {getAllAvailableBadges(true).slice(freeBadges.length).map(availableBadge => {
               const earnedBadge = earnedBadges.find(b => b.id === availableBadge.id);
@@ -1186,5 +1218,56 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     lineHeight: 22,
+  },
+  // Custom upgrade gate styles
+  customUpgradeGate: {
+    backgroundColor: '#F8F9FF',
+    borderRadius: 15,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: '#E8EAFF',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  customUpgradeContent: {
+    alignItems: 'center',
+  },
+  customPremiumBadge: {
+    backgroundColor: '#FFD700',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+  customPremiumBadgeText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#8B5A00',
+  },
+  customUpgradeTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#4C4C4C',
+    marginBottom: 5,
+    textAlign: 'center',
+  },
+  customUpgradeMessage: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 15,
+    lineHeight: 20,
+  },
+  customUpgradeButton: {
+    backgroundColor: '#FF7F50',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  customUpgradeButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });

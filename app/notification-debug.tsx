@@ -16,15 +16,7 @@ import {
   requestNotificationPermissions,
   emergencyAndroidNotificationTest
 } from '../utils/notifications';
-import {
-  AndroidNotificationLogger,
-  startNotificationMonitoring,
-  stopNotificationMonitoring,
-  createDebugVitaminPlan,
-  runComprehensiveAndroidTest,
-  showDebugLogs,
-  checkAndroidNotificationHealth
-} from '../utils/android-notification-debug';
+// Android monitoring functions moved to main notification utils
 import { 
   debugStorageNotificationMismatch, 
   showStorageDebugAlert,
@@ -102,64 +94,17 @@ export default function NotificationDebugScreen() {
   const runComprehensiveTest = async () => {
     Alert.alert(
       'Comprehensive Test',
-      'This will run a full notification test with Android-specific debugging.',
+      'This will run a full notification test.',
       [
         { text: 'Cancel', style: 'cancel' },
         { 
-          text: 'Run Android Test', 
-          onPress: () => handleAction(runComprehensiveAndroidTest, 'Comprehensive Android test')
-        },
-        { 
-          text: 'Run Basic Test', 
-          onPress: () => handleAction(runNotificationTest, 'Basic notification test')
+          text: 'Run Test', 
+          onPress: () => handleAction(runNotificationTest, 'Comprehensive notification test')
         }
       ]
     );
   };
 
-  const createDebugPlan = async () => {
-    Alert.alert(
-      'Create Debug Plan',
-      'This will create a vitamin plan that triggers in 2 minutes for immediate testing.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Create Plan', 
-          onPress: () => handleAction(async () => {
-            const result = await createDebugVitaminPlan();
-            if (result) {
-              Alert.alert(
-                'Debug Plan Created!', 
-                `Watch for notifications:\n- Immediate: in 2 seconds\n- Vitamin reminder: at ${result.scheduledTime}\n- Total scheduled: ${result.notificationIds.length}`
-              );
-            } else {
-              Alert.alert('Error', 'Failed to create debug plan');
-            }
-          }, 'Create debug vitamin plan')
-        }
-      ]
-    );
-  };
-
-  const startMonitoring = () => {
-    startNotificationMonitoring();
-    Alert.alert('Monitoring Started', 'Now listening for all notification events. Check logs for details.');
-  };
-
-  const stopMonitoring = () => {
-    stopNotificationMonitoring();
-    Alert.alert('Monitoring Stopped', 'No longer listening for notification events.');
-  };
-
-  const checkHealth = async () => {
-    const issues = await checkAndroidNotificationHealth();
-    Alert.alert(
-      'Android Notification Health',
-      issues.length === 0 
-        ? '✅ All checks passed! Notifications should work.'
-        : `⚠️ Found ${issues.length} issues:\n\n${issues.join('\n')}`
-    );
-  };
 
   const runAudit = async () => {
     const result = await auditNotifications();
@@ -183,6 +128,7 @@ export default function NotificationDebugScreen() {
       ]
     );
   };
+
 
   const resetSystem = async () => {
     Alert.alert(
@@ -282,24 +228,14 @@ export default function NotificationDebugScreen() {
         {/* Quick Tests Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>⚡ Quick Tests</Text>
-          {renderActionButton('🔥 Create Debug Plan (2min)', createDebugPlan, '#E91E63')}
-          {renderActionButton('🚨 EMERGENCY Android Test', () => handleAction(async () => {
+          {renderActionButton('🚨 Emergency Test', () => handleAction(async () => {
             const id = await emergencyAndroidNotificationTest();
             Alert.alert('Emergency Test', id ? `Immediate notification sent! ID: ${id}` : 'Emergency test failed');
-          }, 'Emergency Android notification test'), '#FF0000')}
+          }, 'Emergency notification test'), '#FF0000')}
           {renderActionButton('Request Permissions', requestPermissions, '#4CAF50')}
           {renderActionButton('Quick Test (5s)', runQuickTest, '#2196F3')}
           {renderActionButton('Comprehensive Test', runComprehensiveTest, '#FF9800')}
           {renderActionButton('View All Notifications', viewAllNotifications, '#9C27B0')}
-        </View>
-
-        {/* Android-Specific Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🤖 Android Debugging</Text>
-          {renderActionButton('📡 Start Monitoring', startMonitoring, '#673AB7')}
-          {renderActionButton('🛑 Stop Monitoring', stopMonitoring, '#795548')}
-          {renderActionButton('📋 Show Debug Logs', showDebugLogs, '#607D8B')}
-          {renderActionButton('🏥 Health Check', checkHealth, '#009688')}
         </View>
 
         {/* Diagnostic Tools Section */}
@@ -332,18 +268,17 @@ export default function NotificationDebugScreen() {
 
         {/* Instructions */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>💡 Android Debugging Guide</Text>
+          <Text style={styles.sectionTitle}>💡 Debugging Guide</Text>
           <Text style={styles.instructionText}>
-            <Text style={styles.bold}>For Android Notification Issues:</Text>{'\n'}
-            1. <Text style={styles.bold}>Start Monitoring</Text> - Enable notification listeners{'\n'}
-            2. <Text style={styles.bold}>Create Debug Plan</Text> - Test with 2-minute vitamin plan{'\n'}
-            3. <Text style={styles.bold}>Health Check</Text> - Verify Android notification settings{'\n'}
-            4. <Text style={styles.bold}>Emergency Test</Text> - Force immediate notification{'\n'}
-            5. <Text style={styles.bold}>Check Logs</Text> - View detailed debug information{'\n'}{'\n'}
-            <Text style={styles.bold}>Known Issues:</Text>{'\n'}
-            • Emulator may not deliver notifications reliably{'\n'}
-            • Battery optimization can block notifications{'\n'}
-            • Android 13+ requires runtime permissions{'\n'}
+            <Text style={styles.bold}>For Notification Issues:</Text>{'\n'}
+            1. <Text style={styles.bold}>Create Debug Plan</Text> - Test with 2-minute vitamin plan{'\n'}
+            2. <Text style={styles.bold}>Emergency Test</Text> - Force immediate notification{'\n'}
+            3. <Text style={styles.bold}>Audit System</Text> - Check for orphaned notifications{'\n'}
+            4. <Text style={styles.bold}>Reset System</Text> - Rebuild all notifications{'\n'}{'\n'}
+            <Text style={styles.bold}>If Nothing Works:</Text>{'\n'}
+            • Delete and reinstall Expo Go app{'\n'}
+            • This clears all notification state{'\n'}
+            • Scan QR code to reload your project{'\n'}
           </Text>
         </View>
       </ScrollView>
