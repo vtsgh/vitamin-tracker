@@ -330,17 +330,29 @@ export async function applyStreakRecovery(vitaminPlanId: string, missedDate: str
 
 /**
  * Enhanced streak calculation that accounts for recoveries
- * CORRECTED: Calculate streak by going backwards from today until we find a gap
+ * FIXED: Calculate streak by counting consecutive days from most recent check-in
  */
 export function calculateStreakWithRecoveries(checkIns: CheckIn[], recoveries: StreakRecovery[], vitaminPlanId: string, currentDate?: string): number {
-  const today = currentDate || new Date().toISOString().split('T')[0];
+  // Get all check-ins for this plan, sorted by date (newest first)
+  const planCheckIns = checkIns
+    .filter(checkin => checkin.vitaminPlanId === vitaminPlanId)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+  console.log(`🔍 Starting streak calculation for plan ${vitaminPlanId}`);
+  console.log(`📋 Available check-ins:`, planCheckIns.map(c => c.date));
+  
+  if (planCheckIns.length === 0) {
+    console.log(`❌ No check-ins found, streak = 0`);
+    return 0;
+  }
+  
+  // Start from the most recent check-in date
   let streak = 0;
-  let currentCheckDate = today; // Start from today and go backwards
+  let currentCheckDate = planCheckIns[0].date; // Most recent check-in
   
-  console.log(`🔍 Starting streak calculation from: ${currentCheckDate}`);
-  console.log(`📋 Available check-ins:`, checkIns.filter(c => c.vitaminPlanId === vitaminPlanId).map(c => c.date));
+  console.log(`🔍 Starting from most recent check-in: ${currentCheckDate}`);
   
-  // Go backwards day by day, starting from today
+  // Go backwards day by day from the most recent check-in
   while (true) {
     // Check if there's a check-in for this date
     const hasCheckIn = checkIns.some(
