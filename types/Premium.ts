@@ -1,7 +1,7 @@
 import { PREMIUM_FEATURES, FEATURE_CATEGORIES, UPGRADE_TRIGGER_CONTEXTS } from '../constants/premium';
 
 export type PremiumFeature = typeof PREMIUM_FEATURES[keyof typeof PREMIUM_FEATURES];
-export type FeatureCategory = typeof FEATURE_CATEGORIES[keyof typeof FEATURE_CATEGORIES];
+export type FeatureCategory = keyof typeof FEATURE_CATEGORIES;
 export type UpgradeTriggerContext = typeof UPGRADE_TRIGGER_CONTEXTS[keyof typeof UPGRADE_TRIGGER_CONTEXTS];
 
 export interface PremiumStatus {
