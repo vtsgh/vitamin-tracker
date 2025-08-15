@@ -4,7 +4,7 @@
     "slug": "takeamin",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/appicon3final.png",
+    "icon": "./assets/images/app-icon-final.png",
     "scheme": "takeamin",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.takeamin.app",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false
