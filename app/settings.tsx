@@ -20,10 +20,6 @@ interface SettingsData {
     soundEnabled: boolean;
     vibrationEnabled: boolean;
   };
-  privacy: {
-    dataCollection: boolean;
-    analytics: boolean;
-  };
   app: {
     theme: 'light' | 'dark' | 'auto';
     language: string;
@@ -42,10 +38,6 @@ const DEFAULT_SETTINGS: SettingsData = {
     enabled: true,
     soundEnabled: true,
     vibrationEnabled: true,
-  },
-  privacy: {
-    dataCollection: true,
-    analytics: true,
   },
   app: {
     theme: 'auto',
@@ -131,16 +123,6 @@ export default function Settings() {
     saveSettings(newSettings);
   };
 
-  const handlePrivacyToggle = (feature: keyof SettingsData['privacy'], value: boolean) => {
-    const newSettings = {
-      ...settings,
-      privacy: {
-        ...settings.privacy,
-        [feature]: value
-      }
-    };
-    saveSettings(newSettings);
-  };
 
   const handleGoHome = () => {
     router.push('/(tabs)/');
@@ -389,26 +371,6 @@ export default function Settings() {
           </>
         )}
 
-        {/* Privacy Section */}
-        {renderSectionHeader('Privacy', '🔒')}
-        
-        {renderSettingItem(
-          'Data Collection',
-          'Help improve the app by sharing anonymous usage data',
-          settings.privacy.dataCollection,
-          (value) => handlePrivacyToggle('dataCollection', value),
-          false,
-          '📊'
-        )}
-
-        {renderSettingItem(
-          'Analytics',
-          'Share app usage analytics to help us improve features',
-          settings.privacy.analytics,
-          (value) => handlePrivacyToggle('analytics', value),
-          false,
-          '📈'
-        )}
 
         {/* Developer Section (remove in production) */}
         {__DEV__ && (
