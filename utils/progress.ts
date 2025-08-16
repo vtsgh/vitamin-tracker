@@ -371,8 +371,13 @@ export function calculateStreakWithRecoveries(checkIns: CheckIn[], recoveries: S
       streak++;
       console.log(`✅ Streak incremented to ${streak} for date ${currentCheckDate}`);
       
-      // Move to previous day
-      const prevDate = new Date(currentCheckDate);
+      // Move to previous day (avoid timezone issues)
+      const dateParts = currentCheckDate.split('-');
+      const year = parseInt(dateParts[0]);
+      const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed
+      const day = parseInt(dateParts[2]);
+      
+      const prevDate = new Date(year, month, day);
       prevDate.setDate(prevDate.getDate() - 1);
       currentCheckDate = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}-${String(prevDate.getDate()).padStart(2, '0')}`;
     } else {
