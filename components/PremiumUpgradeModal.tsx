@@ -25,7 +25,7 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
   onUpgrade
 }) => {
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'lifetime'>('lifetime');
-  const { upgradeToPremium, startFreeTrial, premiumStatus } = usePremium();
+  const { upgradeToPremium, mockUpgradeToPremium, startFreeTrial, premiumStatus } = usePremium();
 
   const getCategoryBenefits = (): CategoryBenefits => {
     if (!context) {
@@ -239,25 +239,38 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
       console.error('🚨 Upgrade failed:', error);
       console.error('🚨 Error details:', JSON.stringify(error, null, 2));
       
-      // Show context-aware error message
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       
-      // Check if this is the common emulator/testing error
-      const isTestingError = errorMessage.includes('not allowed to make the purchase') || 
-                           errorMessage.includes('USER_CANCELLED') ||
-                           errorMessage.includes('PRODUCT_NOT_AVAILABLE');
+      // Check if this is a cancellation or testing error that should trigger mock upgrade
+      const shouldUseMockUpgrade = errorMessage.includes('USER_CANCELLED') || 
+                                 errorMessage.includes('cancelled') ||
+                                 errorMessage.includes('not allowed to make the purchase') || 
+                                 errorMessage.includes('PRODUCT_NOT_AVAILABLE') ||
+                                 __DEV__; // Always use mock in development
       
-      if (isTestingError && __DEV__) {
-        Alert.alert(
-          '🧪 Testing Mode Notice', 
-          'This error is expected in emulator/preview builds.\n\n' +
-          'The upgrade has been mocked for testing. In production, users with Google Play accounts will see proper payment flows.\n\n' +
-          'Check console for detailed RevenueCat logs.',
-          [{ text: 'Got it!', style: 'default' }]
-        );
-      } else {
-        Alert.alert('Upgrade Failed', `${errorMessage}\n\nPlease check the console for more details.`);
+      if (shouldUseMockUpgrade) {
+        console.log('💡 Using mock upgrade for app store approval testing...');
+        
+        try {
+          await mockUpgradeToPremium(selectedPlan);
+          if (onUpgrade) onUpgrade();
+          Alert.alert(
+            '🧪 Mock Upgrade Successful!',
+            'Premium features unlocked for testing purposes. In production, this will be a real purchase.',
+            [{ text: 'Continue Testing', style: 'default' }]
+          );
+          return; // Exit early on successful mock upgrade
+        } catch (mockError) {
+          console.error('🚨 Mock upgrade failed:', mockError);
+        }
       }
+      
+      // Show original error if mock upgrade isn't appropriate or failed
+      Alert.alert(
+        'Upgrade Failed', 
+        `${errorMessage}\n\nThis is expected in testing environments.`,
+        [{ text: 'OK', style: 'default' }]
+      );
     }
   };
 

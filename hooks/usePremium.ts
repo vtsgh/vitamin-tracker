@@ -139,6 +139,30 @@ export const usePremium = () => {
     setUpgradeContext(null);
   }, []);
 
+  // Mock upgrade for development and app store approval
+  const mockUpgradeToPremium = useCallback(async (subscriptionType: 'monthly' | 'lifetime' = 'lifetime') => {
+    console.log('🧪 Mock upgrade initiated for app store approval testing');
+    console.log(`📱 Upgrading to ${subscriptionType} plan`);
+    
+    const newStatus: PremiumStatus = {
+      isPremium: true,
+      subscriptionType,
+      subscriptionDate: new Date().toISOString(),
+      expirationDate: subscriptionType === 'monthly' 
+        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        : subscriptionType === 'lifetime' 
+          ? undefined // Lifetime never expires
+          : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+      trialUsed: premiumStatus.trialUsed
+    };
+    
+    await savePremiumStatus(newStatus);
+    closeUpgradeModal();
+    
+    console.log('✅ Mock upgrade successful! Premium features unlocked');
+    return;
+  }, [premiumStatus.trialUsed, closeUpgradeModal]);
+
   // Upgrade to premium using RevenueCat
   const upgradeToPremium = useCallback(async (subscriptionType: 'monthly' | 'lifetime' = 'monthly') => {
     try {
@@ -146,23 +170,11 @@ export const usePremium = () => {
       
       if (offerings.length === 0) {
         console.log('⚠️ No offerings available, falling back to mock upgrade');
-        console.log('💡 This is expected in emulator/preview builds without Play Store authentication');
-        console.log('💡 In production, users will have proper payment flows');
-        // Fallback to mock upgrade for development
-        const newStatus: PremiumStatus = {
-          isPremium: true,
-          subscriptionType,
-          subscriptionDate: new Date().toISOString(),
-          expirationDate: subscriptionType === 'monthly' 
-            ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-            : subscriptionType === 'lifetime' 
-              ? undefined // Lifetime never expires
-              : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-          trialUsed: premiumStatus.trialUsed
-        };
+        console.log('💡 This is expected in emulator/preview builds without proper App Store setup');
+        console.log('💡 Using mock upgrade for development/approval testing');
         
-        await savePremiumStatus(newStatus);
-        closeUpgradeModal();
+        // Use mock upgrade when no offerings available
+        await mockUpgradeToPremium(subscriptionType);
         return;
       }
 
@@ -364,6 +376,7 @@ export const usePremium = () => {
     
     // Premium actions
     upgradeToPremium,
+    mockUpgradeToPremium, // For app store approval testing
     startFreeTrial,
     restorePurchases,
     

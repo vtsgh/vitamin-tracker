@@ -1,0 +1,111 @@
+{
+  "identifier" : "3F4F2C8A",
+  "nonRenewingSubscriptions" : [
+    {
+      "displayPrice" : "14.99",
+      "familyShareable" : false,
+      "internalID" : "6472A890",
+      "localizations" : [
+        {
+          "description" : "Unlock all premium features forever with a one-time purchase. No monthly fees!",
+          "displayName" : "Takeamin Premium Lifetime",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "takeamin_lifetime",
+      "referenceName" : "Takeamin Lifetime Premium",
+      "type" : "NonRenewingSubscription"
+    }
+  ],
+  "products" : [ ],
+  "settings" : {
+    "_applicationInternalID" : "6749783966",
+    "_developerTeamID" : "6N5NR2C37C",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 746669293.10326505,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21488869",
+      "localizations" : [ ],
+      "name" : "Takeamin Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [ ],
+          "codeOffers" : [ ],
+          "displayPrice" : "2.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6472A891",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Get unlimited vitamin plans, streak recovery, smart reminders, and all premium features.",
+              "displayName" : "Takeamin Premium Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "takeamin_monthly_premium",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Takeamin Monthly Premium",
+          "subscriptionGroupID" : "21488869",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [ ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
