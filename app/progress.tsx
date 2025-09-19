@@ -26,12 +26,9 @@ import {
 } from '../utils/progress';
 import { SmartNotificationEngine } from '../utils/smart-notifications';
 import { useSmartReminders } from '../hooks/useSmartReminders';
-import { usePremium } from '../hooks/usePremium';
-import { PremiumFeatureGate } from '../components/PremiumFeatureGate';
-import { PremiumUpgradeModal } from '../components/PremiumUpgradeModal';
+// Premium imports removed - using donation model instead
 import { StreakRecoveryModal } from '../components/StreakRecoveryModal';
 import { SmartSnoozeModal } from '../components/SmartSnoozeModal';
-import { PREMIUM_FEATURES, UPGRADE_TRIGGER_CONTEXTS } from '../constants/premium';
 
 export default function Progress() {
   const [vitaminPlans, setVitaminPlans] = useState<VitaminPlan[]>([]);
@@ -45,7 +42,7 @@ export default function Progress() {
   const [snoozeInfo, setSnoozeInfo] = useState<{ vitaminName: string; planId: string; originalTime: string; isTodayCompleted: boolean } | null>(null);
   
   const confettiRef = useRef<ConfettiCannon>(null);
-  const { isPremium, showUpgradeModal, closeUpgradeModal, upgradeContext, triggerUpgrade } = usePremium();
+  // Premium system removed - all features available to all users
   const { settings: smartSettings, recordNotificationResponse } = useSmartReminders();
 
 
@@ -152,7 +149,7 @@ export default function Progress() {
     setIsLoading(true);
     
     try {
-      const { newBadges } = await recordCheckIn(selectedPlan.id, date, isPremium);
+      const { newBadges } = await recordCheckIn(selectedPlan.id, date); // All badges available now
       
       // Record successful check-in for behavioral learning
       if (smartSettings.behaviorLearning) {
@@ -373,26 +370,18 @@ export default function Progress() {
     const message = getMotivationalMessage(streak.currentStreak);
 
     const handleSmartSnooze = () => {
-      if (isPremium) {
-        // Check if today is already completed
-        const today = new Date();
-        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-        const isTodayCompleted = hasCheckInForDate(progressData.checkIns, selectedPlan.id, todayStr);
-        
-        setSnoozeInfo({
-          vitaminName: selectedPlan.vitamin,
-          planId: selectedPlan.id,
-          originalTime: selectedPlan.reminderTime || '09:00',
-          isTodayCompleted
-        });
-        setShowSmartSnoozeModal(true);
-      } else {
-        Alert.alert(
-          '✨ Premium Feature',
-          'Smart Snooze is available with Premium! Get AI-powered snooze suggestions based on your habits.',
-          [{ text: 'OK', style: 'default' }]
-        );
-      }
+      // Smart snooze available to all users now
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const isTodayCompleted = hasCheckInForDate(progressData.checkIns, selectedPlan.id, todayStr);
+
+      setSnoozeInfo({
+        vitaminName: selectedPlan.vitamin,
+        planId: selectedPlan.id,
+        originalTime: selectedPlan.reminderTime || '09:00',
+        isTodayCompleted
+      });
+      setShowSmartSnoozeModal(true);
     };
 
     return (
@@ -417,8 +406,7 @@ export default function Progress() {
 
   const renderBadgeShelf = () => {
     const earnedBadges = progressData.badges;
-    const availableBadges = getAllAvailableBadges(isPremium);
-    const freeBadges = getAllAvailableBadges(false);
+    const availableBadges = getAllAvailableBadges(true); // All badges available now
     const totalBadges = availableBadges.length;
     const completionPercentage = totalBadges > 0 ? (earnedBadges.length / totalBadges) * 100 : 0;
 
@@ -462,61 +450,7 @@ export default function Progress() {
             );
           })}
           
-          {/* Premium badges with feature gate */}
-          <PremiumFeatureGate
-            feature={PREMIUM_FEATURES.UNLIMITED_BADGES}
-            upgradePrompt={{
-              title: "🏆 Unlock 43+ More Badges!",
-              message: "Earn exclusive achievements like 'Year Long Legend' and 'Perfect Month'",
-              trigger: UPGRADE_TRIGGER_CONTEXTS.BADGE_LIMIT_REACHED
-            }}
-            fallback={
-              <TouchableOpacity 
-                style={styles.customUpgradeGate} 
-                onPress={() => {
-                  console.log('🎯 Manual upgrade trigger from progress badges');
-                  triggerUpgrade(
-                    PREMIUM_FEATURES.UNLIMITED_BADGES,
-                    UPGRADE_TRIGGER_CONTEXTS.BADGE_LIMIT_REACHED,
-                    { customMessage: "Earn exclusive achievements like 'Year Long Legend' and 'Perfect Month'" }
-                  );
-                }}
-                activeOpacity={0.7}
-              >
-                <View style={styles.customUpgradeContent}>
-                  <View style={styles.customPremiumBadge}>
-                    <Text style={styles.customPremiumBadgeText}>✨ PREMIUM</Text>
-                  </View>
-                  
-                  <Text style={styles.customUpgradeTitle}>
-                    🏆 Unlock 43+ More Badges!
-                  </Text>
-                  
-                  <Text style={styles.customUpgradeMessage}>
-                    Earn exclusive achievements like 'Year Long Legend' and 'Perfect Month'
-                  </Text>
-                  
-                  <View style={styles.customUpgradeButton}>
-                    <Text style={styles.customUpgradeButtonText}>Tap to Upgrade</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            }
-          >
-            {getAllAvailableBadges(true).slice(freeBadges.length).map(availableBadge => {
-              const earnedBadge = earnedBadges.find(b => b.id === availableBadge.id);
-              const isEarned = !!earnedBadge;
-              
-              return (
-                <BadgeItem
-                  key={availableBadge.id}
-                  badge={availableBadge}
-                  isEarned={isEarned}
-                  earnedDate={earnedBadge?.earnedDate}
-                />
-              );
-            })}
-          </PremiumFeatureGate>
+          {/* All badges now available to everyone - no premium gates */}
         </View>
         
       </View>
@@ -573,11 +507,7 @@ export default function Progress() {
         colors={['#FF7F50', '#98FB98', '#87CEEB', '#DDA0DD', '#FFB347']}
       />
 
-      <PremiumUpgradeModal
-        visible={showUpgradeModal}
-        onClose={closeUpgradeModal}
-        context={upgradeContext || undefined}
-      />
+      {/* Premium upgrade modal removed - using donation model instead */}
       
       {streakBreakInfo && (
         <StreakRecoveryModal

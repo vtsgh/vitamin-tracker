@@ -38,7 +38,7 @@ export async function saveProgressData(data: ProgressData): Promise<void> {
 /**
  * Record a check-in for a vitamin plan
  */
-export async function recordCheckIn(vitaminPlanId: string, date?: string, isPremium: boolean = false): Promise<{ newBadges: Badge[] }> {
+export async function recordCheckIn(vitaminPlanId: string, date?: string, isPremium: boolean = true): Promise<{ newBadges: Badge[] }> {
   // Create local date string to avoid timezone issues
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -130,10 +130,10 @@ async function updateStreak(progressData: ProgressData, vitaminPlanId: string, c
 /**
  * Check for new badges earned
  */
-async function checkForNewBadges(progressData: ProgressData, vitaminPlanId: string, streak: Streak, isPremium: boolean = false): Promise<Badge[]> {
+async function checkForNewBadges(progressData: ProgressData, vitaminPlanId: string, streak: Streak, isPremium: boolean = true): Promise<Badge[]> {
   const newBadges: Badge[] = [];
   const earnedBadgeIds = progressData.badges.map(b => b.id);
-  const availableBadges = getAllAvailableBadges(isPremium);
+  const availableBadges = getAllAvailableBadges(true); // Always include premium badges now
 
   for (const availableBadge of availableBadges) {
     // Skip if already earned

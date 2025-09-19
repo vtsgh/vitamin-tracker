@@ -170,19 +170,7 @@ export default function Schedule() {
   };
 
   const handleAddAnother = () => {
-    // Check if user has reached the plan limit
-    if (isLimitReached('MAX_PLANS', vitaminPlans.length)) {
-      // Trigger premium upgrade for plan limit
-      triggerUpgrade(
-        PREMIUM_FEATURES.UNLIMITED_PLANS,
-        UPGRADE_TRIGGER_CONTEXTS.PLAN_LIMIT_REACHED,
-        {
-          plansCount: vitaminPlans.length,
-          customMessage: `You've created ${vitaminPlans.length} plans! Upgrade to Premium for unlimited vitamin plans.`
-        }
-      );
-      return;
-    }
+    // No plan limits - all users can create unlimited plans now
 
     const now = Date.now();
     if (now - lastTapTime.current < 1000 || isNavigating) { // 1 second debounce

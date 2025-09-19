@@ -4,10 +4,8 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import VitaminCapsule from '../../components/VitaminCapsule';
-import { usePremium } from '../../hooks/usePremium';
-import { PremiumUpgradeModal } from '../../components/PremiumUpgradeModal';
-import { UPGRADE_TRIGGER_CONTEXTS } from '../../constants/premium';
-import { debugStorageNotificationMismatch } from '../../utils/storage-debug';
+// Premium imports removed - using donation model instead
+// Debug utilities removed for cleaner build
 
 interface FeatureButton {
   id: string;
@@ -15,7 +13,7 @@ interface FeatureButton {
   subtitle: string;
   icon: string;
   color: string;
-  route: string;
+  route: string | null; // null for special buttons like donate/debug
   enabled: boolean;
 }
 
@@ -39,11 +37,11 @@ const FEATURES: FeatureButton[] = [
     enabled: true
   },
   {
-    id: 'premium',
-    title: 'Upgrade to Premium',
-    subtitle: 'Unlock all features',
-    icon: '✨',
-    color: '#FFD700', // Gold
+    id: 'donate',
+    title: 'Support Takeamin',
+    subtitle: 'Help keep the app free',
+    icon: '💝',
+    color: '#FF69B4', // Hot pink for donation
     route: null, // Special handling
     enabled: true
   },
@@ -101,7 +99,7 @@ export default function Home() {
   const [isNavigating, setIsNavigating] = useState(false);
   const lastTapTime = useRef(0);
   
-  const { isPremium, triggerUpgrade, showUpgradeModal, closeUpgradeModal, upgradeContext, resetPremiumForTesting } = usePremium();
+  // Premium system removed - using donation model instead
   
   // Animation values
   const titleOpacity = useSharedValue(0);
@@ -202,12 +200,10 @@ export default function Home() {
     }
     lastTapTime.current = now;
 
-    // Handle premium upgrade specially
-    if (feature.id === 'premium') {
-      triggerUpgrade(
-        'unlimited_plans' as any,
-        UPGRADE_TRIGGER_CONTEXTS.HOMEPAGE_CTA
-      );
+    // Handle donation specially
+    if (feature.id === 'donate') {
+      // TODO: Implement donation functionality
+      console.log('💝 Donation button pressed - thank you for supporting Takeamin!');
       return;
     }
 
@@ -223,10 +219,12 @@ export default function Home() {
       return;
     }
 
-    console.log(`✅ Navigating to ${feature.title}`);
-    setIsNavigating(true);
-    
-    router.push(feature.route as any);
+    // Only navigate if there's a route
+    if (feature.route) {
+      console.log(`✅ Navigating to ${feature.title}`);
+      setIsNavigating(true);
+      router.push(feature.route as any);
+    }
   };
 
   const renderFeatureButton = (feature: FeatureButton, index: number) => {
@@ -286,24 +284,14 @@ export default function Home() {
         {/* Feature Buttons Grid */}
         <Animated.View style={[styles.featuresSection, animatedButtonsStyle]}>
           <View style={styles.featuresGrid}>
-            {FEATURES.map((feature, index) => {
-              // Don't render premium button if user is already premium
-              if (feature.id === 'premium' && isPremium) {
-                return null;
-              }
-              return renderFeatureButton(feature, index);
-            })}
+            {FEATURES.map((feature, index) => renderFeatureButton(feature, index))}
             {/* Development debug features */}
             {DEV_FEATURES.map((feature, index) => renderFeatureButton(feature, FEATURES.length + index))}
           </View>
         </Animated.View>
       </ScrollView>
 
-      <PremiumUpgradeModal
-        visible={showUpgradeModal}
-        onClose={closeUpgradeModal}
-        context={upgradeContext || undefined}
-      />
+      {/* Premium upgrade modal removed - using donation model instead */}
     </SafeAreaView>
   );
 }
