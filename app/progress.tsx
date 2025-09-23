@@ -435,11 +435,11 @@ export default function Progress() {
         </View>
         
         <View style={styles.badgeGrid}>
-          {/* Free badges */}
-          {freeBadges.map(availableBadge => {
+          {/* All badges available to everyone */}
+          {availableBadges.map(availableBadge => {
             const earnedBadge = earnedBadges.find(b => b.id === availableBadge.id);
             const isEarned = !!earnedBadge;
-            
+
             return (
               <BadgeItem
                 key={availableBadge.id}
@@ -449,8 +449,6 @@ export default function Progress() {
               />
             );
           })}
-          
-          {/* All badges now available to everyone - no premium gates */}
         </View>
         
       </View>

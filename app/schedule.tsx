@@ -11,7 +11,7 @@ import VitaminCapsule from '../components/VitaminCapsule';
 // import { MAX_VITAMIN_PLANS } from '../constants/limits'; // Now using premium limits
 import { usePremium } from '../hooks/usePremium';
 import { PremiumUpgradeModal } from '../components/PremiumUpgradeModal';
-import { PREMIUM_FEATURES, UPGRADE_TRIGGER_CONTEXTS } from '../constants/premium';
+// Premium imports removed - all features now free
 
 export default function Schedule() {
   const [vitaminPlans, setVitaminPlans] = useState<VitaminPlan[]>([]);

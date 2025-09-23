@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState, useRef } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import VitaminCapsule from '../../components/VitaminCapsule';
@@ -64,10 +64,10 @@ const FEATURES: FeatureButton[] = [
     enabled: true
   },
   {
-    id: 'community',
-    title: 'Community',
-    subtitle: 'Connect with others',
-    icon: '👥',
+    id: 'polls',
+    title: 'Polls & Feedback',
+    subtitle: 'Share your thoughts',
+    icon: '📊',
     color: '#FFB347', // Secondary orange
     route: '/community',
     enabled: true
@@ -192,6 +192,41 @@ export default function Home() {
     };
   });
 
+  const handleDonationPress = () => {
+    Alert.alert(
+      "💝 Support Takeamin",
+      "Help us keep Takeamin free for everyone! Your support helps us maintain the app and add new features.",
+      [
+        { text: "Maybe Later", style: "cancel" },
+        {
+          text: "Fill the Vitamin Jar! 🏺",
+          onPress: async () => {
+            try {
+              const donationURL = 'https://buymeacoffee.com/Takeamin';
+              const supported = await Linking.canOpenURL(donationURL);
+
+              if (supported) {
+                await Linking.openURL(donationURL);
+                console.log('💝 Opening donation page - thank you for supporting Takeamin!');
+              } else {
+                Alert.alert(
+                  'Unable to open donation page',
+                  'Please visit: buymeacoffee.com/Takeamin'
+                );
+              }
+            } catch (error) {
+              console.error('Error opening donation link:', error);
+              Alert.alert(
+                'Unable to open donation page',
+                'Please visit: buymeacoffee.com/Takeamin'
+              );
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const handleFeaturePress = (feature: FeatureButton) => {
     const now = Date.now();
     if (now - lastTapTime.current < 500 || isNavigating) { // 500ms debounce
@@ -202,8 +237,7 @@ export default function Home() {
 
     // Handle donation specially
     if (feature.id === 'donate') {
-      // TODO: Implement donation functionality
-      console.log('💝 Donation button pressed - thank you for supporting Takeamin!');
+      handleDonationPress();
       return;
     }
 
