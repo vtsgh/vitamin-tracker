@@ -248,29 +248,11 @@ export function getMotivationalMessage(streak: number): string {
 }
 
 /**
- * Check if streak would break without recovery
+ * Check if streak would break without recovery - DISABLED
+ * Streaks no longer "break" in the new system
  */
 export function wouldStreakBreak(checkIns: CheckIn[], streakRecoveries: StreakRecovery[], vitaminPlanId: string): { wouldBreak: boolean; missedDate: string | null } {
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
-  
-  // Check if user checked in yesterday
-  const hasYesterdayCheckIn = checkIns.some(
-    checkin => checkin.date === yesterdayStr && checkin.vitaminPlanId === vitaminPlanId
-  );
-  
-  // Check if yesterday was already recovered
-  const wasYesterdayRecovered = streakRecoveries.some(
-    recovery => recovery.missedDate === yesterdayStr && recovery.vitaminPlanId === vitaminPlanId
-  );
-  
-  // Streak would break if no check-in yesterday and no recovery used
-  if (!hasYesterdayCheckIn && !wasYesterdayRecovered) {
-    return { wouldBreak: true, missedDate: yesterdayStr };
-  }
-  
+  // Streaks never break in the new system - they just pause
   return { wouldBreak: false, missedDate: null };
 }
 
@@ -287,111 +269,115 @@ export function getStreakRecoveriesThisMonth(recoveries: StreakRecovery[], vitam
 }
 
 /**
- * Use a streak recovery to save a broken streak
+ * Use a streak recovery to save a broken streak - DEPRECATED
+ * This function is kept for compatibility but does nothing in the new system
  */
 export async function applyStreakRecovery(vitaminPlanId: string, missedDate: string): Promise<{ success: boolean; newRecovery?: StreakRecovery }> {
+  console.log('🔄 Streak recovery attempted but streaks no longer break in the new system');
+  return { success: false };
+}
+
+/**
+ * Manually restart a streak for a vitamin plan
+ * This clears all previous check-ins and starts fresh
+ */
+export async function restartStreak(vitaminPlanId: string): Promise<{ success: boolean }> {
   try {
+    console.log(`🔄 Manually restarting streak for plan ${vitaminPlanId}`);
     const progressData = await getProgressData();
-    
-    // Check if this date was already recovered
-    const existingRecovery = progressData.streakRecoveries.find(
-      recovery => recovery.missedDate === missedDate && recovery.vitaminPlanId === vitaminPlanId
+
+    // Remove all check-ins for this plan
+    progressData.checkIns = progressData.checkIns.filter(
+      checkin => checkin.vitaminPlanId !== vitaminPlanId
     );
-    
-    if (existingRecovery) {
-      console.log('This missed date was already recovered');
-      return { success: false };
+
+    // Reset streak data
+    const streakIndex = progressData.streaks.findIndex(s => s.vitaminPlanId === vitaminPlanId);
+    if (streakIndex !== -1) {
+      progressData.streaks[streakIndex] = {
+        vitaminPlanId,
+        currentStreak: 0,
+        longestStreak: progressData.streaks[streakIndex].longestStreak, // Keep longest streak record
+        lastCheckInDate: undefined
+      };
     }
-    
-    // Create new recovery
-    const now = new Date();
-    const recoveryMonth = now.toISOString().slice(0, 7); // YYYY-MM format
-    
-    const newRecovery: StreakRecovery = {
-      id: `recovery_${vitaminPlanId}_${missedDate}_${now.getTime()}`,
-      vitaminPlanId,
-      missedDate,
-      recoveryDate: now.toISOString(),
-      recoveryMonth
-    };
-    
-    // Add recovery to data
-    progressData.streakRecoveries.push(newRecovery);
-    
+
+    // Remove any streak recoveries for this plan (cleanup)
+    progressData.streakRecoveries = progressData.streakRecoveries.filter(
+      recovery => recovery.vitaminPlanId !== vitaminPlanId
+    );
+
     // Save updated data
     await saveProgressData(progressData);
-    
-    return { success: true, newRecovery };
+
+    console.log(`✅ Streak successfully restarted for plan ${vitaminPlanId}`);
+    return { success: true };
   } catch (error) {
-    console.error('Error using streak recovery:', error);
+    console.error('Error restarting streak:', error);
     return { success: false };
   }
 }
 
 /**
- * Enhanced streak calculation that accounts for recoveries
- * FIXED: Calculate streak by counting consecutive days from most recent check-in
+ * Enhanced streak calculation that only counts consecutive check-ins
+ * Streaks never "break" - they just pause until next check-in
  */
 export function calculateStreakWithRecoveries(checkIns: CheckIn[], recoveries: StreakRecovery[], vitaminPlanId: string, currentDate?: string): number {
   // Get all check-ins for this plan, sorted by date (newest first)
   const planCheckIns = checkIns
     .filter(checkin => checkin.vitaminPlanId === vitaminPlanId)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    
+
   console.log(`🔍 Starting streak calculation for plan ${vitaminPlanId}`);
   console.log(`📋 Available check-ins:`, planCheckIns.map(c => c.date));
-  
+
   if (planCheckIns.length === 0) {
     console.log(`❌ No check-ins found, streak = 0`);
     return 0;
   }
-  
+
   // Start from the most recent check-in date
   let streak = 0;
   let currentCheckDate = planCheckIns[0].date; // Most recent check-in
-  
+
   console.log(`🔍 Starting from most recent check-in: ${currentCheckDate}`);
-  
+
   // Go backwards day by day from the most recent check-in
   while (true) {
     // Check if there's a check-in for this date
     const hasCheckIn = checkIns.some(
       checkin => checkin.date === currentCheckDate && checkin.vitaminPlanId === vitaminPlanId
     );
-    
-    // Check if this date was recovered
-    const wasRecovered = recoveries.some(
-      recovery => recovery.missedDate === currentCheckDate && recovery.vitaminPlanId === vitaminPlanId
-    );
-    
-    console.log(`🔍 Checking ${currentCheckDate}: hasCheckIn=${hasCheckIn}, wasRecovered=${wasRecovered}`);
-    
-    // If we have a check-in or a recovery, continue the streak
-    if (hasCheckIn || wasRecovered) {
+
+    console.log(`🔍 Checking ${currentCheckDate}: hasCheckIn=${hasCheckIn}`);
+
+    // Only count days with actual check-ins (no recovery system)
+    if (hasCheckIn) {
       streak++;
       console.log(`✅ Streak incremented to ${streak} for date ${currentCheckDate}`);
-      
+
       // Move to previous day (avoid timezone issues)
       const dateParts = currentCheckDate.split('-');
       const year = parseInt(dateParts[0]);
       const month = parseInt(dateParts[1]) - 1; // Month is 0-indexed
       const day = parseInt(dateParts[2]);
-      
+
       const prevDate = new Date(year, month, day);
       prevDate.setDate(prevDate.getDate() - 1);
       currentCheckDate = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}-${String(prevDate.getDate()).padStart(2, '0')}`;
     } else {
-      console.log(`❌ No check-in or recovery for ${currentCheckDate}, streak ends at ${streak}`);
+      // No check-in found, but streak doesn't "break" - it just stops counting
+      console.log(`⏸️ No check-in for ${currentCheckDate}, streak pauses at ${streak}`);
       break;
     }
-    
+
     // Safety: don't go back more than 365 days
     if (streak > 365) {
       console.log(`⚠️ Safety break: streak > 365 days`);
       break;
     }
   }
-  
+
   console.log(`🏆 Final calculated streak: ${streak}`);
   return streak;
 }

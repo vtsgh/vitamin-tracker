@@ -75,12 +75,12 @@ export default function PollsAndFeedback() {
 
   const handleDonationPress = () => {
     Alert.alert(
-      "💝 Support Takeamin",
-      "Love using our polls and feedback features? Help us keep improving Takeamin for everyone!",
+      "☕ Support a Solo Dev",
+      "Hi! I'm building Takeamin alone and your support helps me add new features and keep it free for everyone!",
       [
         { text: "Not Now", style: "cancel" },
         {
-          text: "Buy Us a Coffee ☕",
+          text: "Buy Me a Coffee ☕",
           onPress: async () => {
             try {
               const donationURL = 'https://buymeacoffee.com/Takeamin';
@@ -88,17 +88,17 @@ export default function PollsAndFeedback() {
 
               if (supported) {
                 await Linking.openURL(donationURL);
-                console.log('☕ Opening Buy Me a Coffee - thanks for your support!');
+                console.log('☕ Opening Buy Me a Coffee - thanks for supporting a solo dev!');
               } else {
                 Alert.alert(
-                  'Visit our donation page',
+                  'Visit my donation page',
                   'Please go to: buymeacoffee.com/Takeamin'
                 );
               }
             } catch (error) {
               console.error('Error opening donation link:', error);
               Alert.alert(
-                'Visit our donation page',
+                'Visit my donation page',
                 'Please go to: buymeacoffee.com/Takeamin'
               );
             }
@@ -236,10 +236,10 @@ export default function PollsAndFeedback() {
 
         <TouchableOpacity style={styles.donationCTA} onPress={handleDonationPress}>
           <Text style={styles.donationText}>
-            💝 Love using Takeamin? Tap to support us and keep it free!
+            New features are constantly worked on. I'm a solo dev and your support helps get them out sooner!
           </Text>
           <Text style={styles.donationSubtext}>
-            ☕ Buy us a coffee • Help fund development
+            ☕ Consider buying me a coffee • Caffeine = code!
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -390,17 +390,17 @@ const styles = StyleSheet.create({
   donationCTA: {
     backgroundColor: '#FF69B4',
     borderRadius: 16,
-    padding: 20,
+    padding: 16,
     marginTop: 10,
     alignItems: 'center',
   },
   donationText: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#fff',
     textAlign: 'center',
     fontWeight: '500',
-    lineHeight: 22,
-    marginBottom: 8,
+    lineHeight: 20,
+    marginBottom: 6,
   },
   donationSubtext: {
     fontSize: 14,

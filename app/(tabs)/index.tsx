@@ -199,7 +199,7 @@ export default function Home() {
       [
         { text: "Maybe Later", style: "cancel" },
         {
-          text: "Fill the Vitamin Jar! 🏺",
+          text: "Buy me a coffee! ☕",
           onPress: async () => {
             try {
               const donationURL = 'https://buymeacoffee.com/Takeamin';

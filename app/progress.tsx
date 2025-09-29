@@ -21,13 +21,11 @@ import {
   getStreakForPlan,
   hasCheckInForDate,
   recordCheckIn,
-  wouldStreakBreak,
   calculateStreakWithRecoveries
 } from '../utils/progress';
 import { SmartNotificationEngine } from '../utils/smart-notifications';
 import { useSmartReminders } from '../hooks/useSmartReminders';
 // Premium imports removed - using donation model instead
-import { StreakRecoveryModal } from '../components/StreakRecoveryModal';
 import { SmartSnoozeModal } from '../components/SmartSnoozeModal';
 
 export default function Progress() {
@@ -36,8 +34,6 @@ export default function Progress() {
   const [selectedPlan, setSelectedPlan] = useState<VitaminPlan | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
-  const [showStreakRecoveryModal, setShowStreakRecoveryModal] = useState(false);
-  const [streakBreakInfo, setStreakBreakInfo] = useState<{ vitaminPlanId: string; missedDate: string; currentStreak: number } | null>(null);
   const [showSmartSnoozeModal, setShowSmartSnoozeModal] = useState(false);
   const [snoozeInfo, setSnoozeInfo] = useState<{ vitaminName: string; planId: string; originalTime: string; isTodayCompleted: boolean } | null>(null);
   
@@ -62,41 +58,12 @@ export default function Progress() {
       const progress = await getProgressData();
       setProgressData(progress);
       
-      // Check for streak recovery opportunity
-      checkForStreakRecoveryOpportunity(plans, progress);
+      // Streak recovery system removed - streaks no longer break
     } catch (error) {
       console.error('Error loading progress data:', error);
     }
   }, [selectedPlan]);
 
-  const checkForStreakRecoveryOpportunity = useCallback((plans: VitaminPlan[], progress: ProgressData) => {
-    // Only check for the selected plan or first plan
-    const planToCheck = selectedPlan || plans[0];
-    if (!planToCheck) return;
-    
-    // Check if streak would break
-    const streakCheck = wouldStreakBreak(progress.checkIns, progress.streakRecoveries || [], planToCheck.id);
-    
-    if (streakCheck.wouldBreak && streakCheck.missedDate) {
-      // Calculate current streak using enhanced calculation
-      const currentStreak = calculateStreakWithRecoveries(
-        progress.checkIns, 
-        progress.streakRecoveries || [], 
-        planToCheck.id
-      );
-      
-      // Only show modal if there's actually a meaningful streak to save (> 1 day)
-      // 1 day isn't worth a recovery since they can just start fresh easily
-      if (currentStreak > 1) {
-        setStreakBreakInfo({
-          vitaminPlanId: planToCheck.id,
-          missedDate: streakCheck.missedDate,
-          currentStreak
-        });
-        setShowStreakRecoveryModal(true);
-      }
-    }
-  }, [selectedPlan]);
 
   // Load data on focus
   useFocusEffect(
@@ -507,22 +474,6 @@ export default function Progress() {
 
       {/* Premium upgrade modal removed - using donation model instead */}
       
-      {streakBreakInfo && (
-        <StreakRecoveryModal
-          visible={showStreakRecoveryModal}
-          onClose={() => {
-            setShowStreakRecoveryModal(false);
-            setStreakBreakInfo(null);
-          }}
-          vitaminPlanId={streakBreakInfo.vitaminPlanId}
-          missedDate={streakBreakInfo.missedDate}
-          currentStreak={streakBreakInfo.currentStreak}
-          onRecoveryUsed={() => {
-            // Reload data to reflect the recovery
-            loadData();
-          }}
-        />
-      )}
 
       {snoozeInfo && (
         <SmartSnoozeModal
@@ -540,6 +491,7 @@ export default function Progress() {
             // Here you could schedule a new notification for the snoozed time
             // For now, we just close the modal
           }}
+          onDataChanged={loadData}
         />
       )}
     </SafeAreaView>

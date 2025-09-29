@@ -13,6 +13,7 @@ import { useSmartReminders } from '../hooks/useSmartReminders';
 import { formatDisplayTime } from '../utils/notifications';
 import { usePremium } from '../hooks/usePremium';
 import { FREE_LIMITS, PREMIUM_LIMITS } from '../constants/premium';
+import { restartStreak, getProgressData, getStreakForPlan } from '../utils/progress';
 
 interface SmartSnoozeModalProps {
   visible: boolean;
@@ -22,6 +23,7 @@ interface SmartSnoozeModalProps {
   originalTime: string;
   isTodayCompleted: boolean;
   onSnoozeApplied: (snoozeMinutes: number) => void;
+  onDataChanged?: () => void; // Callback to refresh parent data after streak reset
 }
 
 interface SnoozeOption {
@@ -38,12 +40,14 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
   planId,
   originalTime,
   isTodayCompleted,
-  onSnoozeApplied
+  onSnoozeApplied,
+  onDataChanged
 }) => {
   const [snoozeOptions, setSnoozeOptions] = useState<SnoozeOption[]>([]);
   const [isApplying, setIsApplying] = useState(false);
   const [snoozesUsedToday, setSnoozesUsedToday] = useState(0);
-  
+  const [currentStreak, setCurrentStreak] = useState(0);
+
   const { settings, behaviorProfile, recordNotificationResponse } = useSmartReminders();
   const { isPremium, getLimit } = usePremium();
 
@@ -51,8 +55,20 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
     if (visible) {
       loadSnoozesUsedToday();
       generateSmartSnoozeOptions();
+      loadCurrentStreak();
     }
   }, [visible]);
+
+  const loadCurrentStreak = async () => {
+    try {
+      const progressData = await getProgressData();
+      const streak = getStreakForPlan(progressData.streaks, planId);
+      setCurrentStreak(streak.currentStreak);
+    } catch (error) {
+      console.error('Error loading current streak:', error);
+      setCurrentStreak(0);
+    }
+  };
 
   const loadSnoozesUsedToday = async () => {
     try {
@@ -190,7 +206,7 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
 
     Alert.alert(
       '⏭️ Skip This Dose?',
-      `Are you sure you want to skip your ${vitaminName} today? This will affect your streak tracking.`,
+      `Are you sure you want to skip your ${vitaminName} today? Your streak will just pause - no pressure!`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -198,20 +214,78 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
           style: 'destructive',
           onPress: async () => {
             console.log(`📝 User skipped ${vitaminName} for today`);
-            
+
             // Record skip for learning
             if (settings.behaviorLearning) {
               console.log('📊 Recording skip for behavioral learning');
               await recordNotificationResponse('ignored', new Date());
-              
+
               await SmartNotificationEngine.recordNotificationResponse(planId, {
                 type: 'ignored',
                 timestamp: new Date(),
                 originalTime: originalTime
               });
             }
-            
+
             onClose();
+          }
+        }
+      ]
+    );
+  };
+
+  const handleRestartStreak = async () => {
+    if (currentStreak === 0) {
+      Alert.alert(
+        'No Streak to Restart',
+        `Your ${vitaminName} streak is already at 0. Just take your vitamins to start building a new streak!`,
+        [{ text: 'Got it!', style: 'default' }]
+      );
+      return;
+    }
+
+    Alert.alert(
+      '🔄 Restart Streak?',
+      `Are you sure you want to restart your ${vitaminName} streak? This will reset your current ${currentStreak}-day streak to 0, but your longest streak record will be preserved.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Restart Streak',
+          style: 'destructive',
+          onPress: async () => {
+            console.log(`🔄 User requested streak restart for ${vitaminName}`);
+
+            try {
+              const result = await restartStreak(planId);
+              if (result.success) {
+                Alert.alert(
+                  '🌱 Fresh Start!',
+                  `Your ${vitaminName} streak has been reset to 0. Time for a fresh beginning! Your previous longest streak record is still preserved.`,
+                  [{
+                    text: "Let's Go!",
+                    style: 'default',
+                    onPress: () => {
+                      setCurrentStreak(0); // Update local state
+                      onDataChanged?.(); // Refresh parent data
+                      onClose();
+                    }
+                  }]
+                );
+              } else {
+                Alert.alert(
+                  'Error',
+                  'Failed to restart streak. Please try again.',
+                  [{ text: 'OK', style: 'default' }]
+                );
+              }
+            } catch (error) {
+              console.error('Error restarting streak:', error);
+              Alert.alert(
+                'Error',
+                'Failed to restart streak. Please try again.',
+                [{ text: 'OK', style: 'default' }]
+              );
+            }
           }
         }
       ]
@@ -262,11 +336,20 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
             })()}
           </View>
 
+          {/* Current Streak Display */}
+          {currentStreak > 0 && (
+            <View style={styles.streakDisplay}>
+              <Text style={styles.streakDisplayText}>
+                🔥 Current streak: {currentStreak} {currentStreak === 1 ? 'day' : 'days'}
+              </Text>
+            </View>
+          )}
+
           {/* Quick Actions */}
           <View style={styles.quickActions}>
             <TouchableOpacity
               style={[
-                styles.quickActionButton, 
+                styles.quickActionButton,
                 styles.skipButton,
                 isTodayCompleted && styles.quickActionDisabled
               ]}
@@ -281,6 +364,17 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
                 {isTodayCompleted ? 'Already Taken' : 'Skip Today'}
               </Text>
             </TouchableOpacity>
+
+            {currentStreak > 0 && (
+              <TouchableOpacity
+                style={[styles.quickActionButton, styles.restartButton]}
+                onPress={handleRestartStreak}
+                disabled={isApplying}
+              >
+                <Text style={styles.quickActionIcon}>🔄</Text>
+                <Text style={styles.quickActionText}>Restart Streak</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Smart Snooze Options */}
@@ -401,24 +495,45 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#6B7280',
   },
+  streakDisplay: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginBottom: 20,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+  },
+  streakDisplayText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#D97706',
+  },
   quickActions: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginBottom: 40,
+    gap: 12,
   },
   quickActionButton: {
     alignItems: 'center',
     paddingVertical: 20,
-    paddingHorizontal: 40,
+    paddingHorizontal: 30,
     borderRadius: 20,
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
+    flex: 1,
+    maxWidth: 140,
   },
   skipButton: {
     backgroundColor: '#6B7280',
+  },
+  restartButton: {
+    backgroundColor: '#F59E0B',
   },
   quickActionDisabled: {
     backgroundColor: '#D1D5DB',
