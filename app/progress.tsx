@@ -712,7 +712,7 @@ const styles = StyleSheet.create({
   },
   pageSubtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -773,7 +773,7 @@ const styles = StyleSheet.create({
   },
   streakLabel: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     fontWeight: '500',
   },
   motivationalMessage: {
@@ -849,7 +849,7 @@ const styles = StyleSheet.create({
   dayHeader: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     width: 40,
   },
@@ -944,7 +944,7 @@ const styles = StyleSheet.create({
   },
   emptyStateText: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 30,
@@ -984,7 +984,7 @@ const styles = StyleSheet.create({
   },
   badgeShelfCount: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     fontWeight: '500',
     marginBottom: 15,
   },
@@ -1134,7 +1134,7 @@ const styles = StyleSheet.create({
   },
   customUpgradeMessage: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     marginBottom: 15,
     lineHeight: 20,

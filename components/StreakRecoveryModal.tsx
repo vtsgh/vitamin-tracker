@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     marginBottom: 20,
     lineHeight: 22,
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   secondaryButtonText: {
-    color: '#666',
+    color: '#000000',
     fontSize: 16,
     fontWeight: '500',
   },

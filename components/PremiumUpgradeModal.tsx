@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     fontWeight: 'bold',
   },
   content: {
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     lineHeight: 22,
     paddingHorizontal: 10,
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
   },
   benefitDescription: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     lineHeight: 20,
   },
   pricingSection: {
@@ -548,11 +548,11 @@ const styles = StyleSheet.create({
   },
   planPeriod: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
   },
   planDescription: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
   },
   actionSection: {
     marginBottom: 20,

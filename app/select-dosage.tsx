@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 18,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   },
   dosageSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     fontStyle: 'italic',
   },
   customInputSection: {
@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
   },
   unitSelectorLabel: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     fontWeight: '600',
     marginBottom: 8,
   },
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
   },
   unitButtonText: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     fontWeight: '500',
   },
   unitButtonTextSelected: {

@@ -291,6 +291,9 @@ export default function SmartReminders() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <Text style={styles.pageTitle}>Smart Reminders</Text>
         <Text style={styles.pageSubtitle}>AI-powered timing that learns from your habits</Text>
+        <Text style={styles.privacyNotice}>
+          🔒 All data stays on your device - no tracking or collection from us!
+        </Text>
 
         {/* Settings Section */}
         <View style={styles.section}>
@@ -510,13 +513,20 @@ const styles = StyleSheet.create({
   },
   pageSubtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  privacyNotice: {
+    fontSize: 13,
+    color: '#059669',
     textAlign: 'center',
     marginBottom: 30,
+    fontWeight: '500',
   },
   loadingText: {
     fontSize: 18,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     marginTop: 100,
   },
@@ -566,7 +576,7 @@ const styles = StyleSheet.create({
   },
   settingDescription: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     lineHeight: 20,
   },
   premiumBadge: {
@@ -598,7 +608,7 @@ const styles = StyleSheet.create({
   },
   premiumPromptText: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -681,7 +691,7 @@ const styles = StyleSheet.create({
   },
   timingLabel: {
     fontSize: 12,
-    color: '#666',
+    color: '#000000',
     marginBottom: 5,
   },
   timingTime: {
@@ -695,7 +705,7 @@ const styles = StyleSheet.create({
   },
   recommendationReason: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     marginBottom: 8,
     lineHeight: 20,
   },
@@ -738,7 +748,7 @@ const styles = StyleSheet.create({
   },
   noRecommendationsText: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     lineHeight: 22,
   },
@@ -764,7 +774,7 @@ const styles = StyleSheet.create({
   tipText: {
     flex: 1,
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     lineHeight: 20,
   },
 });

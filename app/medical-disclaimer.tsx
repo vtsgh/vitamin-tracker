@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   },
   lastUpdatedText: {
     fontSize: 12,
-    color: '#666',
+    color: '#000000',
     fontStyle: 'italic',
   },
   buttonContainer: {

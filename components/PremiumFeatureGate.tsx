@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   },
   premiumMessage: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     marginBottom: 15,
     lineHeight: 20,
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   },
   previewDescription: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     lineHeight: 20,
   },
   previewOverlay: {

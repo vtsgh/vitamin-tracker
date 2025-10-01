@@ -6,11 +6,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   CURRENT_FEATURE_POLL,
   CURRENT_USAGE_POLL,
-  getPollStats,
-  formatPollPercentage,
+  BMC_REDIRECT_MESSAGE,
   FeaturePoll
 } from '../constants/community';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function PollsAndFeedback() {
   const [featurePoll, setFeaturePoll] = useState<FeaturePoll>(CURRENT_FEATURE_POLL);
@@ -22,12 +20,9 @@ export default function PollsAndFeedback() {
   const poll1Opacity = useSharedValue(0);
   const poll2Opacity = useSharedValue(0);
 
-  const stats = getPollStats();
 
   useFocusEffect(
     useCallback(() => {
-      loadUserVotes();
-
       if (!hasAnimated) {
         startAnimations();
         setHasAnimated(true);
@@ -53,19 +48,34 @@ export default function PollsAndFeedback() {
     poll2Opacity.value = 1;
   }, []);
 
-  const loadUserVotes = async () => {
+  const handlePollVote = async (poll: FeaturePoll) => {
     try {
-      const featureVote = await AsyncStorage.getItem(`poll_vote_${featurePoll.id}`);
-      const usageVote = await AsyncStorage.getItem(`poll_vote_${usagePoll.id}`);
+      console.log(`🗳️ Redirecting to BMC poll: ${poll.question}`);
 
-      if (featureVote) {
-        setFeaturePoll(prev => ({ ...prev, userVote: featureVote }));
-      }
-      if (usageVote) {
-        setUsagePoll(prev => ({ ...prev, userVote: usageVote }));
+      const supported = await Linking.canOpenURL(poll.bmcUrl);
+      if (supported) {
+        await Linking.openURL(poll.bmcUrl);
+
+        // Show thank you message
+        setTimeout(() => {
+          Alert.alert(
+            BMC_REDIRECT_MESSAGE.title,
+            BMC_REDIRECT_MESSAGE.message,
+            [{ text: 'You\'re welcome! 😊', style: 'default' }]
+          );
+        }, 1000); // Small delay to let the browser open first
+      } else {
+        Alert.alert(
+          'Visit the poll',
+          `Please visit: ${poll.bmcUrl}`
+        );
       }
     } catch (error) {
-      console.error('Error loading user votes:', error);
+      console.error('Error opening BMC poll:', error);
+      Alert.alert(
+        'Visit the poll',
+        `Please visit: ${poll.bmcUrl}`
+      );
     }
   };
 
@@ -73,127 +83,30 @@ export default function PollsAndFeedback() {
     router.push('/(tabs)/');
   };
 
-  const handleDonationPress = () => {
-    Alert.alert(
-      "☕ Support a Solo Dev",
-      "Hi! I'm building Takeamin alone and your support helps me add new features and keep it free for everyone!",
-      [
-        { text: "Not Now", style: "cancel" },
-        {
-          text: "Buy Me a Coffee ☕",
-          onPress: async () => {
-            try {
-              const donationURL = 'https://buymeacoffee.com/Takeamin';
-              const supported = await Linking.canOpenURL(donationURL);
 
-              if (supported) {
-                await Linking.openURL(donationURL);
-                console.log('☕ Opening Buy Me a Coffee - thanks for supporting a solo dev!');
-              } else {
-                Alert.alert(
-                  'Visit my donation page',
-                  'Please go to: buymeacoffee.com/Takeamin'
-                );
-              }
-            } catch (error) {
-              console.error('Error opening donation link:', error);
-              Alert.alert(
-                'Visit my donation page',
-                'Please go to: buymeacoffee.com/Takeamin'
-              );
-            }
-          }
-        }
-      ]
-    );
-  };
 
-  const handleVote = async (poll: FeaturePoll, option: string, setPoll: React.Dispatch<React.SetStateAction<FeaturePoll>>) => {
-    try {
-      // Save vote locally
-      await AsyncStorage.setItem(`poll_vote_${poll.id}`, option);
-
-      // Update poll state
-      setPoll(prev => ({
-        ...prev,
-        userVote: option,
-        votes: {
-          ...prev.votes,
-          [option]: (prev.votes[option] || 0) + 1
-        }
-      }));
-
-      console.log(`✅ Voted for "${option}" in ${poll.question}`);
-    } catch (error) {
-      console.error('Error saving vote:', error);
-    }
-  };
-
-  const renderPoll = (poll: FeaturePoll, setPoll: React.Dispatch<React.SetStateAction<FeaturePoll>>, animatedStyle: any) => {
-    const totalVotes = Object.values(poll.votes).reduce((sum, votes) => sum + votes, 0);
-    const hasVoted = !!poll.userVote;
-
+  const renderPoll = (poll: FeaturePoll, animatedStyle: any) => {
     return (
       <Animated.View style={[styles.pollCard, animatedStyle]}>
-        <View style={styles.pollHeader}>
-          <Text style={styles.pollQuestion}>{poll.question}</Text>
-          {poll.description && (
-            <Text style={styles.pollDescription}>{poll.description}</Text>
-          )}
-        </View>
-
-        <View style={styles.pollOptions}>
-          {poll.options.map((option, index) => {
-            const votes = poll.votes[option] || 0;
-            const percentage = formatPollPercentage(votes, totalVotes);
-            const isSelected = poll.userVote === option;
-
-            return (
-              <TouchableOpacity
-                key={index}
-                style={[
-                  styles.pollOption,
-                  hasVoted && styles.pollOptionVoted,
-                  isSelected && styles.pollOptionSelected
-                ]}
-                onPress={() => !hasVoted && handleVote(poll, option, setPoll)}
-                disabled={hasVoted}
-              >
-                <View style={styles.pollOptionContent}>
-                  <Text style={[
-                    styles.pollOptionText,
-                    isSelected && styles.pollOptionTextSelected
-                  ]}>
-                    {option}
-                  </Text>
-                  {hasVoted && (
-                    <Text style={[
-                      styles.pollOptionPercentage,
-                      isSelected && styles.pollOptionPercentageSelected
-                    ]}>
-                      {percentage}
-                    </Text>
-                  )}
-                </View>
-                {hasVoted && (
-                  <View style={[
-                    styles.pollOptionBar,
-                    { width: `${Math.round((votes / totalVotes) * 100)}%` },
-                    isSelected && styles.pollOptionBarSelected
-                  ]} />
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        {hasVoted && (
-          <View style={styles.pollFooter}>
-            <Text style={styles.pollVoteCount}>
-              {totalVotes} total votes
-            </Text>
+        <TouchableOpacity onPress={() => handlePollVote(poll)}>
+          <View style={styles.pollHeader}>
+            <Text style={styles.pollQuestion}>{poll.question}</Text>
+            {poll.description && (
+              <Text style={styles.pollDescription}>{poll.description}</Text>
+            )}
           </View>
-        )}
+
+          <View style={styles.pollOptions}>
+            {poll.options.map((option, index) => (
+              <View key={index} style={styles.pollOption}>
+                <Text style={styles.pollOptionText}>
+                  {option}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+        </TouchableOpacity>
       </Animated.View>
     );
   };
@@ -229,19 +142,16 @@ export default function PollsAndFeedback() {
           <Text style={styles.subtitle}>
             Help us improve Takeamin with your input!
           </Text>
+          <Text style={styles.supporterNote}>
+            Only supporters can vote & see results
+          </Text>
+          <Text style={styles.instructionNote}>
+            Tap on one of the polls below to get started
+          </Text>
         </Animated.View>
 
-        {renderPoll(featurePoll, setFeaturePoll, animatedPoll1Style)}
-        {renderPoll(usagePoll, setUsagePoll, animatedPoll2Style)}
-
-        <TouchableOpacity style={styles.donationCTA} onPress={handleDonationPress}>
-          <Text style={styles.donationText}>
-            New features are constantly worked on. I'm a solo dev and your support helps get them out sooner!
-          </Text>
-          <Text style={styles.donationSubtext}>
-            ☕ Consider buying me a coffee • Caffeine = code!
-          </Text>
-        </TouchableOpacity>
+        {renderPoll(featurePoll, animatedPoll1Style)}
+        {renderPoll(usagePoll, animatedPoll2Style)}
       </ScrollView>
     </SafeAreaView>
   );
@@ -293,7 +203,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     lineHeight: 22,
   },
@@ -319,94 +229,35 @@ const styles = StyleSheet.create({
   },
   pollDescription: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     lineHeight: 20,
   },
   pollOptions: {
     gap: 12,
   },
   pollOption: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    position: 'relative',
-    overflow: 'hidden',
-  },
-  pollOptionVoted: {
     backgroundColor: '#F8F9FA',
-  },
-  pollOptionSelected: {
-    borderColor: '#FF7F50',
-    backgroundColor: '#FFF4F0',
-  },
-  pollOptionContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    zIndex: 2,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
   },
   pollOptionText: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#333',
     fontWeight: '500',
   },
-  pollOptionTextSelected: {
-    color: '#FF7F50',
-    fontWeight: 'bold',
-  },
-  pollOptionPercentage: {
+  supporterNote: {
     fontSize: 14,
-    color: '#666',
+    color: '#FF7F50',
     fontWeight: '600',
-  },
-  pollOptionPercentageSelected: {
-    color: '#FF7F50',
-  },
-  pollOptionBar: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: '#E9ECEF',
-    zIndex: 1,
-  },
-  pollOptionBarSelected: {
-    backgroundColor: '#FFE5D6',
-  },
-  pollFooter: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#E9ECEF',
-    alignItems: 'center',
-  },
-  pollVoteCount: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: '500',
-  },
-  donationCTA: {
-    backgroundColor: '#FF69B4',
-    borderRadius: 16,
-    padding: 16,
-    marginTop: 10,
-    alignItems: 'center',
-  },
-  donationText: {
-    fontSize: 15,
-    color: '#fff',
     textAlign: 'center',
-    fontWeight: '500',
-    lineHeight: 20,
-    marginBottom: 6,
+    marginTop: 8,
   },
-  donationSubtext: {
-    fontSize: 14,
-    color: '#fff',
+  instructionNote: {
+    fontSize: 13,
+    color: '#000000',
     textAlign: 'center',
-    opacity: 0.9,
-    fontWeight: '400',
+    marginTop: 6,
+    fontStyle: 'italic',
   },
 });

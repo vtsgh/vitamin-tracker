@@ -4,17 +4,8 @@ import React, { useCallback, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePremium } from '../hooks/usePremium';
-import { PremiumFeatureGate } from '../components/PremiumFeatureGate';
-import { PREMIUM_FEATURES, UPGRADE_TRIGGER_CONTEXTS } from '../constants/premium';
 
 interface SettingsData {
-  smartReminders: {
-    enabled: boolean;
-    adaptiveTiming: boolean;
-    behaviorLearning: boolean;
-    locationReminders: boolean;
-    multiChannel: boolean;
-  };
   notifications: {
     enabled: boolean;
     soundEnabled: boolean;
@@ -27,13 +18,6 @@ interface SettingsData {
 }
 
 const DEFAULT_SETTINGS: SettingsData = {
-  smartReminders: {
-    enabled: false,
-    adaptiveTiming: false,
-    behaviorLearning: false,
-    locationReminders: false,
-    multiChannel: false,
-  },
   notifications: {
     enabled: true,
     soundEnabled: true,
@@ -83,34 +67,6 @@ export default function Settings() {
     }
   };
 
-  const handleSmartReminderToggle = (value: boolean) => {
-    const newSettings = {
-      ...settings,
-      smartReminders: {
-        ...settings.smartReminders,
-        enabled: value,
-        // If disabling, turn off all sub-features
-        ...(value ? {} : {
-          adaptiveTiming: false,
-          behaviorLearning: false,
-          locationReminders: false,
-          multiChannel: false,
-        })
-      }
-    };
-    saveSettings(newSettings);
-  };
-
-  const handleSmartFeatureToggle = (feature: keyof SettingsData['smartReminders'], value: boolean) => {
-    const newSettings = {
-      ...settings,
-      smartReminders: {
-        ...settings.smartReminders,
-        [feature]: value
-      }
-    };
-    saveSettings(newSettings);
-  };
 
   const handleNotificationToggle = (feature: keyof SettingsData['notifications'], value: boolean) => {
     const newSettings = {
@@ -125,7 +81,7 @@ export default function Settings() {
 
 
   const handleGoHome = () => {
-    router.push('/(tabs)/');
+    router.push('/');
   };
 
   const debugRevenueCat = async () => {
@@ -190,7 +146,7 @@ export default function Settings() {
                 'premiumStatus'
               ]);
               Alert.alert('Success', 'All data has been cleared.', [
-                { text: 'OK', onPress: () => router.push('/(tabs)/') }
+                { text: 'OK', onPress: () => router.push('/') }
               ]);
             } catch (error) {
               Alert.alert('Error', 'Failed to clear data.');
@@ -265,77 +221,12 @@ export default function Settings() {
           <Text style={styles.premiumStatusText}>{getPremiumStatusText()}</Text>
         </View>
 
-        {/* Smart Reminders Section */}
-        <PremiumFeatureGate
-          feature={PREMIUM_FEATURES.CUSTOM_SCHEDULES}
-          upgradePrompt={{
-            title: "🧠 Unlock Smart Reminders",
-            message: "Get AI-powered reminder timing, behavioral learning, and location-based notifications",
-            trigger: UPGRADE_TRIGGER_CONTEXTS.FEATURE_DISCOVERY
-          }}
-          fallback={
-            <View style={styles.premiumSection}>
-              {renderSectionHeader('Smart Reminders', '🧠')}
-              <View style={styles.premiumPrompt}>
-                <Text style={styles.premiumPromptTitle}>Upgrade to Premium</Text>
-                <Text style={styles.premiumPromptText}>
-                  Unlock intelligent reminders that adapt to your schedule and habits
-                </Text>
-              </View>
-            </View>
-          }
-        >
-          {renderSectionHeader('Smart Reminders', '🧠')}
-          
-          {renderSettingItem(
-            'Enable Smart Reminders',
-            'AI-powered reminders that adapt to your routine',
-            settings.smartReminders.enabled,
-            handleSmartReminderToggle,
-            true,
-            '🎯'
-          )}
-
-          {settings.smartReminders.enabled && (
-            <>
-              {renderSettingItem(
-                'Adaptive Timing',
-                'Automatically adjust reminder times based on your response patterns',
-                settings.smartReminders.adaptiveTiming,
-                (value) => handleSmartFeatureToggle('adaptiveTiming', value),
-                true,
-                '⏰'
-              )}
-
-              {renderSettingItem(
-                'Behavior Learning',
-                'Learn from your habits to optimize reminder timing',
-                settings.smartReminders.behaviorLearning,
-                (value) => handleSmartFeatureToggle('behaviorLearning', value),
-                true,
-                '🧠'
-              )}
-
-              {renderSettingItem(
-                'Location Reminders',
-                'Get reminded when you arrive at home or work',
-                settings.smartReminders.locationReminders,
-                (value) => handleSmartFeatureToggle('locationReminders', value),
-                true,
-                '📍'
-              )}
-
-              {renderSettingItem(
-                'Multi-Channel Notifications',
-                'Use multiple reminder methods (push, widget, etc.)',
-                settings.smartReminders.multiChannel,
-                (value) => handleSmartFeatureToggle('multiChannel', value),
-                true,
-                '📱'
-              )}
-            </>
-          )}
-        </PremiumFeatureGate>
+        {/* Smart Reminders Section - Redirect to dedicated page */}
+        {renderSectionHeader('Smart Reminders', '🧠')}
+        <TouchableOpacity style={styles.settingButton} onPress={() => router.push('/smart-reminders')}>
+          <Text style={styles.settingButtonText}>Configure Smart Reminders</Text>
+          <Text style={styles.settingButtonSubtext}>AI-powered timing that learns from your habits</Text>
+        </TouchableOpacity>
 
         {/* Basic Notifications */}
         {renderSectionHeader('Notifications', '🔔')}
@@ -450,13 +341,13 @@ const styles = StyleSheet.create({
   },
   pageSubtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     marginBottom: 30,
   },
   loadingText: {
     fontSize: 18,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     marginTop: 100,
   },
@@ -474,7 +365,7 @@ const styles = StyleSheet.create({
   },
   premiumStatusLabel: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     marginBottom: 5,
   },
   premiumStatusText: {
@@ -533,7 +424,7 @@ const styles = StyleSheet.create({
   },
   settingDescription: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     lineHeight: 20,
   },
   premiumBadge: {
@@ -568,7 +459,7 @@ const styles = StyleSheet.create({
   },
   premiumPromptText: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -626,7 +517,7 @@ const styles = StyleSheet.create({
   },
   settingButtonSubtext: {
     fontSize: 14,
-    color: "#666",
+    color: "#000000",
   },
   medicalDisclaimerText: {
     fontSize: 16,

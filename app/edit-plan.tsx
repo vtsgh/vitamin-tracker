@@ -863,7 +863,7 @@ const styles = StyleSheet.create({
   },
   vitaminHeaderSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     lineHeight: 20,
     textAlign: 'center',
     fontStyle: 'italic',
@@ -908,7 +908,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   removeDosageButton: {
-    backgroundColor: '#666',
+    backgroundColor: '#000000',
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
@@ -985,7 +985,7 @@ const styles = StyleSheet.create({
   },
   dosageEditorCloseText: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     fontWeight: 'bold',
   },
   dosageEditorScroll: {
@@ -1060,7 +1060,7 @@ const styles = StyleSheet.create({
   },
   unitSelectorLabel: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     fontWeight: '600',
     marginBottom: 8,
   },
@@ -1081,7 +1081,7 @@ const styles = StyleSheet.create({
   },
   unitButtonText: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     fontWeight: '500',
   },
   unitButtonTextSelected: {

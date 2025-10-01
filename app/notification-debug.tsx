@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   },
   statusTitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     marginBottom: 5,
   },
   statusValue: {
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     width: '100%',
   },
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
   },
   instructionText: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     lineHeight: 22,
     backgroundColor: '#fff',
     padding: 15,

@@ -195,7 +195,7 @@ export default function Home() {
   const handleDonationPress = () => {
     Alert.alert(
       "💝 Support Takeamin",
-      "Help us keep Takeamin free for everyone! Your support helps us maintain the app and add new features.",
+      "Built and maintained by a solo developer who loves coffee! If you find Takeamin useful, consider buying me a coffee!",
       [
         { text: "Maybe Later", style: "cancel" },
         {

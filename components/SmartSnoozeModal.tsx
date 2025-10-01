@@ -5,7 +5,8 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert
+  Alert,
+  ScrollView
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SmartNotificationEngine } from '../utils/smart-notifications';
@@ -307,7 +308,11 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
           </TouchableOpacity>
         </View>
 
-        <View style={styles.content}>
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Title */}
           <View style={styles.titleSection}>
             <Text style={styles.vitaminIcon}>⏰</Text>
@@ -315,25 +320,22 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
             <Text style={styles.subtitle}>What would you like to do?</Text>
           </View>
 
-          {/* Status and Limits */}
+          {/* Status and Tips */}
           <View style={styles.statusSection}>
             {isTodayCompleted && (
               <View style={styles.completedBadge}>
                 <Text style={styles.completedBadgeText}>✅ Already taken today!</Text>
               </View>
             )}
-            
-            {(() => {
-              const maxSnoozes = getLimit('MAX_SMART_SNOOZES_PER_DAY');
-              const remaining = maxSnoozes === -1 ? '∞' : Math.max(0, maxSnoozes - snoozesUsedToday);
-              return (
-                <View style={styles.snoozeCounter}>
-                  <Text style={styles.snoozeCounterText}>
-                    📱 Smart Snoozes: {remaining === '∞' ? 'Unlimited' : `${remaining} remaining`}
-                  </Text>
-                </View>
-              );
-            })()}
+
+            {/* Learning Tip - moved up for better visibility */}
+            {settings.behaviorLearning && (
+              <View style={styles.learningTip}>
+                <Text style={styles.learningTipText}>
+                  🧠 Your choices help improve future recommendations
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Current Streak Display */}
@@ -381,7 +383,7 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
           <View style={styles.snoozeSection}>
             <Text style={styles.sectionTitle}>🧠 Smart Snooze Options</Text>
             <Text style={styles.sectionSubtitle}>AI-suggested timing based on your habits</Text>
-            
+
             <View style={styles.snoozeOptions}>
               {snoozeOptions.map((option, index) => (
                 <TouchableOpacity
@@ -404,15 +406,7 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
             </View>
           </View>
 
-          {/* Learning Note */}
-          {settings.behaviorLearning && (
-            <View style={styles.learningNote}>
-              <Text style={styles.learningNoteText}>
-                🧠 Your choices help improve future recommendations
-              </Text>
-            </View>
-          )}
-        </View>
+        </ScrollView>
       </View>
     </Modal>
   );
@@ -440,12 +434,15 @@ const styles = StyleSheet.create({
   },
   closeButtonText: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     fontWeight: 'bold',
   },
   content: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  scrollContent: {
+    paddingBottom: 40,
   },
   titleSection: {
     alignItems: 'center',
@@ -463,7 +460,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
   },
   statusSection: {
@@ -484,16 +481,17 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#059669',
   },
-  snoozeCounter: {
-    backgroundColor: '#F3F4F6',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 15,
+  learningTip: {
+    backgroundColor: '#E8F4FD',
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
   },
-  snoozeCounterText: {
+  learningTipText: {
     fontSize: 12,
+    color: '#2563EB',
+    textAlign: 'center',
     fontWeight: '500',
-    color: '#6B7280',
   },
   streakDisplay: {
     backgroundColor: '#FEF3C7',
@@ -513,13 +511,13 @@ const styles = StyleSheet.create({
   quickActions: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 40,
+    marginBottom: 30,
     gap: 12,
   },
   quickActionButton: {
     alignItems: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 30,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
     borderRadius: 20,
     elevation: 3,
     shadowColor: '#000',
@@ -540,19 +538,20 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   quickActionIcon: {
-    fontSize: 24,
-    marginBottom: 8,
+    fontSize: 20,
+    marginBottom: 6,
   },
   quickActionText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   quickActionTextDisabled: {
     color: '#9CA3AF',
   },
   snoozeSection: {
-    flex: 1,
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 20,
@@ -563,7 +562,7 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: '#000000',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -599,21 +598,7 @@ const styles = StyleSheet.create({
   },
   snoozeReason: {
     fontSize: 12,
-    color: '#666',
+    color: '#000000',
     fontStyle: 'italic',
-  },
-  learningNote: {
-    backgroundColor: '#E8F4FD',
-    borderRadius: 12,
-    padding: 15,
-    marginTop: 20,
-    marginBottom: 30,
-    alignItems: 'center',
-  },
-  learningNoteText: {
-    fontSize: 12,
-    color: '#2563EB',
-    textAlign: 'center',
-    fontWeight: '500',
   },
 });

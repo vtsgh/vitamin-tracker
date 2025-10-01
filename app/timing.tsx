@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   },
   recommendationLabel: {
     fontSize: 10,
-    color: '#666',
+    color: '#000000',
     fontWeight: '600',
   },
   recommendationLabelSelected: {
