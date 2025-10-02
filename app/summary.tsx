@@ -188,7 +188,7 @@ export default function Summary() {
         </View>
         
         <Text style={styles.message}>
-          Your vitamin plan is ready! We&apos;ll send you friendly reminders at your chosen time. You&apos;ve got this! 😊
+          Your vitamin plan is ready! We&apos;ll send you friendly reminders at your chosen time. You&apos;ve got this!
         </Text>
         
         <TouchableOpacity style={styles.finishButton} onPress={handleFinish}>

@@ -215,6 +215,6 @@ export const SMART_SNOOZE_OPTIONS = {
   MEDIUM: { minutes: 30, label: "30 minutes", emoji: "" },
   LONG: { minutes: 60, label: "1 hour", emoji: "⏳" },
   MEAL_TIME: { minutes: 120, label: "After next meal", emoji: "🍽️" },
-  EVENING: { minutes: 480, label: "This evening", emoji: "🌅" },
+  EVENING: { minutes: 480, label: "This evening", emoji: "" },
   TOMORROW: { minutes: 1440, label: "Tomorrow", emoji: "📅" },
 } as const;

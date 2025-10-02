@@ -53,7 +53,7 @@ export default function Timing() {
 
   const vitaminId = getVitaminId(vitamin || '');
   const recommendations = VITAMIN_TIMING_RECOMMENDATIONS[vitaminId];
-  const showSmartRecommendations = isPremium && settings.enabled && recommendations;
+  const showSmartRecommendations = false; // Disabled to avoid medical advice implications
 
   const handleTimeChange = (event: any, selectedTime?: Date) => {
     setShowTimePicker(Platform.OS === 'ios');
@@ -73,19 +73,7 @@ export default function Timing() {
   const handleContinue = () => {
     const timeString = `${reminderTime.getHours().toString().padStart(2, '0')}:${reminderTime.getMinutes().toString().padStart(2, '0')}`;
     console.log(`Selected reminder time: ${timeString}`);
-    
-    // Show confirmation for smart recommendations
-    if (showSmartRecommendations && selectedRecommendation) {
-      Alert.alert(
-        '🧠 Smart Timing Selected!',
-        `Great choice! This timing is optimal for ${vitamin} absorption. Your reminder is set for ${formatDisplayTime(timeString)}.`,
-        [
-          { text: 'Perfect!', onPress: () => navigateToNext(timeString) }
-        ]
-      );
-    } else {
-      navigateToNext(timeString);
-    }
+    navigateToNext(timeString);
   };
 
   const navigateToNext = (timeString: string) => {

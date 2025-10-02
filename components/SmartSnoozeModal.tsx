@@ -333,7 +333,7 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
             {settings.behaviorLearning && (
               <View style={styles.learningTip}>
                 <Text style={styles.learningTipText}>
-                  🧠 Your choices help improve future recommendations
+                  Your choices help improve future recommendations
                 </Text>
               </View>
             )}

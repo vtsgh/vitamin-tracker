@@ -8,6 +8,7 @@ import { VITAMINS } from '../constants/vitamins';
 import { scheduleVitaminReminders, cancelNotifications, formatDisplayTime } from '../utils/notifications';
 import { getDosageOptions, formatDosageDisplay } from '../constants/dosages';
 import VitaminCapsule from '../components/VitaminCapsule';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const frequencyOptions = [
   { id: 'daily', label: 'Daily' },
@@ -27,6 +28,8 @@ const daysOfWeek = [
 ];
 
 export default function EditPlan() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const { id, vitamin, dosageAmount, dosageUnit, dosageDisplay, frequency, endDate, customDays, reminderTime } = useLocalSearchParams<{
     id: string;
     vitamin: string;
@@ -71,6 +74,10 @@ export default function EditPlan() {
   const vitaminObj = VITAMINS.find(v => v.label === editedVitamin);
   const vitaminId = vitaminObj?.id || '';
   const dosageOptions = getDosageOptions(vitaminId);
+
+  console.log('Edit Plan - Vitamin:', editedVitamin);
+  console.log('Edit Plan - Vitamin ID:', vitaminId);
+  console.log('Edit Plan - Dosage Options:', dosageOptions.length);
 
   const getCommonUnits = (vitaminId: string): string[] => {
     if (['vitamin-a', 'vitamin-d', 'vitamin-e'].includes(vitaminId)) {
@@ -255,7 +262,7 @@ export default function EditPlan() {
           <Text style={styles.vitaminHeaderTitle}>{editedVitamin}</Text>
         </View>
         <Text style={styles.vitaminHeaderSubtitle}>
-          Fine-tune your health journey! Adjust your schedule, dosage, or timing to keep your wellness routine perfectly balanced. 🌿
+          Update your schedule, dosage, or reminder time as needed.
         </Text>
       </View>
 
@@ -455,13 +462,14 @@ export default function EditPlan() {
       {/* Dosage Editor Modal */}
       {showDosageEditor && (
         <View style={styles.dosageEditorOverlay}>
-          <KeyboardAvoidingView 
+          <KeyboardAvoidingView
             style={styles.dosageEditorModal}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={0}
           >
             <View style={styles.dosageEditorHeader}>
               <Text style={styles.dosageEditorTitle}>Select Dosage</Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.dosageEditorClose}
                 onPress={() => setShowDosageEditor(false)}
               >
@@ -469,11 +477,16 @@ export default function EditPlan() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView 
+            <ScrollView
               style={styles.dosageEditorScroll}
               contentContainerStyle={styles.dosageEditorContent}
               keyboardShouldPersistTaps="handled"
             >
+              {/* Debug info */}
+              <Text style={{ color: colors.textPrimary, padding: 10 }}>
+                Available options: {dosageOptions.length}
+              </Text>
+
               {/* Predefined dosage options */}
               {dosageOptions.map((option, index) => (
                 <TouchableOpacity
@@ -549,16 +562,17 @@ export default function EditPlan() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: any) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
     padding: 20,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     textAlign: 'center',
     marginTop: 60,
     marginBottom: 40,
@@ -570,12 +584,12 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 15,
     padding: 25,
     marginBottom: 30,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -589,7 +603,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     marginBottom: 10,
   },
   frequencyContainer: {
@@ -598,25 +612,25 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   frequencyButton: {
-    backgroundColor: '#f8f8f8',
+    backgroundColor: colors.surfaceElevated,
     borderWidth: 2,
-    borderColor: '#FF7F50',
+    borderColor: colors.primary,
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 10,
     marginBottom: 5,
   },
   frequencyButtonSelected: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
   },
   frequencyButtonText: {
     fontSize: 14,
-    color: '#FF7F50',
+    color: colors.primary,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   frequencyButtonTextSelected: {
-    color: '#fff',
+    color: colors.white,
   },
   daysContainer: {
     flexDirection: 'row',
@@ -629,7 +643,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     minWidth: 45,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -638,12 +652,12 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   selectedDayButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
   },
   unselectedDayButton: {
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
     borderWidth: 2,
-    borderColor: '#FF7F50',
+    borderColor: colors.primary,
   },
   dayButtonText: {
     fontSize: 12,
@@ -651,34 +665,34 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   selectedDayButtonText: {
-    color: '#fff',
+    color: colors.white,
   },
   unselectedDayButtonText: {
-    color: '#FF7F50',
+    color: colors.primary,
   },
   timeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 10,
     padding: 15,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   timeText: {
     fontSize: 16,
-    color: '#333',
+    color: colors.textPrimary,
     flex: 1,
   },
   changeTimeButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
   },
   changeTimeButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 14,
     fontWeight: 'bold',
   },
@@ -692,14 +706,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   timePickerDoneButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
     alignSelf: 'center',
     marginTop: 15,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -708,7 +722,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   timePickerDoneButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
@@ -717,25 +731,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 10,
     padding: 15,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   dateText: {
     fontSize: 16,
-    color: '#333',
+    color: colors.textPrimary,
     flex: 1,
   },
   changeDateButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
   },
   changeDateButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 14,
     fontWeight: 'bold',
   },
@@ -749,13 +763,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   androidPickerContainer: {
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
     borderRadius: 15,
     padding: 20,
     borderWidth: 2,
-    borderColor: '#FF7F50',
+    borderColor: colors.primary,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -764,14 +778,14 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   datePickerDoneButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
     alignSelf: 'center',
     marginTop: 15,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -780,20 +794,20 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   datePickerDoneButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   saveButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 40,
     paddingVertical: 15,
     borderRadius: 25,
     alignSelf: 'center',
     marginBottom: 20,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -802,13 +816,13 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   saveButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   backButton: {
-    backgroundColor: '#6B7280',
+    backgroundColor: colors.border,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 25,
@@ -816,7 +830,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginBottom: 20,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -825,21 +839,21 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   backButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
 
   // Vitamin header styles
   vitaminHeader: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     marginHorizontal: 20,
     marginTop: 10,
     marginBottom: 15,
     borderRadius: 15,
     padding: 20,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -858,12 +872,12 @@ const styles = StyleSheet.create({
   vitaminHeaderTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     flex: 1,
   },
   vitaminHeaderSubtitle: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textSecondary,
     lineHeight: 20,
     textAlign: 'center',
     fontStyle: 'italic',
@@ -871,11 +885,11 @@ const styles = StyleSheet.create({
 
   // Dosage editing styles
   currentDosageContainer: {
-    backgroundColor: '#f8f8f8',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 10,
     padding: 15,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   currentDosageDisplay: {
     flexDirection: 'row',
@@ -887,7 +901,7 @@ const styles = StyleSheet.create({
   },
   currentDosageText: {
     fontSize: 16,
-    color: '#333',
+    color: colors.textPrimary,
     fontWeight: '600',
   },
   dosageActions: {
@@ -895,27 +909,27 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   changeDosageButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
     flex: 1,
   },
   changeDosageButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   removeDosageButton: {
-    backgroundColor: '#000000',
+    backgroundColor: colors.error,
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 20,
     flex: 1,
   },
   removeDosageButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center',
@@ -948,19 +962,20 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   dosageEditorModal: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     margin: 20,
-    maxHeight: '80%',
+    height: '70%',
     width: '90%',
     elevation: 10,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 4,
     },
     shadowOpacity: 0.3,
     shadowRadius: 8,
+    flexDirection: 'column',
   },
   dosageEditorHeader: {
     flexDirection: 'row',
@@ -968,24 +983,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    borderBottomColor: colors.border,
   },
   dosageEditorTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
   },
   dosageEditorClose: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#E5E5E5',
+    backgroundColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
   },
   dosageEditorCloseText: {
     fontSize: 16,
-    color: '#000000',
+    color: colors.textSecondary,
     fontWeight: 'bold',
   },
   dosageEditorScroll: {
@@ -995,11 +1010,11 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   dosageOption: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 15,
     marginBottom: 12,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -1007,7 +1022,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
     borderWidth: 1,
-    borderColor: '#E5E5E5',
+    borderColor: colors.border,
   },
   dosageOptionContent: {
     padding: 15,
@@ -1016,27 +1031,27 @@ const styles = StyleSheet.create({
   dosageOptionText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     marginTop: 5,
     marginBottom: 3,
   },
   dosageOptionLabel: {
     fontSize: 14,
-    color: '#FF7F50',
+    color: colors.primary,
     fontWeight: '600',
   },
   customDosageSection: {
-    backgroundColor: '#F8F9FF',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 15,
     padding: 20,
     marginTop: 10,
     borderWidth: 2,
-    borderColor: '#E8EAFF',
+    borderColor: colors.borderLight,
   },
   customDosageTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 15,
     textAlign: 'center',
   },
@@ -1049,54 +1064,55 @@ const styles = StyleSheet.create({
   customDosageAmountInput: {
     flex: 1,
     borderWidth: 2,
-    borderColor: '#E5E5E5',
+    borderColor: colors.border,
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
+    color: colors.textPrimary,
   },
   customDosageUnitSelector: {
     flex: 1,
   },
   unitSelectorLabel: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textSecondary,
     fontWeight: '600',
     marginBottom: 8,
   },
   unitButton: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.surfaceElevated,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
     marginRight: 8,
     borderWidth: 2,
-    borderColor: '#E5E5E5',
+    borderColor: colors.border,
     minWidth: 50,
     alignItems: 'center',
   },
   unitButtonSelected: {
-    backgroundColor: '#FF7F50',
-    borderColor: '#FF7F50',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   unitButtonText: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textSecondary,
     fontWeight: '500',
   },
   unitButtonTextSelected: {
-    color: '#fff',
+    color: colors.white,
     fontWeight: 'bold',
   },
   confirmCustomButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
   },
   confirmCustomButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
-});
+});}
