@@ -4,8 +4,11 @@ import { useRef, useState, useCallback } from 'react';
 import { getDosageOptions, formatDosageDisplay } from '../constants/dosages';
 import { VITAMINS } from '../constants/vitamins';
 import VitaminCapsule from '../components/VitaminCapsule';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function SelectDosage() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const { vitamin } = useLocalSearchParams<{ vitamin: string }>();
   const [isNavigating, setIsNavigating] = useState(false);
   const [showCustomInput, setShowCustomInput] = useState(false);
@@ -254,23 +257,24 @@ export default function SelectDosage() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: any) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
     padding: 20,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     textAlign: 'center',
     marginTop: 60,
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 18,
-    color: '#000000',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -283,12 +287,12 @@ const styles = StyleSheet.create({
     paddingBottom: 120, // Extra padding for keyboard
   },
   dosageButton: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     marginBottom: 15,
     width: '90%',
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -299,12 +303,12 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   customButton: {
-    backgroundColor: '#E8F4FD',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 20,
     marginBottom: 15,
     width: '90%',
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -312,11 +316,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     borderWidth: 2,
-    borderColor: '#87CEEB',
+    borderColor: colors.smartRemindersButton,
   },
   customButtonActive: {
-    backgroundColor: '#D1E7FF',
-    borderColor: '#FF7F50',
+    backgroundColor: colors.surfaceElevated,
+    borderColor: colors.primary,
   },
   dosageContent: {
     padding: 20,
@@ -337,27 +341,27 @@ const styles = StyleSheet.create({
   dosageAmount: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
   },
   dosageLabel: {
     fontSize: 16,
-    color: '#FF7F50',
+    color: colors.primary,
     fontWeight: '600',
     marginBottom: 3,
   },
   dosageSubtitle: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textSecondary,
     fontStyle: 'italic',
   },
   customInputSection: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 15,
     padding: 20,
     width: '90%',
     marginBottom: 20,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -365,7 +369,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     borderWidth: 2,
-    borderColor: '#FF7F50',
+    borderColor: colors.primary,
   },
   inputRow: {
     flexDirection: 'row',
@@ -375,11 +379,11 @@ const styles = StyleSheet.create({
   amountInput: {
     flex: 1,
     borderWidth: 2,
-    borderColor: '#E5E5E5',
+    borderColor: colors.border,
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     marginRight: 10,
   },
   unitSelector: {
@@ -387,7 +391,7 @@ const styles = StyleSheet.create({
   },
   unitSelectorLabel: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textSecondary,
     fontWeight: '600',
     marginBottom: 8,
   },
@@ -395,21 +399,21 @@ const styles = StyleSheet.create({
     flexGrow: 0,
   },
   unitButton: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.surfaceElevated,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
     marginRight: 8,
     borderWidth: 2,
-    borderColor: '#E5E5E5',
+    borderColor: colors.border,
     minWidth: 50,
     alignItems: 'center',
   },
   unitButtonSelected: {
-    backgroundColor: '#FF7F50',
-    borderColor: '#FF7F50',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
     elevation: 2,
-    shadowColor: '#FF7F50',
+    shadowColor: colors.primary,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -419,33 +423,33 @@ const styles = StyleSheet.create({
   },
   unitButtonText: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textSecondary,
     fontWeight: '500',
   },
   unitButtonTextSelected: {
-    color: '#fff',
+    color: colors.white,
     fontWeight: 'bold',
   },
   confirmCustomButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',
   },
   confirmCustomButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
   backButton: {
-    backgroundColor: '#87CEEB',
+    backgroundColor: colors.smartRemindersButton,
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 25,
     alignSelf: 'center',
     marginBottom: 20,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -454,18 +458,19 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   backButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
   disabledButton: {
-    backgroundColor: '#cccccc',
+    backgroundColor: colors.border,
     opacity: 0.6,
   },
   errorText: {
     fontSize: 18,
-    color: '#FF6B6B',
+    color: colors.error,
     textAlign: 'center',
     marginTop: 100,
   },
 });
+}

@@ -4,8 +4,11 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal, Linking } 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import VitaminCapsule from '../components/VitaminCapsule';
 import { VITAMIN_EDUCATION_CARDS, HEALTH_ARTICLES, INSIGHT_CATEGORIES, FEATURED_CONTENT, getWeeklyArticles, VitaminEducationCard, HealthArticle } from '../constants/health-insights';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function HealthInsights() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [selectedCard, setSelectedCard] = useState<VitaminEducationCard | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<HealthArticle | null>(null);
   const [expandedArticles, setExpandedArticles] = useState<Set<string>>(new Set());
@@ -278,10 +281,11 @@ export default function HealthInsights() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: any) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
   },
   homeButton: {
     position: 'absolute',
@@ -290,11 +294,11 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -302,7 +306,7 @@ const styles = StyleSheet.create({
   },
   homeButtonIcon: {
     fontSize: 18,
-    color: '#fff',
+    color: colors.white,
   },
   scrollView: {
     flex: 1,
@@ -312,30 +316,30 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     textAlign: 'center',
     marginBottom: 5,
   },
   pageSubtitle: {
     fontSize: 16,
-    color: '#000000',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 20,
   },
   
   // Seasonal Recommendations Styles
   seasonalSection: {
-    backgroundColor: '#F0F9FF',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 20,
     padding: 20,
     marginBottom: 30,
     borderWidth: 2,
-    borderColor: '#87CEEB',
+    borderColor: colors.smartRemindersButton,
   },
   seasonalMessage: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2563EB',
+    color: colors.smartRemindersButton,
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -351,7 +355,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     minWidth: 80,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -363,7 +367,7 @@ const styles = StyleSheet.create({
   seasonalVitaminName: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.white,
     textAlign: 'center',
   },
   section: {
@@ -376,7 +380,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     textAlign: 'center',
   },
   sectionTitleIcon: {
@@ -384,7 +388,7 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textSecondary,
     marginBottom: 20,
     lineHeight: 20,
     textAlign: 'center',
@@ -404,34 +408,34 @@ const styles = StyleSheet.create({
   },
   scrollIndicatorText: {
     fontSize: 14,
-    color: '#FF7F50',
+    color: colors.primary,
     fontWeight: '600',
     marginBottom: 5,
   },
   scrollIndicatorArrow: {
     fontSize: 18,
-    color: '#FF7F50',
+    color: colors.primary,
     opacity: 0.8,
   },
   vitaminCard: {
     borderRadius: 20,
     padding: 20,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
   },
   featuredCard: {
     borderWidth: 2,
-    borderColor: '#FFD700',
+    borderColor: colors.healthButton,
     elevation: 5,
   },
   featuredBadge: {
     position: 'absolute',
     top: -8,
     right: 15,
-    backgroundColor: '#FFD700',
+    backgroundColor: colors.healthButton,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
@@ -440,7 +444,7 @@ const styles = StyleSheet.create({
   featuredBadgeText: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#8B5A00',
+    color: colors.white,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -454,12 +458,12 @@ const styles = StyleSheet.create({
   cardName: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.white,
     flex: 1,
   },
   cardBenefit: {
     fontSize: 15,
-    color: '#fff',
+    color: colors.white,
     opacity: 0.95,
     lineHeight: 22,
     marginBottom: 15,
@@ -471,13 +475,13 @@ const styles = StyleSheet.create({
   },
   tapHint: {
     fontSize: 12,
-    color: '#fff',
+    color: colors.white,
     opacity: 0.8,
     fontStyle: 'italic',
   },
   cardArrow: {
     fontSize: 18,
-    color: '#fff',
+    color: colors.white,
     fontWeight: 'bold',
   },
 
@@ -486,24 +490,24 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   articleCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 15,
     padding: 18,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
   featuredArticleCard: {
     borderWidth: 2,
-    borderColor: '#FF7F50',
+    borderColor: colors.primary,
   },
   featuredArticleBadge: {
     position: 'absolute',
     top: -8,
     left: 15,
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
@@ -526,7 +530,7 @@ const styles = StyleSheet.create({
   articleTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   articleMeta: {
@@ -535,33 +539,33 @@ const styles = StyleSheet.create({
   },
   articleReadTime: {
     fontSize: 12,
-    color: '#FF7F50',
+    color: colors.primary,
     fontWeight: '600',
   },
   articleCategory: {
     fontSize: 12,
-    color: '#000000',
+    color: colors.textSecondary,
   },
   expandIcon: {
     fontSize: 14,
-    color: '#FF7F50',
+    color: colors.primary,
     fontWeight: 'bold',
   },
   articleSummary: {
     fontSize: 14,
-    color: '#555',
+    color: colors.textSecondary,
     lineHeight: 20,
     marginBottom: 8,
   },
   articleContent: {
     borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
+    borderTopColor: colors.border,
     paddingTop: 15,
     marginTop: 10,
   },
   articleText: {
     fontSize: 14,
-    color: '#444',
+    color: colors.textPrimary,
     lineHeight: 22,
     marginBottom: 15,
   },
@@ -569,36 +573,36 @@ const styles = StyleSheet.create({
     marginTop: 15,
     paddingTop: 15,
     borderTopWidth: 1,
-    borderTopColor: '#E5E5E5',
+    borderTopColor: colors.border,
   },
   sourcesTitle: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 10,
   },
   sourceItem: {
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surfaceElevated,
     padding: 12,
     borderRadius: 8,
     marginBottom: 8,
     borderLeftWidth: 3,
-    borderLeftColor: '#FF7F50',
+    borderLeftColor: colors.primary,
   },
   sourceOrg: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#FF7F50',
+    color: colors.primary,
     marginBottom: 4,
   },
   sourceTitle: {
     fontSize: 12,
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   sourceLink: {
     fontSize: 11,
-    color: '#2563EB',
+    color: colors.smartRemindersButton,
     fontWeight: '500',
   },
   relatedSection: {
@@ -607,7 +611,7 @@ const styles = StyleSheet.create({
   relatedTitle: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   relatedTags: {
@@ -616,22 +620,22 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   relatedTag: {
-    backgroundColor: '#F0F9FF',
+    backgroundColor: colors.surfaceElevated,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E0E7FF',
+    borderColor: colors.borderLight,
   },
   relatedTagText: {
     fontSize: 12,
-    color: '#2563EB',
+    color: colors.smartRemindersButton,
   },
 
   // Modal Styles
   modalContainer: {
     flex: 1,
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -644,13 +648,13 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#E5E5E5',
+    backgroundColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
   },
   closeButtonText: {
     fontSize: 16,
-    color: '#000000',
+    color: colors.textPrimary,
     fontWeight: 'bold',
   },
   modalContent: {
@@ -670,7 +674,7 @@ const styles = StyleSheet.create({
   modalCardName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: colors.white,
     textAlign: 'center',
   },
   modalSection: {
@@ -679,17 +683,17 @@ const styles = StyleSheet.create({
   modalSectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 12,
   },
   modalSectionText: {
     fontSize: 16,
-    color: '#555',
+    color: colors.textSecondary,
     lineHeight: 24,
   },
   topDisclaimer: {
-    backgroundColor: '#F0F9FF',
-    borderColor: '#BAE6FD',
+    backgroundColor: colors.surfaceElevated,
+    borderColor: colors.smartRemindersButton,
     borderWidth: 1,
     borderRadius: 8,
     padding: 12,
@@ -698,9 +702,10 @@ const styles = StyleSheet.create({
   },
   topDisclaimerText: {
     fontSize: 12,
-    color: '#0369A1',
+    color: colors.smartRemindersButton,
     textAlign: 'center',
     fontWeight: '500',
     lineHeight: 16,
   },
 });
+}

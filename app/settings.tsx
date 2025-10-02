@@ -4,6 +4,7 @@ import React, { useCallback, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePremium } from '../hooks/usePremium';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface SettingsData {
   notifications: {
@@ -32,8 +33,12 @@ const DEFAULT_SETTINGS: SettingsData = {
 export default function Settings() {
   const [settings, setSettings] = useState<SettingsData>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const { isPremium, getPremiumStatusText, resetPremiumForTesting } = usePremium();
+  const { colors, theme, toggleTheme, isDark } = useTheme();
+
+  // Create styles with theme colors
+  const styles = createStyles(colors);
 
   // Load settings on focus
   useFocusEffect(
@@ -262,6 +267,28 @@ export default function Settings() {
           </>
         )}
 
+        {/* Display Settings */}
+        {renderSectionHeader('Display', '🎨')}
+
+        <View style={styles.settingItem}>
+          <View style={styles.settingContent}>
+            <View style={styles.settingTextContainer}>
+              <View style={styles.settingTitleRow}>
+                <Text style={styles.settingIcon}>🌓</Text>
+                <Text style={styles.settingTitle}>Dark Mode</Text>
+              </View>
+              <Text style={styles.settingDescription}>
+                {isDark ? 'Professional dark theme enabled' : 'Warm light theme enabled'}
+              </Text>
+            </View>
+            <Switch
+              value={isDark}
+              onValueChange={toggleTheme}
+              trackColor={{ false: '#E5E5E5', true: '#FF7F50' }}
+              thumbColor={isDark ? '#fff' : '#f4f3f4'}
+            />
+          </View>
+        </View>
 
         {/* Developer Section (remove in production) */}
         {__DEV__ && (
@@ -301,11 +328,13 @@ export default function Settings() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF3E0',
-  },
+// Create styles function that accepts theme colors
+function createStyles(colors: any) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
   homeButton: {
     position: 'absolute',
     top: 50,
@@ -313,11 +342,11 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -325,7 +354,7 @@ const styles = StyleSheet.create({
   },
   homeButtonIcon: {
     fontSize: 18,
-    color: '#fff',
+    color: colors.white,
   },
   scrollView: {
     flex: 1,
@@ -335,29 +364,29 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     textAlign: 'center',
     marginBottom: 5,
   },
   pageSubtitle: {
     fontSize: 16,
-    color: '#000000',
+    color: colors.textPrimary,
     textAlign: 'center',
     marginBottom: 30,
   },
   loadingText: {
     fontSize: 18,
-    color: '#000000',
+    color: colors.textPrimary,
     textAlign: 'center',
     marginTop: 100,
   },
   premiumStatus: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 15,
     padding: 20,
     marginBottom: 30,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
@@ -365,13 +394,13 @@ const styles = StyleSheet.create({
   },
   premiumStatusLabel: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textPrimary,
     marginBottom: 5,
   },
   premiumStatusText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -386,14 +415,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
   },
   settingItem: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 15,
     marginBottom: 12,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -419,16 +448,16 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     flex: 1,
   },
   settingDescription: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textPrimary,
     lineHeight: 20,
   },
   premiumBadge: {
-    backgroundColor: '#FFD700',
+    backgroundColor: colors.warning,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 8,
@@ -437,53 +466,53 @@ const styles = StyleSheet.create({
   premiumBadgeText: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#8B5A00',
+    color: colors.textPrimary,
   },
   premiumSection: {
     marginBottom: 20,
   },
   premiumPrompt: {
-    backgroundColor: '#F8F9FF',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 15,
     padding: 20,
     borderWidth: 2,
-    borderColor: '#E8EAFF',
+    borderColor: colors.border,
     borderStyle: 'dashed',
     alignItems: 'center',
   },
   premiumPromptTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#4C4C4C',
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   premiumPromptText: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textPrimary,
     textAlign: 'center',
     lineHeight: 20,
   },
   actionButton: {
-    backgroundColor: '#87CEEB',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     alignItems: 'center',
   },
   actionButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
   dangerButton: {
-    backgroundColor: '#FF6B6B',
+    backgroundColor: colors.error,
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,
     alignItems: 'center',
   },
   dangerButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -494,16 +523,16 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: '#999',
+    color: colors.textTertiary,
     textAlign: 'center',
     lineHeight: 20,
   },
   settingButton: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.surface,
     borderRadius: 15,
     marginBottom: 12,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -512,21 +541,22 @@ const styles = StyleSheet.create({
   settingButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333",
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   settingButtonSubtext: {
     fontSize: 14,
-    color: "#000000",
+    color: colors.textPrimary,
   },
   medicalDisclaimerText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#000", // Black color for better visibility
+    color: colors.textPrimary, // Black color for better visibility
     marginBottom: 4,
   },
-  medicalDisclaimerSubtext: {
-    fontSize: 14,
-    color: "#000", // Black color for consistency
-  },
-});
+    medicalDisclaimerSubtext: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+  });
+}

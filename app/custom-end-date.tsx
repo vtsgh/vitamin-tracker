@@ -2,8 +2,11 @@ import { StyleSheet, Text, View, Platform, TouchableOpacity } from 'react-native
 import { useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function CustomEndDate() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime, frequency, customDays } = useLocalSearchParams<{ 
     vitamin: string; 
     dosageAmount: string;
@@ -84,10 +87,11 @@ export default function CustomEndDate() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: any) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
     padding: 20,
   },
   content: {
@@ -97,17 +101,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     textAlign: 'center',
     marginTop: 60,
     marginBottom: 60,
   },
   datePickerContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 20,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -123,13 +127,13 @@ const styles = StyleSheet.create({
   },
   selectedDateText: {
     fontSize: 18,
-    color: '#FF7F50',
+    color: colors.primary,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
   },
   backButton: {
-    backgroundColor: '#6B7280',
+    backgroundColor: colors.border,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 25,
@@ -137,7 +141,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginBottom: 20,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -146,19 +150,19 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   backButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
   continueButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 40,
     paddingVertical: 15,
     borderRadius: 25,
     marginTop: 40,
     width: '80%',
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -167,9 +171,9 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   continueButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
   },
-});
+});}

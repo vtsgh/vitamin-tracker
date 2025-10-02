@@ -11,6 +11,7 @@ import {
   ScrollView,
   Alert
 } from 'react-native';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface NoteInputModalProps {
   visible: boolean;
@@ -35,6 +36,8 @@ export const NoteInputModal: React.FC<NoteInputModalProps> = ({
   vitaminName,
   existingNote
 }) => {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [noteText, setNoteText] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -169,10 +172,11 @@ export const NoteInputModal: React.FC<NoteInputModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+function createStyles(colors: any) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -185,13 +189,13 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#E5E5E5',
+    backgroundColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
   },
   closeButtonText: {
     fontSize: 16,
-    color: '#000000',
+    color: colors.textSecondary,
     fontWeight: 'bold',
   },
   content: {
@@ -212,46 +216,46 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     marginBottom: 5,
   },
   subtitle: {
     fontSize: 16,
-    color: '#000000',
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   instructionsBox: {
-    backgroundColor: '#E8F4FD',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 12,
     padding: 15,
     marginBottom: 20,
   },
   instructionsText: {
     fontSize: 13,
-    color: '#2563EB',
+    color: colors.smartRemindersButton,
     lineHeight: 20,
   },
   inputContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 15,
     padding: 15,
     marginBottom: 20,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
   textInput: {
     fontSize: 15,
-    color: '#333',
+    color: colors.textPrimary,
     minHeight: 200,
     maxHeight: 300,
     lineHeight: 22,
   },
   charCount: {
     fontSize: 12,
-    color: '#999',
+    color: colors.textTertiary,
     textAlign: 'right',
     marginTop: 10,
   },
@@ -266,24 +270,24 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
   clearButton: {
-    backgroundColor: '#6B7280',
+    backgroundColor: colors.border,
   },
   clearButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
   saveButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
   },
   saveButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -291,14 +295,15 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   privacyNote: {
-    backgroundColor: '#F0F9FF',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 12,
     padding: 12,
     alignItems: 'center',
   },
   privacyText: {
     fontSize: 12,
-    color: '#0369A1',
+    color: colors.smartRemindersButton,
     textAlign: 'center',
   },
 });
+}

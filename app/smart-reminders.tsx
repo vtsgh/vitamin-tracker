@@ -11,6 +11,7 @@ import { formatDisplayTime, cancelNotifications } from '../utils/notifications';
 import { TIME_INSIGHTS } from '../constants/smart-reminders';
 import { PremiumFeatureGate } from '../components/PremiumFeatureGate';
 import { PREMIUM_FEATURES, UPGRADE_TRIGGER_CONTEXTS } from '../constants/premium';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface TimingRecommendation {
   planId: string;
@@ -22,6 +23,8 @@ interface TimingRecommendation {
 }
 
 export default function SmartReminders() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [vitaminPlans, setVitaminPlans] = useState<VitaminPlan[]>([]);
   const [recommendations, setRecommendations] = useState<TimingRecommendation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -473,10 +476,11 @@ export default function SmartReminders() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: any) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
   },
   homeButton: {
     position: 'absolute',
@@ -485,11 +489,11 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -497,7 +501,7 @@ const styles = StyleSheet.create({
   },
   homeButtonIcon: {
     fontSize: 18,
-    color: '#fff',
+    color: colors.white,
   },
   scrollView: {
     flex: 1,
@@ -507,26 +511,26 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     textAlign: 'center',
     marginBottom: 5,
   },
   pageSubtitle: {
     fontSize: 16,
-    color: '#000000',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 15,
   },
   privacyNotice: {
     fontSize: 13,
-    color: '#059669',
+    color: colors.success,
     textAlign: 'center',
     marginBottom: 30,
     fontWeight: '500',
   },
   loadingText: {
     fontSize: 18,
-    color: '#000000',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginTop: 100,
   },
@@ -536,16 +540,16 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 15,
   },
   // Settings styles
   settingItem: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 15,
     marginBottom: 12,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -571,16 +575,16 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     flex: 1,
   },
   settingDescription: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   premiumBadge: {
-    backgroundColor: '#FFD700',
+    backgroundColor: colors.healthButton,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 8,
@@ -589,36 +593,36 @@ const styles = StyleSheet.create({
   premiumBadgeText: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#8B5A00',
+    color: colors.white,
   },
   premiumPrompt: {
-    backgroundColor: '#F8F9FF',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 15,
     padding: 20,
     borderWidth: 2,
-    borderColor: '#E8EAFF',
+    borderColor: colors.borderLight,
     borderStyle: 'dashed',
     alignItems: 'center',
   },
   premiumPromptTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#4C4C4C',
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   premiumPromptText: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
   },
   // Summary styles
   summaryCard: {
-    backgroundColor: '#E8F4FD',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 20,
     padding: 20,
     borderWidth: 2,
-    borderColor: '#87CEEB',
+    borderColor: colors.smartRemindersButton,
   },
   summaryGrid: {
     flexDirection: 'row',
@@ -632,22 +636,22 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 12,
-    color: '#1E40AF',
+    color: colors.smartRemindersButton,
     marginBottom: 5,
   },
   summaryValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#059669',
+    color: colors.success,
   },
   // Recommendation styles
   recommendationCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 20,
     marginBottom: 15,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
@@ -661,17 +665,17 @@ const styles = StyleSheet.create({
   recommendationVitamin: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
   },
   confidenceBadge: {
-    backgroundColor: '#E8F4FD',
+    backgroundColor: colors.surfaceElevated,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
   confidenceText: {
     fontSize: 12,
-    color: '#2563EB',
+    color: colors.smartRemindersButton,
     fontWeight: '600',
   },
   timingComparison: {
@@ -680,7 +684,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     marginBottom: 15,
     paddingVertical: 10,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 15,
   },
   currentTiming: {
@@ -691,73 +695,73 @@ const styles = StyleSheet.create({
   },
   timingLabel: {
     fontSize: 12,
-    color: '#000000',
+    color: colors.textSecondary,
     marginBottom: 5,
   },
   timingTime: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
   },
   timingArrow: {
     fontSize: 24,
-    color: '#FF7F50',
+    color: colors.primary,
   },
   recommendationReason: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textSecondary,
     marginBottom: 8,
     lineHeight: 20,
   },
   recommendationImprovement: {
     fontSize: 14,
-    color: '#059669',
+    color: colors.success,
     fontWeight: '600',
     marginBottom: 15,
   },
   applyButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingVertical: 12,
     borderRadius: 15,
     alignItems: 'center',
   },
   applyButtonDisabled: {
-    backgroundColor: '#cccccc',
+    backgroundColor: colors.border,
     opacity: 0.6,
   },
   applyButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
   noRecommendationsCard: {
-    backgroundColor: '#F0F9FF',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 20,
     padding: 25,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#E0E7FF',
+    borderColor: colors.borderLight,
     borderStyle: 'dashed',
   },
   noRecommendationsTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#4C4C4C',
+    color: colors.textPrimary,
     marginBottom: 15,
     textAlign: 'center',
   },
   noRecommendationsText: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
   },
   tipsCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 20,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -774,7 +778,8 @@ const styles = StyleSheet.create({
   tipText: {
     flex: 1,
     fontSize: 14,
-    color: '#000000',
+    color: colors.textSecondary,
     lineHeight: 20,
   },
 });
+}

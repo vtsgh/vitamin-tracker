@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const daysOfWeek = [
   { id: 'monday', label: 'Monday' },
@@ -13,6 +14,8 @@ const daysOfWeek = [
 ];
 
 export default function CustomDays() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime } = useLocalSearchParams<{ 
     vitamin: string; 
     dosageAmount: string;
@@ -75,23 +78,24 @@ export default function CustomDays() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: any) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
     padding: 20,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     textAlign: 'center',
     marginTop: 60,
     marginBottom: 20,
   },
   description: {
     fontSize: 18,
-    color: '#555',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 40,
     paddingHorizontal: 20,
@@ -110,7 +114,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     width: '80%',
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -119,13 +123,13 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   selectedDayButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     borderWidth: 0,
   },
   unselectedDayButton: {
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
     borderWidth: 2,
-    borderColor: '#FF7F50',
+    borderColor: colors.primary,
   },
   dayButtonText: {
     fontSize: 20,
@@ -133,13 +137,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   selectedDayButtonText: {
-    color: '#fff',
+    color: colors.white,
   },
   unselectedDayButtonText: {
-    color: '#FF7F50',
+    color: colors.primary,
   },
   continueButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 40,
     paddingVertical: 15,
     borderRadius: 25,
@@ -147,7 +151,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: '80%',
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -156,13 +160,13 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   continueButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   backButton: {
-    backgroundColor: '#6B7280',
+    backgroundColor: colors.border,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 25,
@@ -170,7 +174,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginBottom: 20,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -179,8 +183,9 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   backButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
 });
+}

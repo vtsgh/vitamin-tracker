@@ -17,11 +17,20 @@ export default function MedicalDisclaimer({ onAccept, showBackButton = true }: M
       // Mark disclaimer as accepted
       await AsyncStorage.setItem('medicalDisclaimerAccepted', 'true');
       await AsyncStorage.setItem('medicalDisclaimerAcceptedDate', new Date().toISOString());
-      
+
       if (onAccept) {
         onAccept();
       } else {
-        router.back();
+        // Check if user has already selected a theme
+        const hasSelectedTheme = await AsyncStorage.getItem('app_theme_preference');
+
+        if (hasSelectedTheme) {
+          // Theme already selected, go to home
+          router.replace('/');
+        } else {
+          // First time user, show theme picker
+          router.replace('/theme-picker');
+        }
       }
     } catch (error) {
       console.error('Error saving disclaimer acceptance:', error);

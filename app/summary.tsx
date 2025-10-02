@@ -8,8 +8,11 @@ import { MAX_VITAMIN_PLANS } from '../constants/limits';
 import VitaminCapsule from '../components/VitaminCapsule';
 import { useSmartReminders } from '../hooks/useSmartReminders';
 import { usePremium } from '../hooks/usePremium';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function Summary() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const { vitamin, dosageAmount, dosageUnit, dosageDisplay, reminderTime, frequency, endDate, customDays } = useLocalSearchParams<{ 
     vitamin: string; 
     dosageAmount: string;
@@ -199,14 +202,15 @@ export default function Summary() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: any) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
     padding: 20,
   },
   backButton: {
-    backgroundColor: '#6B7280',
+    backgroundColor: colors.border,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 25,
@@ -214,7 +218,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginBottom: 20,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -223,7 +227,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   backButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -236,17 +240,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     textAlign: 'center',
     marginBottom: 30,
   },
   summaryCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 25,
     marginBottom: 30,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -257,14 +261,14 @@ const styles = StyleSheet.create({
   summaryTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     textAlign: 'center',
     marginBottom: 15,
   },
   summaryVitamin: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -280,30 +284,30 @@ const styles = StyleSheet.create({
   summaryDosage: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#FF7F50',
+    color: colors.primary,
   },
   summaryDetail: {
     fontSize: 16,
-    color: '#555',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 8,
     lineHeight: 22,
   },
   message: {
     fontSize: 18,
-    color: '#555',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 26,
     paddingHorizontal: 10,
     marginBottom: 40,
   },
   finishButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 40,
     paddingVertical: 15,
     borderRadius: 25,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -312,9 +316,9 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   finishButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
   },
-});
+});}

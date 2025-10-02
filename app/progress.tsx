@@ -28,8 +28,10 @@ import { SmartNotificationEngine } from '../utils/smart-notifications';
 import { useSmartReminders } from '../hooks/useSmartReminders';
 // Premium imports removed - using donation model instead
 import { SmartSnoozeModal } from '../components/SmartSnoozeModal';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function Progress() {
+  const { colors } = useTheme();
   const [vitaminPlans, setVitaminPlans] = useState<VitaminPlan[]>([]);
   const [progressData, setProgressData] = useState<ProgressData>({ checkIns: [], streaks: [], badges: [], streakRecoveries: [] });
   const [selectedPlan, setSelectedPlan] = useState<VitaminPlan | null>(null);
@@ -37,10 +39,13 @@ export default function Progress() {
   const [isLoading, setIsLoading] = useState(false);
   const [showSmartSnoozeModal, setShowSmartSnoozeModal] = useState(false);
   const [snoozeInfo, setSnoozeInfo] = useState<{ vitaminName: string; planId: string; originalTime: string; isTodayCompleted: boolean } | null>(null);
-  
+
   const confettiRef = useRef<ConfettiCannon>(null);
   // Premium system removed - all features available to all users
   const { settings: smartSettings, recordNotificationResponse } = useSmartReminders();
+
+  // Create styles with theme colors
+  const styles = createStyles(colors);
 
 
   const loadData = useCallback(async () => {
@@ -535,6 +540,8 @@ interface CalendarDayProps {
 }
 
 function CalendarDay({ day, onPress, disabled }: CalendarDayProps) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const scale = useSharedValue(1);
   const checkScale = useSharedValue(day.hasCheckIn ? 1 : 0);
 
@@ -628,6 +635,8 @@ interface BadgeItemProps {
 }
 
 function BadgeItem({ badge, isEarned, earnedDate }: BadgeItemProps) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const badgeScale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -698,490 +707,493 @@ function BadgeItem({ badge, isEarned, earnedDate }: BadgeItemProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF3E0',
-  },
-  homeButton: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FF7F50',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    zIndex: 1,
-  },
-  homeButtonIcon: {
-    fontSize: 18,
-    color: '#fff',
-  },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 60,
-  },
-  pageTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#FF7F50',
-    textAlign: 'center',
-    marginBottom: 5,
-  },
-  pageSubtitle: {
-    fontSize: 16,
-    color: '#000000',
-    textAlign: 'center',
-    marginBottom: 30,
-  },
-  planSelector: {
-    marginBottom: 20,
-  },
-  planSelectorLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#555',
-    marginBottom: 10,
-  },
-  planOptions: {
-    flexDirection: 'row',
-  },
-  planOption: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#fff',
-    marginRight: 10,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-  planOptionSelected: {
-    backgroundColor: '#FF7F50',
-  },
-  planOptionText: {
-    color: '#555',
-    fontWeight: '500',
-  },
-  planOptionTextSelected: {
-    color: '#fff',
-  },
-  streakInfo: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 20,
-    alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  streakBadge: {
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  streakNumber: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#FF7F50',
-  },
-  streakLabel: {
-    fontSize: 16,
-    color: '#000000',
-    fontWeight: '500',
-  },
-  motivationalMessage: {
-    fontSize: 16,
-    color: '#555',
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 15,
-  },
-  smartSnoozeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#6366F1',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    alignSelf: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-  smartSnoozeIcon: {
-    fontSize: 16,
-    marginRight: 6,
-  },
-  smartSnoozeText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  calendarHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  monthNavButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FF7F50',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  monthNavText: {
-    fontSize: 20,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  monthTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-  },
-  calendarGrid: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 15,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    marginBottom: 40,
-  },
-  dayHeaders: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 10,
-  },
-  dayHeader: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000000',
-    textAlign: 'center',
-    width: 40,
-  },
-  daysGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  calendarDay: {
-    width: '14.28%', // 100% / 7 days
-    aspectRatio: 1,
-    padding: 2,
-  },
-  calendarDayInner: {
-    flex: 1,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    position: 'relative',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-  },
-  calendarDayTodayInner: {
-    backgroundColor: '#87CEEB', // Full blue background for today
-    borderColor: '#1E40AF',
-    borderWidth: 3,
-    elevation: 3,
-    shadowOpacity: 0.2,
-  },
-  calendarDayCompletedInner: {
-    backgroundColor: '#FF7F50', // Coral background for completed days
-    borderColor: '#B91C1C',
-    borderWidth: 3,
-    elevation: 3,
-    shadowOpacity: 0.2,
-  },
-  calendarDayInactive: {
-    opacity: 0.3,
-  },
-  calendarDayText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-  },
-  calendarDayTextInactive: {
-    color: '#ccc',
-  },
-  calendarDayTextCompleted: {
-    color: '#fff',
-  },
-  calendarDayBeforePlan: {
-    backgroundColor: '#f0f0f0',
-    borderColor: '#ddd',
-    opacity: 0.4,
-  },
-  calendarDayTextBeforePlan: {
-    color: '#bbb',
-  },
-  checkMark: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#98FB98',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkMarkText: {
-    fontSize: 10,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  noteIndicator: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-  },
-  noteIndicatorText: {
-    fontSize: 10,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  emptyStateTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FF7F50',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  emptyStateText: {
-    fontSize: 16,
-    color: '#000000',
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 30,
-  },
-  createPlanButton: {
-    backgroundColor: '#FF7F50',
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 25,
-  },
-  createPlanButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  // Badge Shelf Styles
-  badgeShelf: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 20,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  badgeShelfHeader: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  badgeShelfTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FF7F50',
-    marginBottom: 5,
-  },
-  badgeShelfCount: {
-    fontSize: 14,
-    color: '#000000',
-    fontWeight: '500',
-    marginBottom: 15,
-  },
-  progressBarContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-  },
-  progressBarBackground: {
-    flex: 1,
-    height: 8,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginRight: 10,
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: '#FF7F50',
-    borderRadius: 4,
-  },
-  progressPercentage: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#FF7F50',
-    minWidth: 35,
-    textAlign: 'right',
-  },
-  badgeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  badgeItem: {
-    width: '30%', // 3 badges per row with gaps
-    aspectRatio: 1,
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    borderWidth: 2,
-    borderColor: '#FF7F50',
-  },
-  badgeItemLocked: {
-    backgroundColor: '#f8f8f8',
-    borderColor: '#ddd',
-    opacity: 0.6,
-  },
-  badgeItemInner: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 8,
-    position: 'relative',
-  },
-  badgeIcon: {
-    fontSize: 24,
-    marginBottom: 6,
-  },
-  badgeIconLocked: {
-    opacity: 0.4,
-  },
-  badgeName: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#333',
-    textAlign: 'center',
-    lineHeight: 14,
-  },
-  badgeNameLocked: {
-    color: '#999',
-  },
-  earnedIndicator: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#98FB98',
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-  },
-  earnedIndicatorText: {
-    fontSize: 12,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  // Calendar Instructions Styles
-  calendarInstructions: {
-    backgroundColor: '#E8F4FD',
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: '#87CEEB',
-    alignItems: 'center',
-  },
-  calendarInstructionsText: {
-    fontSize: 16,
-    color: '#2563EB',
-    fontWeight: '600',
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  // Custom upgrade gate styles
-  customUpgradeGate: {
-    backgroundColor: '#F8F9FF',
-    borderRadius: 15,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: '#E8EAFF',
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    marginVertical: 10,
-  },
-  customUpgradeContent: {
-    alignItems: 'center',
-  },
-  customPremiumBadge: {
-    backgroundColor: '#FFD700',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginBottom: 10,
-  },
-  customPremiumBadgeText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#8B5A00',
-  },
-  customUpgradeTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#4C4C4C',
-    marginBottom: 5,
-    textAlign: 'center',
-  },
-  customUpgradeMessage: {
-    fontSize: 14,
-    color: '#000000',
-    textAlign: 'center',
-    marginBottom: 15,
-    lineHeight: 20,
-  },
-  customUpgradeButton: {
-    backgroundColor: '#FF7F50',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-  },
-  customUpgradeButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-});
+// Create styles function that accepts theme colors
+function createStyles(colors: any) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    homeButton: {
+      position: 'absolute',
+      top: 50,
+      left: 20,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+      elevation: 3,
+      shadowColor: colors.shadowColor,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      zIndex: 1,
+    },
+    homeButtonIcon: {
+      fontSize: 18,
+      color: colors.white,
+    },
+    scrollView: {
+      flex: 1,
+      paddingHorizontal: 20,
+      paddingTop: 60,
+    },
+    pageTitle: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: colors.primary,
+      textAlign: 'center',
+      marginBottom: 5,
+    },
+    pageSubtitle: {
+      fontSize: 16,
+      color: colors.textPrimary,
+      textAlign: 'center',
+      marginBottom: 30,
+    },
+    planSelector: {
+      marginBottom: 20,
+    },
+    planSelectorLabel: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      marginBottom: 10,
+    },
+    planOptions: {
+      flexDirection: 'row',
+    },
+    planOption: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 20,
+      backgroundColor: colors.surface,
+      marginRight: 10,
+      elevation: 2,
+      shadowColor: colors.shadowColor,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+    },
+    planOptionSelected: {
+      backgroundColor: colors.primary,
+    },
+    planOptionText: {
+      color: colors.textSecondary,
+      fontWeight: '500',
+    },
+    planOptionTextSelected: {
+      color: colors.white,
+    },
+    streakInfo: {
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+      padding: 20,
+      marginBottom: 20,
+      alignItems: 'center',
+      elevation: 3,
+      shadowColor: colors.shadowColor,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+    },
+    streakBadge: {
+      alignItems: 'center',
+      marginBottom: 15,
+    },
+    streakNumber: {
+      fontSize: 36,
+      fontWeight: 'bold',
+      color: colors.primary,
+    },
+    streakLabel: {
+      fontSize: 16,
+      color: colors.textPrimary,
+      fontWeight: '500',
+    },
+    motivationalMessage: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      lineHeight: 22,
+      marginBottom: 15,
+    },
+    smartSnoozeButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#6366F1',
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 20,
+      alignSelf: 'center',
+      elevation: 2,
+      shadowColor: colors.shadowColor,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+    },
+    smartSnoozeIcon: {
+      fontSize: 16,
+      marginRight: 6,
+    },
+    smartSnoozeText: {
+      color: colors.white,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    calendarHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    monthNavButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    monthNavText: {
+      fontSize: 20,
+      color: colors.white,
+      fontWeight: 'bold',
+    },
+    monthTitle: {
+      fontSize: 20,
+      fontWeight: '600',
+      color: colors.textPrimary,
+    },
+    calendarGrid: {
+      backgroundColor: colors.calendarBackground,
+      borderRadius: 15,
+      padding: 15,
+      elevation: 3,
+      shadowColor: colors.shadowColor,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      marginBottom: 40,
+    },
+    dayHeaders: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      marginBottom: 10,
+    },
+    dayHeader: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.calendarText,
+      textAlign: 'center',
+      width: 40,
+    },
+    daysGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+    },
+    calendarDay: {
+      width: '14.28%', // 100% / 7 days
+      aspectRatio: 1,
+      padding: 2,
+    },
+    calendarDayInner: {
+      flex: 1,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'transparent',
+      position: 'relative',
+      borderWidth: 1,
+      borderColor: colors.calendarBorder,
+      elevation: 1,
+      shadowColor: colors.shadowColor,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.08,
+      shadowRadius: 2,
+    },
+    calendarDayTodayInner: {
+      backgroundColor: colors.calendarToday,
+      borderColor: colors.primary,
+      borderWidth: 3,
+      elevation: 3,
+      shadowOpacity: 0.2,
+    },
+    calendarDayCompletedInner: {
+      backgroundColor: colors.calendarCompleted,
+      borderColor: colors.primary,
+      borderWidth: 3,
+      elevation: 3,
+      shadowOpacity: 0.2,
+    },
+    calendarDayInactive: {
+      opacity: 0.3,
+    },
+    calendarDayText: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: colors.calendarText,
+    },
+    calendarDayTextInactive: {
+      color: colors.textTertiary,
+    },
+    calendarDayTextCompleted: {
+      color: colors.white,
+    },
+    calendarDayBeforePlan: {
+      backgroundColor: colors.surface,
+      borderColor: colors.borderLight,
+      opacity: 0.4,
+    },
+    calendarDayTextBeforePlan: {
+      color: colors.textTertiary,
+    },
+    checkMark: {
+      position: 'absolute',
+      top: -2,
+      right: -2,
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      backgroundColor: colors.success,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    checkMarkText: {
+      fontSize: 10,
+      color: colors.white,
+      fontWeight: 'bold',
+    },
+    noteIndicator: {
+      position: 'absolute',
+      bottom: -2,
+      right: -2,
+    },
+    noteIndicatorText: {
+      fontSize: 10,
+    },
+    emptyState: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 40,
+    },
+    emptyStateTitle: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: colors.primary,
+      marginBottom: 15,
+      textAlign: 'center',
+    },
+    emptyStateText: {
+      fontSize: 16,
+      color: colors.textPrimary,
+      textAlign: 'center',
+      lineHeight: 24,
+      marginBottom: 30,
+    },
+    createPlanButton: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 30,
+      paddingVertical: 15,
+      borderRadius: 25,
+    },
+    createPlanButtonText: {
+      color: colors.white,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    // Badge Shelf Styles
+    badgeShelf: {
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+      padding: 20,
+      marginBottom: 20,
+      elevation: 3,
+      shadowColor: colors.shadowColor,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+    },
+    badgeShelfHeader: {
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    badgeShelfTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: colors.primary,
+      marginBottom: 5,
+    },
+    badgeShelfCount: {
+      fontSize: 14,
+      color: colors.textPrimary,
+      fontWeight: '500',
+      marginBottom: 15,
+    },
+    progressBarContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      width: '100%',
+    },
+    progressBarBackground: {
+      flex: 1,
+      height: 8,
+      backgroundColor: colors.border,
+      borderRadius: 4,
+      overflow: 'hidden',
+      marginRight: 10,
+    },
+    progressBarFill: {
+      height: '100%',
+      backgroundColor: colors.primary,
+      borderRadius: 4,
+    },
+    progressPercentage: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.primary,
+      minWidth: 35,
+      textAlign: 'right',
+    },
+    badgeGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      gap: 12,
+    },
+    badgeItem: {
+      width: '30%', // 3 badges per row with gaps
+      aspectRatio: 1,
+      backgroundColor: colors.surface,
+      borderRadius: 15,
+      elevation: 2,
+      shadowColor: colors.shadowColor,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      borderWidth: 2,
+      borderColor: colors.primary,
+    },
+    badgeItemLocked: {
+      backgroundColor: colors.surfaceElevated,
+      borderColor: colors.border,
+      opacity: 0.6,
+    },
+    badgeItemInner: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 8,
+      position: 'relative',
+    },
+    badgeIcon: {
+      fontSize: 24,
+      marginBottom: 6,
+    },
+    badgeIconLocked: {
+      opacity: 0.4,
+    },
+    badgeName: {
+      fontSize: 11,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      textAlign: 'center',
+      lineHeight: 14,
+    },
+    badgeNameLocked: {
+      color: colors.textTertiary,
+    },
+    earnedIndicator: {
+      position: 'absolute',
+      top: -2,
+      right: -2,
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: colors.success,
+      justifyContent: 'center',
+      alignItems: 'center',
+      elevation: 2,
+      shadowColor: colors.shadowColor,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.3,
+      shadowRadius: 2,
+    },
+    earnedIndicatorText: {
+      fontSize: 12,
+      color: colors.white,
+      fontWeight: 'bold',
+    },
+    // Calendar Instructions Styles
+    calendarInstructions: {
+      backgroundColor: colors.surfaceElevated,
+      borderRadius: 15,
+      padding: 15,
+      marginBottom: 15,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+    },
+    calendarInstructionsText: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      fontWeight: '600',
+      textAlign: 'center',
+      lineHeight: 22,
+    },
+    // Custom upgrade gate styles
+    customUpgradeGate: {
+      backgroundColor: colors.surfaceElevated,
+      borderRadius: 15,
+      padding: 20,
+      borderWidth: 2,
+      borderColor: colors.border,
+      borderStyle: 'dashed',
+      alignItems: 'center',
+      marginVertical: 10,
+    },
+    customUpgradeContent: {
+      alignItems: 'center',
+    },
+    customPremiumBadge: {
+      backgroundColor: colors.warning,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 12,
+      marginBottom: 10,
+    },
+    customPremiumBadgeText: {
+      fontSize: 12,
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+    },
+    customUpgradeTitle: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+      marginBottom: 5,
+      textAlign: 'center',
+    },
+    customUpgradeMessage: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: 15,
+      lineHeight: 20,
+    },
+    customUpgradeButton: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 20,
+    },
+    customUpgradeButtonText: {
+      color: colors.white,
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+  });
+}

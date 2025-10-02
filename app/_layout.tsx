@@ -1,17 +1,18 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 import { requestNotificationPermissions } from '@/utils/notifications';
 import { hasAcceptedMedicalDisclaimer } from '@/utils/medical-disclaimer';
 import { router } from 'expo-router';
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+// Inner component that can access theme context
+function AppContent() {
+  const { isDark } = useTheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -30,7 +31,7 @@ export default function RootLayout() {
           }, 100);
         }
         setDisclaimerChecked(true);
-        
+
         // Request notification permissions
         const granted = await requestNotificationPermissions();
         if (granted) {
@@ -55,7 +56,7 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <NavigationThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="schedule" options={{ headerShown: false }} />
@@ -75,9 +76,18 @@ export default function RootLayout() {
         <Stack.Screen name="consistency" options={{ headerShown: false }} />
         <Stack.Screen name="smart-reminders" options={{ headerShown: false }} />
         <Stack.Screen name="medical-disclaimer" options={{ headerShown: false }} />
+        <Stack.Screen name="theme-picker" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style={isDark ? "light" : "dark"} />
+    </NavigationThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <AppContent />
     </ThemeProvider>
   );
 }

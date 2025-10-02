@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, Platform, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { router, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { useState, useCallback } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { formatDisplayTime } from '../utils/notifications';
 import { VITAMIN_TIMING_RECOMMENDATIONS } from '../constants/smart-reminders';
@@ -8,6 +9,8 @@ import { useSmartReminders } from '../hooks/useSmartReminders';
 import { usePremium } from '../hooks/usePremium';
 
 export default function Timing() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const { vitamin, dosageAmount, dosageUnit, dosageDisplay } = useLocalSearchParams<{ 
     vitamin: string;
     dosageAmount: string;
@@ -203,10 +206,11 @@ export default function Timing() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: any) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
   },
   scrollView: {
     flex: 1,
@@ -219,18 +223,18 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     textAlign: 'center',
     marginTop: 60,
     marginBottom: 20,
   },
   smartRecommendationsContainer: {
-    backgroundColor: '#E8F4FD',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 20,
     padding: 20,
     marginBottom: 30,
     borderWidth: 2,
-    borderColor: '#87CEEB',
+    borderColor: colors.smartRemindersButton,
   },
   smartHeader: {
     flexDirection: 'row',
@@ -267,22 +271,22 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   recommendationButton: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 15,
     padding: 15,
     alignItems: 'center',
     flex: 1,
     borderWidth: 2,
-    borderColor: '#E5E7EB',
+    borderColor: colors.border,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
   recommendationButtonSelected: {
-    backgroundColor: '#FF7F50',
-    borderColor: '#FF7F50',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
     elevation: 4,
     shadowOpacity: 0.3,
     transform: [{ scale: 1.05 }],
@@ -290,35 +294,35 @@ const styles = StyleSheet.create({
   recommendationTime: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   recommendationTimeSelected: {
-    color: '#fff',
+    color: colors.white,
   },
   recommendationLabel: {
     fontSize: 10,
-    color: '#000000',
+    color: colors.textSecondary,
     fontWeight: '600',
   },
   recommendationLabelSelected: {
-    color: '#fff',
+    color: colors.white,
   },
   description: {
     fontSize: 18,
-    color: '#555',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 50,
     paddingHorizontal: 20,
     lineHeight: 24,
   },
   timePickerContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 30,
     marginBottom: 40,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -329,23 +333,23 @@ const styles = StyleSheet.create({
   },
   selectedTimeLabel: {
     fontSize: 16,
-    color: '#FF7F50',
+    color: colors.primary,
     fontWeight: 'bold',
     marginBottom: 10,
   },
   selectedTimeText: {
     fontSize: 32,
-    color: '#333',
+    color: colors.textPrimary,
     fontWeight: 'bold',
     marginBottom: 20,
   },
   changeTimeButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -354,7 +358,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   changeTimeButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -368,13 +372,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   timePickerDoneButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
     marginTop: 15,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -383,12 +387,12 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   timePickerDoneButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
   continueButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 40,
     paddingVertical: 15,
     borderRadius: 25,
@@ -396,7 +400,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     width: '80%',
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -405,13 +409,13 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   continueButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   backButton: {
-    backgroundColor: '#6B7280',
+    backgroundColor: colors.border,
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 25,
@@ -419,7 +423,7 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginBottom: 20,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -428,8 +432,8 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   backButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
-});
+});}

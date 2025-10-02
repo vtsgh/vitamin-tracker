@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert, Linking, I
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import VitaminCapsule from '../../components/VitaminCapsule';
+import { useTheme } from '@/contexts/ThemeContext';
 // Premium imports removed - using donation model instead
 // Debug utilities removed for cleaner build
 
@@ -18,97 +19,108 @@ interface FeatureButton {
   enabled: boolean;
 }
 
-const FEATURES: FeatureButton[] = [
-  {
-    id: 'schedule',
-    title: 'My Vitamin Schedule',
-    subtitle: 'View and manage your plans',
-    icon: '📅',
-    color: '#8B5CF6', // Purple for calendar/scheduling
-    route: '/schedule',
-    enabled: true
-  },
-  {
-    id: 'progress',
-    title: 'Progress Tracking',
-    subtitle: 'See your consistency',
-    icon: '📊',
-    color: '#98FB98', // Health green
-    route: '/progress',
-    enabled: true
-  },
-  {
-    id: 'donate',
-    title: 'Support Takeamin',
-    subtitle: 'Support privacy-first development',
-    icon: '☕',
-    customIcon: require('../../assets/images/iced-coffee.png'),
-    color: '#FF7F50', // Primary coral for iced coffee/donation - contrasts teal drink
+// Function to get features with theme-appropriate colors
+function getFeatures(colors: any): FeatureButton[] {
+  return [
+    {
+      id: 'schedule',
+      title: 'My Vitamin Schedule',
+      subtitle: 'View and manage your plans',
+      icon: '📅',
+      color: colors.scheduleButton,
+      route: '/schedule',
+      enabled: true
+    },
+    {
+      id: 'progress',
+      title: 'Progress Tracking',
+      subtitle: 'See your consistency',
+      icon: '📊',
+      color: colors.progressButton,
+      route: '/progress',
+      enabled: true
+    },
+    {
+      id: 'donate',
+      title: 'Support Takeamin',
+      subtitle: 'Support privacy-first development',
+      icon: '☕',
+      customIcon: require('../../assets/images/iced-coffee.png'),
+      color: colors.donateButton,
+      route: null, // Special handling
+      enabled: true
+    },
+    {
+      id: 'smart-reminders',
+      title: 'Smart Reminders',
+      subtitle: 'AI-powered timing & settings',
+      icon: '🔔',
+      color: colors.smartRemindersButton,
+      route: '/smart-reminders',
+      enabled: true
+    },
+    {
+      id: 'health',
+      title: 'Health Insights',
+      subtitle: 'Learn about vitamins',
+      icon: '💡',
+      color: colors.healthButton,
+      route: '/health',
+      enabled: true
+    },
+    {
+      id: 'polls',
+      title: 'Polls & Feedback',
+      subtitle: 'Share your thoughts',
+      icon: '📊',
+      color: colors.pollsButton,
+      route: '/community',
+      enabled: true
+    },
+    {
+      id: 'settings',
+      title: 'Settings',
+      subtitle: 'Customize your experience',
+      icon: '⚙️',
+      color: colors.settingsButton,
+      route: '/settings',
+      enabled: true
+    }
+  ];
+}
+
+// Development-only debug feature - function to get with theme colors
+function getDevFeatures(colors: any): FeatureButton[] {
+  return __DEV__ ? [{
+    id: 'notification-debug',
+    title: '🧪 Debug Notifications',
+    subtitle: 'Test & audit notifications',
+    icon: '🔧',
+    color: colors.scheduleButton, // Reuse purple schedule color for debug
     route: null, // Special handling
     enabled: true
-  },
-  {
-    id: 'smart-reminders',
-    title: 'Smart Reminders',
-    subtitle: 'AI-powered timing & settings',
-    icon: '🔔',
-    color: '#67E8F9', // Light cyan
-    route: '/smart-reminders',
-    enabled: true
-  },
-  {
-    id: 'health',
-    title: 'Health Insights',
-    subtitle: 'Learn about vitamins',
-    icon: '💡',
-    color: '#DDA0DD', // Light purple
-    route: '/health',
-    enabled: true
-  },
-  {
-    id: 'polls',
-    title: 'Polls & Feedback',
-    subtitle: 'Share your thoughts',
-    icon: '📊',
-    color: '#FFB347', // Secondary orange
-    route: '/community',
-    enabled: true
-  },
-  {
-    id: 'settings',
-    title: 'Settings',
-    subtitle: 'Customize your experience',
-    icon: '⚙️',
-    color: '#6B7280', // Gray
-    route: '/settings',
-    enabled: true
-  }
-];
-
-// Development-only debug feature
-const DEV_FEATURES: FeatureButton[] = __DEV__ ? [{
-  id: 'notification-debug',
-  title: '🧪 Debug Notifications',
-  subtitle: 'Test & audit notifications',
-  icon: '🔧',
-  color: '#8B5CF6', // Purple for debug
-  route: null, // Special handling
-  enabled: true
-}] : [];
+  }] : [];
+}
 
 export default function Home() {
+  const { colors, isDark } = useTheme();
   const [hasAnimated, setHasAnimated] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const lastTapTime = useRef(0);
-  
+
   // Premium system removed - using donation model instead
-  
+
   // Animation values
   const titleOpacity = useSharedValue(0);
   const subtitleOpacity = useSharedValue(0);
   const capsuleScale = useSharedValue(0);
   const buttonsOpacity = useSharedValue(0);
   const capsuleRotation = useSharedValue(0);
+
+  // Create styles and features with theme colors
+  const styles = createStyles(colors);
+  const FEATURES = getFeatures(colors);
+  const DEV_FEATURES = getDevFeatures(colors);
 
   useFocusEffect(
     useCallback(() => {
@@ -336,95 +348,98 @@ export default function Home() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF3E0', // soft cream color
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 40,
-  },
-  heroSection: {
-    alignItems: 'center',
-    paddingTop: 40,
-    paddingBottom: 40,
-  },
-  appTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#FF7F50', // coral color
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  capsuleContainer: {
-    marginBottom: 20,
-  },
-  appSubtitle: {
-    fontSize: 18,
-    color: '#555',
-    textAlign: 'center',
-    lineHeight: 24,
-    paddingHorizontal: 20,
-  },
-  featuresSection: {
-    flex: 1,
-  },
-  featuresGrid: {
-    gap: 15,
-  },
-  featureButton: {
-    borderRadius: 20,
-    padding: 20,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
+// Create styles function that accepts theme colors
+function createStyles(colors: any) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  featureButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  featureIcon: {
-    fontSize: 28,
-    marginRight: 15,
-  },
-  featureIconImage: {
-    width: 28,
-    height: 28,
-    marginRight: 15,
-  },
-  featureTextContainer: {
-    flex: 1,
-  },
-  featureTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 4,
-  },
-  featureSubtitle: {
-    fontSize: 14,
-    color: '#fff',
-    opacity: 0.9,
-  },
-  featureArrow: {
-    fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  disabledText: {
-    opacity: 0.8,
-  },
-});
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: 20,
+      paddingTop: 20,
+      paddingBottom: 40,
+    },
+    heroSection: {
+      alignItems: 'center',
+      paddingTop: 40,
+      paddingBottom: 40,
+    },
+    appTitle: {
+      fontSize: 32,
+      fontWeight: 'bold',
+      color: colors.primary,
+      textAlign: 'center',
+      marginBottom: 20,
+    },
+    capsuleContainer: {
+      marginBottom: 20,
+    },
+    appSubtitle: {
+      fontSize: 18,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      lineHeight: 24,
+      paddingHorizontal: 20,
+    },
+    featuresSection: {
+      flex: 1,
+    },
+    featuresGrid: {
+      gap: 15,
+    },
+    featureButton: {
+      borderRadius: 20,
+      padding: 20,
+      elevation: 3,
+      shadowColor: colors.shadowColor,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+    },
+    featureButtonContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    featureIcon: {
+      fontSize: 28,
+      marginRight: 15,
+    },
+    featureIconImage: {
+      width: 28,
+      height: 28,
+      marginRight: 15,
+    },
+    featureTextContainer: {
+      flex: 1,
+    },
+    featureTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: colors.white,
+      marginBottom: 4,
+    },
+    featureSubtitle: {
+      fontSize: 14,
+      color: colors.white,
+      opacity: 0.9,
+    },
+    featureArrow: {
+      fontSize: 18,
+      color: colors.white,
+      fontWeight: 'bold',
+    },
+    disabledButton: {
+      opacity: 0.6,
+    },
+    disabledText: {
+      opacity: 0.8,
+    },
+  });
+}

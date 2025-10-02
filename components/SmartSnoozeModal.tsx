@@ -16,6 +16,7 @@ import { usePremium } from '../hooks/usePremium';
 import { FREE_LIMITS, PREMIUM_LIMITS } from '../constants/premium';
 import { restartStreak, getProgressData, getStreakForPlan, addNoteToCheckIn, getCheckInWithNote } from '../utils/progress';
 import { NoteInputModal } from './NoteInputModal';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface SmartSnoozeModalProps {
   visible: boolean;
@@ -52,6 +53,8 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [existingNote, setExistingNote] = useState<string | undefined>(undefined);
 
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const { settings, behaviorProfile, recordNotificationResponse } = useSmartReminders();
   const { isPremium, getLimit } = usePremium();
 
@@ -414,10 +417,11 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+function createStyles(colors: any) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -430,13 +434,13 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#E5E5E5',
+    backgroundColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
   },
   closeButtonText: {
     fontSize: 16,
-    color: '#000000',
+    color: colors.textSecondary,
     fontWeight: 'bold',
   },
   content: {
@@ -457,12 +461,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     marginBottom: 5,
   },
   subtitle: {
     fontSize: 16,
-    color: '#000000',
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   statusSection: {
@@ -522,7 +526,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 20,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
@@ -530,13 +534,13 @@ const styles = StyleSheet.create({
     maxWidth: 140,
   },
   addNoteButton: {
-    backgroundColor: '#10B981',
+    backgroundColor: colors.success,
   },
   restartButton: {
-    backgroundColor: '#F59E0B',
+    backgroundColor: colors.warning,
   },
   quickActionDisabled: {
-    backgroundColor: '#D1D5DB',
+    backgroundColor: colors.border,
     opacity: 0.6,
   },
   quickActionIcon: {
@@ -544,13 +548,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   quickActionText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   quickActionTextDisabled: {
-    color: '#9CA3AF',
+    color: colors.textTertiary,
   },
   snoozeSection: {
     marginBottom: 20,
@@ -558,13 +562,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     textAlign: 'center',
     marginBottom: 5,
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -572,11 +576,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   snoozeOption: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 15,
     padding: 16,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -595,12 +599,12 @@ const styles = StyleSheet.create({
   snoozeLabel: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 2,
   },
   snoozeReason: {
     fontSize: 12,
-    color: '#000000',
+    color: colors.textSecondary,
     fontStyle: 'italic',
   },
-});
+});}

@@ -9,8 +9,11 @@ import {
   BMC_REDIRECT_MESSAGE,
   FeaturePoll
 } from '../constants/community';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function PollsAndFeedback() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [featurePoll, setFeaturePoll] = useState<FeaturePoll>(CURRENT_FEATURE_POLL);
   const [usagePoll, setUsagePoll] = useState<FeaturePoll>(CURRENT_USAGE_POLL);
   const [hasAnimated, setHasAnimated] = useState(false);
@@ -157,10 +160,11 @@ export default function PollsAndFeedback() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: any) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF3E0',
+    backgroundColor: colors.background,
   },
   homeButton: {
     position: 'absolute',
@@ -170,10 +174,10 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -197,22 +201,22 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#000000',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
   },
   pollCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -224,40 +228,41 @@ const styles = StyleSheet.create({
   pollQuestion: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   pollDescription: {
     fontSize: 14,
-    color: '#000000',
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   pollOptions: {
     gap: 12,
   },
   pollOption: {
-    backgroundColor: '#F8F9FA',
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
   },
   pollOptionText: {
     fontSize: 15,
-    color: '#333',
+    color: colors.textPrimary,
     fontWeight: '500',
   },
   supporterNote: {
     fontSize: 14,
-    color: '#FF7F50',
+    color: colors.primary,
     fontWeight: '600',
     textAlign: 'center',
     marginTop: 8,
   },
   instructionNote: {
     fontSize: 13,
-    color: '#000000',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginTop: 6,
     fontStyle: 'italic',
   },
 });
+}

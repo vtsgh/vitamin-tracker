@@ -12,8 +12,10 @@ import VitaminCapsule from '../components/VitaminCapsule';
 import { usePremium } from '../hooks/usePremium';
 import { PremiumUpgradeModal } from '../components/PremiumUpgradeModal';
 // Premium imports removed - all features now free
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function Schedule() {
+  const { colors } = useTheme();
   const [vitaminPlans, setVitaminPlans] = useState<VitaminPlan[]>([]);
   const [isNavigating, setIsNavigating] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
@@ -21,8 +23,11 @@ export default function Schedule() {
   const lastTapTime = useRef(0);
   const buttonScale = useSharedValue(1);
   const addButtonScale = useSharedValue(1);
-  
+
   const { getLimit, isLimitReached, triggerUpgrade, showUpgradeModal, closeUpgradeModal, upgradeContext } = usePremium();
+
+  // Create styles with theme colors
+  const styles = createStyles(colors);
   
   // Intro animation values
   const titleOpacity = useSharedValue(0);
@@ -425,18 +430,20 @@ export default function Schedule() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FAF3E0', // soft cream color
-    padding: 20,
-  },
+// Create styles function that accepts theme colors
+function createStyles(colors: any) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.background,
+      padding: 20,
+    },
   appName: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#FF7F50', // coral-like color
+    color: colors.primary, // coral-like color
     marginTop: 60, // Reduced since we made header more compact
     marginBottom: 10,
   },
@@ -462,12 +469,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   button: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 40,
     paddingVertical: 15,
     borderRadius: 25,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -476,15 +483,15 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   buttonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  emptyState: {
-    fontSize: 18,
-    color: '#555',
-    textAlign: 'center',
+    emptyState: {
+      fontSize: 18,
+      color: colors.textSecondary,
+      textAlign: 'center',
     marginBottom: 30,
     paddingHorizontal: 20,
   },
@@ -504,14 +511,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   planCard: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 15,
     padding: 12,
     marginBottom: 12,
     width: '47%',
     minHeight: 180, // Increased to contain buttons properly
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -529,7 +536,7 @@ const styles = StyleSheet.create({
   planVitamin: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#FF7F50',
+    color: colors.primary,
     marginBottom: 6,
   },
   planDosageContainer: {
@@ -540,38 +547,38 @@ const styles = StyleSheet.create({
   vitaminIcon: {
     marginRight: 4,
   },
-  planDosage: {
-    fontSize: 12,
-    color: '#87CEEB',
-    fontWeight: '600',
-  },
-  planFrequency: {
-    fontSize: 13,
-    color: '#555',
-    marginBottom: 3,
-  },
+    planDosage: {
+      fontSize: 12,
+      color: colors.primary,
+      fontWeight: '600',
+    },
+    planFrequency: {
+      fontSize: 13,
+      color: colors.textSecondary,
+      marginBottom: 3,
+    },
   planReminderTime: {
     fontSize: 12,
-    color: '#FF7F50',
+    color: colors.primary,
     fontWeight: '600',
     marginBottom: 3,
   },
-  planEndDate: {
-    fontSize: 11,
-    color: '#777',
-  },
+    planEndDate: {
+      fontSize: 11,
+      color: colors.textTertiary,
+    },
   planActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   editButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 8,
     paddingVertical: 8,
     borderRadius: 15,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -585,12 +592,12 @@ const styles = StyleSheet.create({
     minHeight: 50,
   },
   deleteButton: {
-    backgroundColor: '#FF6B6B',
+    backgroundColor: colors.error,
     paddingHorizontal: 8,
     paddingVertical: 8,
     borderRadius: 15,
     elevation: 2,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -608,7 +615,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   actionButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontSize: 10,
     fontWeight: 'bold',
     textAlign: 'center',
@@ -623,12 +630,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addButton: {
-    backgroundColor: '#FF7F50',
+    backgroundColor: colors.primary,
     paddingHorizontal: 40,
     paddingVertical: 15,
     borderRadius: 25,
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -648,11 +655,11 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#FF7F50', // Coral theme color
+    backgroundColor: colors.primary, // Coral theme color
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 3,
-    shadowColor: '#000',
+    shadowColor: colors.shadowColor,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -661,8 +668,9 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     zIndex: 1, // Ensure it's above other elements
   },
-  homeButtonIcon: {
-    fontSize: 18,
-    color: '#fff',
-  },
-});
+    homeButtonIcon: {
+      fontSize: 18,
+      color: colors.white,
+    },
+  });
+}
