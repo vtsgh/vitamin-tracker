@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import VitaminCapsule from '../components/VitaminCapsule';
 import { VITAMIN_EDUCATION_CARDS, HEALTH_ARTICLES, INSIGHT_CATEGORIES, FEATURED_CONTENT, getWeeklyArticles, VitaminEducationCard, HealthArticle } from '../constants/health-insights';
@@ -109,6 +109,24 @@ export default function HealthInsights() {
         {isExpanded && (
           <View style={styles.articleContent}>
             <Text style={styles.articleText}>{article.content}</Text>
+
+            {article.sources && article.sources.length > 0 && (
+              <View style={styles.sourcesSection}>
+                <Text style={styles.sourcesTitle}>Sources:</Text>
+                {article.sources.map((source, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.sourceItem}
+                    onPress={() => Linking.openURL(source.url)}
+                  >
+                    <Text style={styles.sourceOrg}>{source.organization}</Text>
+                    <Text style={styles.sourceTitle}>{source.title}</Text>
+                    <Text style={styles.sourceLink}>Read full article →</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
             {article.relatedVitamins && article.relatedVitamins.length > 0 && (
               <View style={styles.relatedSection}>
                 <Text style={styles.relatedTitle}>Related Vitamins:</Text>
@@ -192,11 +210,11 @@ export default function HealthInsights() {
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <Text style={styles.pageTitle}>Health Insights</Text>
-        <Text style={styles.pageSubtitle}>Learn about vitamins, wellness, and nutrition 🎓</Text>
+        <Text style={styles.pageSubtitle}>Learn about vitamins, wellness, and nutrition</Text>
 
         <View style={styles.topDisclaimer}>
           <Text style={styles.topDisclaimerText}>
-            ⚕️ All content on this page is for educational purposes only and not medical advice • Always consult healthcare professionals
+            All content on this page is for educational purposes only and not medical advice • Always consult healthcare professionals
           </Text>
         </View>
 
@@ -236,7 +254,7 @@ export default function HealthInsights() {
           
           {/* Scroll Indicator */}
           <View style={styles.scrollIndicator}>
-            <Text style={styles.scrollIndicatorText}>📚 More content below</Text>
+            <Text style={styles.scrollIndicatorText}>More content below</Text>
             <Text style={styles.scrollIndicatorArrow}>⬇️</Text>
           </View>
         </View>
@@ -547,8 +565,44 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 15,
   },
+  sourcesSection: {
+    marginTop: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E5E5',
+  },
+  sourcesTitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  sourceItem: {
+    backgroundColor: '#F8F9FA',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#FF7F50',
+  },
+  sourceOrg: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#FF7F50',
+    marginBottom: 4,
+  },
+  sourceTitle: {
+    fontSize: 12,
+    color: '#333',
+    marginBottom: 4,
+  },
+  sourceLink: {
+    fontSize: 11,
+    color: '#2563EB',
+    fontWeight: '500',
+  },
   relatedSection: {
-    marginTop: 10,
+    marginTop: 15,
   },
   relatedTitle: {
     fontSize: 13,
@@ -573,8 +627,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#2563EB',
   },
-
-
 
   // Modal Styles
   modalContainer: {

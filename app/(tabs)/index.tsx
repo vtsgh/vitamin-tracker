@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState, useRef } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert, Linking } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert, Linking, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import VitaminCapsule from '../../components/VitaminCapsule';
@@ -12,6 +12,7 @@ interface FeatureButton {
   title: string;
   subtitle: string;
   icon: string;
+  customIcon?: any; // Optional custom image source for icons
   color: string;
   route: string | null; // null for special buttons like donate/debug
   enabled: boolean;
@@ -23,7 +24,7 @@ const FEATURES: FeatureButton[] = [
     title: 'My Vitamin Schedule',
     subtitle: 'View and manage your plans',
     icon: '📅',
-    color: '#FF7F50', // Primary coral
+    color: '#8B5CF6', // Purple for calendar/scheduling
     route: '/schedule',
     enabled: true
   },
@@ -39,9 +40,10 @@ const FEATURES: FeatureButton[] = [
   {
     id: 'donate',
     title: 'Support Takeamin',
-    subtitle: 'Help keep the app free',
-    icon: '💝',
-    color: '#FF69B4', // Hot pink for donation
+    subtitle: 'Support privacy-first development',
+    icon: '☕',
+    customIcon: require('../../assets/images/iced-coffee.png'),
+    color: '#FF7F50', // Primary coral for iced coffee/donation - contrasts teal drink
     route: null, // Special handling
     enabled: true
   },
@@ -194,12 +196,12 @@ export default function Home() {
 
   const handleDonationPress = () => {
     Alert.alert(
-      "💝 Support Takeamin",
+      "Support Takeamin",
       "Built and maintained by a solo developer who loves coffee! If you find Takeamin useful, consider buying me a coffee!",
       [
         { text: "Maybe Later", style: "cancel" },
         {
-          text: "Buy me a coffee! ☕",
+          text: "Buy me a coffee!",
           onPress: async () => {
             try {
               const donationURL = 'https://buymeacoffee.com/Takeamin';
@@ -207,7 +209,7 @@ export default function Home() {
 
               if (supported) {
                 await Linking.openURL(donationURL);
-                console.log('💝 Opening donation page - thank you for supporting Takeamin!');
+                console.log('Opening donation page - thank you for supporting Takeamin!');
               } else {
                 Alert.alert(
                   'Unable to open donation page',
@@ -276,7 +278,11 @@ export default function Home() {
         disabled={isNavigating}
       >
         <View style={styles.featureButtonContent}>
-          <Text style={styles.featureIcon}>{feature.icon}</Text>
+          {feature.customIcon ? (
+            <Image source={feature.customIcon} style={styles.featureIconImage} />
+          ) : (
+            <Text style={styles.featureIcon}>{feature.icon}</Text>
+          )}
           <View style={styles.featureTextContainer}>
             <Text style={[styles.featureTitle, isDisabled && styles.disabledText]}>
               {feature.title}
@@ -311,7 +317,7 @@ export default function Home() {
           </Animated.View>
           
           <Animated.Text style={[styles.appSubtitle, animatedSubtitleStyle]}>
-            Your personal vitamin companion for better health! 🌟
+            Takeamin to take your vitamin!
           </Animated.Text>
         </View>
 
@@ -389,6 +395,11 @@ const styles = StyleSheet.create({
   },
   featureIcon: {
     fontSize: 28,
+    marginRight: 15,
+  },
+  featureIconImage: {
+    width: 28,
+    height: 28,
     marginRight: 15,
   },
   featureTextContainer: {

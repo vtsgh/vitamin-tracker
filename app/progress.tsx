@@ -21,7 +21,8 @@ import {
   getStreakForPlan,
   hasCheckInForDate,
   recordCheckIn,
-  calculateStreakWithRecoveries
+  calculateStreakWithRecoveries,
+  getCheckInWithNote
 } from '../utils/progress';
 import { SmartNotificationEngine } from '../utils/smart-notifications';
 import { useSmartReminders } from '../hooks/useSmartReminders';
@@ -100,16 +101,28 @@ export default function Progress() {
 
     // Check if this day is already checked in
     const isAlreadyCheckedIn = hasCheckInForDate(progressData.checkIns, selectedPlan.id, date);
-    
+
     if (isAlreadyCheckedIn) {
-      // Show a different message for already completed days
-      const currentStreak = getStreakForPlan(progressData.streaks, selectedPlan.id).currentStreak;
-      const encouragingMessage = getMotivationalMessage(currentStreak);
-      Alert.alert(
-        '✅ Already completed!',
-        `You already took your vitamin on this day! ${encouragingMessage}`,
-        [{ text: 'Keep going!', style: 'default' }]
-      );
+      // Check if there's a note for this day
+      const checkIn = getCheckInWithNote(progressData.checkIns, selectedPlan.id, date);
+
+      if (checkIn?.note) {
+        // Show the note
+        Alert.alert(
+          '📝 Your Note',
+          checkIn.note,
+          [{ text: 'Close', style: 'default' }]
+        );
+      } else {
+        // Show a different message for already completed days without notes
+        const currentStreak = getStreakForPlan(progressData.streaks, selectedPlan.id).currentStreak;
+        const encouragingMessage = getMotivationalMessage(currentStreak);
+        Alert.alert(
+          '✅ Already completed!',
+          `You already took your vitamin on this day! ${encouragingMessage}`,
+          [{ text: 'Keep going!', style: 'default' }]
+        );
+      }
       return;
     }
 
@@ -179,7 +192,7 @@ export default function Progress() {
     return (
       <View style={styles.calendarInstructions}>
         <Text style={styles.calendarInstructionsText}>
-          ✨ Gently tap the days you took your vitamin, then scroll to admire your growing trophy case 🏆
+          Gently tap the days you took your vitamin, then scroll to admire your growing trophy case 🏆
         </Text>
       </View>
     );
@@ -254,21 +267,27 @@ export default function Progress() {
       const isToday = year === todayYear && month === todayMonth && day === todayDay;
       
       const hasCheckIn = hasCheckInForDate(progressData.checkIns, selectedPlan.id, dateStr);
-      
-      // Check if future using local date comparison to avoid timezone issues  
+
+      // Get note for this day (if any)
+      const checkIn = getCheckInWithNote(progressData.checkIns, selectedPlan.id, dateStr);
+      const hasNote = hasCheckIn && !!checkIn?.note;
+
+      // Check if future using local date comparison to avoid timezone issues
       const isFuture = year > todayYear ||
                       (year === todayYear && month > todayMonth) ||
                       (year === todayYear && month === todayMonth && day > todayDay);
-      
+
       // Check if date is before plan creation (prevent checking past dates)
       const isBeforePlanCreation = selectedPlan.createdDate ? dateStr < selectedPlan.createdDate : false;
-      
+
       days.push({
         date: dateStr,
         day: day,
         isCurrentMonth,
         isToday,
         hasCheckIn,
+        hasNote,
+        note: checkIn?.note,
         isFuture,
         isBeforePlanCreation,
       });
@@ -359,13 +378,13 @@ export default function Progress() {
         </View>
         <Text style={styles.motivationalMessage}>{message}</Text>
         
-        {/* Smart Snooze Button */}
-        <TouchableOpacity 
+        {/* Reminder Options Button */}
+        <TouchableOpacity
           style={styles.smartSnoozeButton}
           onPress={handleSmartSnooze}
         >
           <Text style={styles.smartSnoozeIcon}>🧠</Text>
-          <Text style={styles.smartSnoozeText}>Smart Snooze</Text>
+          <Text style={styles.smartSnoozeText}>Reminder Options</Text>
         </TouchableOpacity>
       </View>
     );
@@ -451,7 +470,7 @@ export default function Progress() {
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <Text style={styles.pageTitle}>Progress Tracking</Text>
-        <Text style={styles.pageSubtitle}>Your Gentle Streak Garden 🌿</Text>
+        <Text style={styles.pageSubtitle}>Track your progress, build consistency</Text>
         
         {renderPlanSelector()}
         {renderStreakInfo()}
@@ -506,6 +525,8 @@ interface CalendarDayProps {
     isCurrentMonth: boolean;
     isToday: boolean;
     hasCheckIn: boolean;
+    hasNote?: boolean;
+    note?: string;
     isFuture: boolean;
     isBeforePlanCreation: boolean;
   };
@@ -587,6 +608,11 @@ function CalendarDay({ day, onPress, disabled }: CalendarDayProps) {
           <Animated.View style={[styles.checkMark, checkAnimatedStyle]}>
             <Text style={styles.checkMarkText}>✓</Text>
           </Animated.View>
+        )}
+        {day.hasNote && (
+          <View style={styles.noteIndicator}>
+            <Text style={styles.noteIndicatorText}>📝</Text>
+          </View>
         )}
       </Animated.View>
     </TouchableOpacity>
@@ -928,6 +954,14 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#fff',
     fontWeight: 'bold',
+  },
+  noteIndicator: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+  },
+  noteIndicatorText: {
+    fontSize: 10,
   },
   emptyState: {
     flex: 1,

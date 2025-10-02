@@ -210,9 +210,9 @@ export const LOCATION_TYPES = {
 
 // Smart snooze suggestions based on context
 export const SMART_SNOOZE_OPTIONS = {
-  QUICK: { minutes: 5, label: "5 minutes", emoji: "⚡" },
-  SHORT: { minutes: 15, label: "15 minutes", emoji: "🎯" },
-  MEDIUM: { minutes: 30, label: "30 minutes", emoji: "🕐" },
+  QUICK: { minutes: 5, label: "5 minutes", emoji: "" },
+  SHORT: { minutes: 15, label: "15 minutes", emoji: "" },
+  MEDIUM: { minutes: 30, label: "30 minutes", emoji: "" },
   LONG: { minutes: 60, label: "1 hour", emoji: "⏳" },
   MEAL_TIME: { minutes: 120, label: "After next meal", emoji: "🍽️" },
   EVENING: { minutes: 480, label: "This evening", emoji: "🌅" },

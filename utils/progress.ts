@@ -235,16 +235,16 @@ export function getStreakForPlan(streaks: Streak[], vitaminPlanId: string): Stre
  * Get motivational message based on streak
  */
 export function getMotivationalMessage(streak: number): string {
-  if (streak === 0) return "Ready to start your health journey? 🌱";
-  if (streak === 1) return "Great start! One day is a win 🌼";
-  if (streak === 2) return "Two days strong! You're building momentum 🌿";
+  if (streak === 0) return "Ready to start your health journey?";
+  if (streak === 1) return "Great start! One day is a win";
+  if (streak === 2) return "Two days strong! You're building momentum";
   if (streak === 3) return "3-day streak! That's habit-forming magic 🪄";
-  if (streak === 7) return "One week! Your health garden is growing strong 🌸";
-  if (streak === 14) return "Two weeks of dedication! You're amazing 🌺";
-  if (streak === 30) return "30 days! You're a vitamin champion 🌳";
+  if (streak === 7) return "One week! Your consistency is paying off";
+  if (streak === 14) return "Two weeks of dedication! You're amazing";
+  if (streak === 30) return "30 days! You're a vitamin champion";
   if (streak >= 50) return "Incredible dedication! You're an inspiration ✨";
-  
-  return `${streak} days strong! Keep nurturing your health 🌿`;
+
+  return `${streak} days strong! Keep it up`;
 }
 
 /**
@@ -380,4 +380,52 @@ export function calculateStreakWithRecoveries(checkIns: CheckIn[], recoveries: S
 
   console.log(`🏆 Final calculated streak: ${streak}`);
   return streak;
+}
+
+/**
+ * Add or update a note for a specific check-in
+ */
+export async function addNoteToCheckIn(
+  vitaminPlanId: string,
+  date: string,
+  note: string
+): Promise<boolean> {
+  try {
+    const progressData = await getProgressData();
+
+    // Find the check-in for this date and plan
+    const checkIn = progressData.checkIns.find(
+      c => c.date === date && c.vitaminPlanId === vitaminPlanId
+    );
+
+    if (!checkIn) {
+      console.error(`❌ No check-in found for plan ${vitaminPlanId} on ${date}`);
+      return false;
+    }
+
+    // Update the note
+    checkIn.note = note.trim() || undefined; // Remove note if empty
+
+    // Save updated data
+    await saveProgressData(progressData);
+    console.log(`📝 Note ${note.trim() ? 'added' : 'removed'} for plan ${vitaminPlanId} on ${date}`);
+
+    return true;
+  } catch (error) {
+    console.error('Error adding note to check-in:', error);
+    return false;
+  }
+}
+
+/**
+ * Get check-in with note for a specific date and plan
+ */
+export function getCheckInWithNote(
+  checkIns: CheckIn[],
+  vitaminPlanId: string,
+  date: string
+): CheckIn | undefined {
+  return checkIns.find(
+    c => c.date === date && c.vitaminPlanId === vitaminPlanId
+  );
 }

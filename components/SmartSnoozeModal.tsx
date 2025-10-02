@@ -14,7 +14,8 @@ import { useSmartReminders } from '../hooks/useSmartReminders';
 import { formatDisplayTime } from '../utils/notifications';
 import { usePremium } from '../hooks/usePremium';
 import { FREE_LIMITS, PREMIUM_LIMITS } from '../constants/premium';
-import { restartStreak, getProgressData, getStreakForPlan } from '../utils/progress';
+import { restartStreak, getProgressData, getStreakForPlan, addNoteToCheckIn, getCheckInWithNote } from '../utils/progress';
+import { NoteInputModal } from './NoteInputModal';
 
 interface SmartSnoozeModalProps {
   visible: boolean;
@@ -48,6 +49,8 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
   const [isApplying, setIsApplying] = useState(false);
   const [snoozesUsedToday, setSnoozesUsedToday] = useState(0);
   const [currentStreak, setCurrentStreak] = useState(0);
+  const [showNoteModal, setShowNoteModal] = useState(false);
+  const [existingNote, setExistingNote] = useState<string | undefined>(undefined);
 
   const { settings, behaviorProfile, recordNotificationResponse } = useSmartReminders();
   const { isPremium, getLimit } = usePremium();
@@ -57,8 +60,24 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
       loadSnoozesUsedToday();
       generateSmartSnoozeOptions();
       loadCurrentStreak();
+      loadExistingNote();
     }
   }, [visible]);
+
+  const loadExistingNote = async () => {
+    try {
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+      const progressData = await getProgressData();
+      const checkIn = getCheckInWithNote(progressData.checkIns, planId, todayStr);
+
+      setExistingNote(checkIn?.note);
+    } catch (error) {
+      console.error('Error loading existing note:', error);
+      setExistingNote(undefined);
+    }
+  };
 
   const loadCurrentStreak = async () => {
     try {
@@ -193,48 +212,6 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
   };
 
 
-  const handleSkip = async () => {
-    // Check if today is already completed
-    if (isTodayCompleted) {
-      console.log('⚠️ Skip attempted on already completed day');
-      Alert.alert(
-        '✅ Already Taken!',
-        `You've already taken your ${vitaminName} today! No need to skip.`,
-        [{ text: 'Got it!', style: 'default', onPress: onClose }]
-      );
-      return;
-    }
-
-    Alert.alert(
-      '⏭️ Skip This Dose?',
-      `Are you sure you want to skip your ${vitaminName} today? Your streak will just pause - no pressure!`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Skip',
-          style: 'destructive',
-          onPress: async () => {
-            console.log(`📝 User skipped ${vitaminName} for today`);
-
-            // Record skip for learning
-            if (settings.behaviorLearning) {
-              console.log('📊 Recording skip for behavioral learning');
-              await recordNotificationResponse('ignored', new Date());
-
-              await SmartNotificationEngine.recordNotificationResponse(planId, {
-                type: 'ignored',
-                timestamp: new Date(),
-                originalTime: originalTime
-              });
-            }
-
-            onClose();
-          }
-        }
-      ]
-    );
-  };
-
   const handleRestartStreak = async () => {
     if (currentStreak === 0) {
       Alert.alert(
@@ -293,6 +270,27 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
     );
   };
 
+  const handleAddNote = () => {
+    setShowNoteModal(true);
+  };
+
+  const handleSaveNote = async (note: string): Promise<boolean> => {
+    try {
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+      const success = await addNoteToCheckIn(planId, todayStr, note);
+      if (success) {
+        setExistingNote(note);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error saving note:', error);
+      return false;
+    }
+  };
+
   return (
     <Modal
       visible={visible}
@@ -349,23 +347,18 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
 
           {/* Quick Actions */}
           <View style={styles.quickActions}>
-            <TouchableOpacity
-              style={[
-                styles.quickActionButton,
-                styles.skipButton,
-                isTodayCompleted && styles.quickActionDisabled
-              ]}
-              onPress={handleSkip}
-              disabled={isApplying || isTodayCompleted}
-            >
-              <Text style={styles.quickActionIcon}>⏭️</Text>
-              <Text style={[
-                styles.quickActionText,
-                isTodayCompleted && styles.quickActionTextDisabled
-              ]}>
-                {isTodayCompleted ? 'Already Taken' : 'Skip Today'}
-              </Text>
-            </TouchableOpacity>
+            {isTodayCompleted && (
+              <TouchableOpacity
+                style={[styles.quickActionButton, styles.addNoteButton]}
+                onPress={handleAddNote}
+                disabled={isApplying}
+              >
+                <Text style={styles.quickActionIcon}>📝</Text>
+                <Text style={styles.quickActionText}>
+                  {existingNote ? 'Edit Note' : 'Add Note'}
+                </Text>
+              </TouchableOpacity>
+            )}
 
             {currentStreak > 0 && (
               <TouchableOpacity
@@ -381,7 +374,7 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
 
           {/* Smart Snooze Options */}
           <View style={styles.snoozeSection}>
-            <Text style={styles.sectionTitle}>🧠 Smart Snooze Options</Text>
+            <Text style={styles.sectionTitle}>Smart Snooze Options</Text>
             <Text style={styles.sectionSubtitle}>AI-suggested timing based on your habits</Text>
 
             <View style={styles.snoozeOptions}>
@@ -393,7 +386,7 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
                   disabled={isApplying}
                 >
                   <View style={styles.snoozeOptionContent}>
-                    <Text style={styles.snoozeEmoji}>{option.emoji}</Text>
+                    {option.emoji && <Text style={styles.snoozeEmoji}>{option.emoji}</Text>}
                     <View style={styles.snoozeText}>
                       <Text style={styles.snoozeLabel}>{option.label}</Text>
                       {option.reason && (
@@ -407,6 +400,15 @@ export const SmartSnoozeModal: React.FC<SmartSnoozeModalProps> = ({
           </View>
 
         </ScrollView>
+
+        {/* Note Input Modal */}
+        <NoteInputModal
+          visible={showNoteModal}
+          onClose={() => setShowNoteModal(false)}
+          onSave={handleSaveNote}
+          vitaminName={vitaminName}
+          existingNote={existingNote}
+        />
       </View>
     </Modal>
   );
@@ -527,8 +529,8 @@ const styles = StyleSheet.create({
     flex: 1,
     maxWidth: 140,
   },
-  skipButton: {
-    backgroundColor: '#6B7280',
+  addNoteButton: {
+    backgroundColor: '#10B981',
   },
   restartButton: {
     backgroundColor: '#F59E0B',

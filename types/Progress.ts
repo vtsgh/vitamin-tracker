@@ -2,6 +2,7 @@ export interface CheckIn {
   date: string; // ISO date string (YYYY-MM-DD)
   vitaminPlanId: string;
   timestamp: number; // When the check-in was recorded
+  note?: string; // Optional user note about this check-in (local only)
 }
 
 export interface Streak {
