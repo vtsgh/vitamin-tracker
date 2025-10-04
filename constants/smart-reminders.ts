@@ -67,19 +67,19 @@ export const DEFAULT_TIMING_SUGGESTIONS = {
 // Notification escalation messages
 export const ESCALATION_MESSAGES = {
   gentle: [
-    "Gentle reminder: Time for your {vitamin}! 🌱",
-    "Your daily {vitamin} is ready! ✨",
-    "{vitamin} time! Your health journey continues 🌿",
+    "Takeamin time! Your {vitamin} is ready",
+    "Time for your {vitamin}",
+    "{vitamin} time - Takeamin to stay on track",
   ],
   encouraging: [
-    "Don't break your streak! Time for {vitamin} 💪",
-    "You're doing great! Don't forget your {vitamin} 🌟",
-    "Keep your healthy habit going with {vitamin} 🎯",
+    "You're on a roll! Time for {vitamin}",
+    "{vitamin} time - keep your streak going",
+    "Time for {vitamin} - you're doing great",
   ],
   urgent: [
-    "Last call for {vitamin}! You've got this 🚨",
-    "Final reminder: {vitamin} is waiting for you ⏰",
-    "Don't let today slip by without your {vitamin} 📢",
+    "Still time for {vitamin} today",
+    "Your {vitamin} is waiting",
+    "{vitamin} reminder - get back on track",
   ],
 };
 

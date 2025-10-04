@@ -414,8 +414,8 @@ export async function scheduleVitaminReminders(plan: VitaminPlan): Promise<strin
 
     // Create notification content with unique title for each vitamin
     const notificationContent = {
-      title: `💊 ${plan.vitamin} Reminder!`,
-      body: `Don't forget to take your ${plan.vitamin} today. You've got this! 🌟`,
+      title: `Time to Takeamin!`,
+      body: `Your ${plan.vitamin} is ready`,
       sound: true,
       ...(Platform.OS === 'android' && { channelId: `vitamin-reminders-${plan.id}` }),
       data: {

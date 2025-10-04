@@ -398,9 +398,9 @@ export class SmartNotificationEngine {
     settings: SmartReminderSettings,
     behaviorProfile?: NotificationBehaviorProfile
   ): Notifications.NotificationContent {
-    
-    let title = '💊 Time for your vitamins!';
-    let body = `Don't forget to take your ${plan.vitamin} today. You've got this! 🌟`;
+
+    let title = 'Time to Takeamin!';
+    let body = `Your ${plan.vitamin} is ready`;
 
     // Apply behavioral escalation if enabled
     if (settings.behaviorLearning && behaviorProfile) {
