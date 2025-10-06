@@ -122,22 +122,7 @@ export default function Home() {
   const FEATURES = getFeatures(colors);
   const DEV_FEATURES = getDevFeatures(colors);
 
-  useFocusEffect(
-    useCallback(() => {
-      // Reset navigation state when screen comes into focus
-      setIsNavigating(false);
-      
-      // Only trigger intro animations on first load
-      if (!hasAnimated) {
-        startIntroAnimations();
-        setHasAnimated(true);
-      } else {
-        // Show elements immediately without animation when returning
-        showElementsImmediately();
-      }
-    }, [hasAnimated, startIntroAnimations, showElementsImmediately])
-  );
-
+  // Define animation functions before useFocusEffect to avoid hoisting errors
   const startIntroAnimations = useCallback(() => {
     // Reset all animations
     titleOpacity.value = 0;
@@ -175,6 +160,22 @@ export default function Home() {
     buttonsOpacity.value = 1;
     capsuleRotation.value = 0; // Reset rotation
   }, [titleOpacity, subtitleOpacity, capsuleScale, buttonsOpacity, capsuleRotation]);
+
+  useFocusEffect(
+    useCallback(() => {
+      // Reset navigation state when screen comes into focus
+      setIsNavigating(false);
+
+      // Only trigger intro animations on first load
+      if (!hasAnimated) {
+        startIntroAnimations();
+        setHasAnimated(true);
+      } else {
+        // Show elements immediately without animation when returning
+        showElementsImmediately();
+      }
+    }, [hasAnimated, startIntroAnimations, showElementsImmediately])
+  );
 
   const animatedTitleStyle = useAnimatedStyle(() => {
     return {

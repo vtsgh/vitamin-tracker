@@ -67,7 +67,10 @@ export async function testNotificationCancellation(): Promise<boolean> {
         body: 'This notification should be cancelled immediately',
         sound: false,
       },
-      trigger: { seconds: 60 } // 1 minute from now
+      trigger: {
+        type: 'timeInterval',
+        seconds: 60
+      } as Notifications.TimeIntervalTriggerInput // 1 minute from now
     });
     console.log(`🧪 Scheduled test notification with ID: ${testId}`);
     
@@ -200,7 +203,7 @@ export async function showCleanupMenu(): Promise<void> {
             const result = await nuclearCleanup();
             Alert.alert('☢️ Nuclear Complete', `Before: ${result.before}\nAfter: ${result.after}`);
           } catch (error) {
-            Alert.alert('❌ Error', `Nuclear cleanup failed: ${error.message}`);
+            Alert.alert('❌ Error', `Nuclear cleanup failed: ${(error as Error).message}`);
           }
         }
       },
@@ -211,7 +214,7 @@ export async function showCleanupMenu(): Promise<void> {
             const success = await testNotificationCancellation();
             Alert.alert('🧪 Test Complete', success ? 'Cancellation works!' : 'Cancellation failed!');
           } catch (error) {
-            Alert.alert('❌ Error', `Test failed: ${error.message}`);
+            Alert.alert('❌ Error', `Test failed: ${(error as Error).message}`);
           }
         }
       },
@@ -222,7 +225,7 @@ export async function showCleanupMenu(): Promise<void> {
             await expoGoNotificationWorkaround();
             Alert.alert('🤖 Workaround Complete', 'Expo Go workaround applied');
           } catch (error) {
-            Alert.alert('❌ Error', `Workaround failed: ${error.message}`);
+            Alert.alert('❌ Error', `Workaround failed: ${(error as Error).message}`);
           }
         }
       },

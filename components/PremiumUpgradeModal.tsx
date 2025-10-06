@@ -25,7 +25,8 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
   onUpgrade
 }) => {
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'lifetime'>('lifetime');
-  const { upgradeToPremium, mockUpgradeToPremium, startFreeTrial, premiumStatus } = usePremium();
+  const { premiumStatus } = usePremium();
+  // Note: upgradeToPremium, mockUpgradeToPremium, startFreeTrial removed in donation model
 
   const getCategoryBenefits = (): CategoryBenefits => {
     if (!context) {
@@ -227,65 +228,31 @@ export const PremiumUpgradeModal: React.FC<UpgradeModalProps> = ({
   };
 
   const handleUpgrade = async () => {
-    try {
-      await upgradeToPremium(selectedPlan);
-      if (onUpgrade) onUpgrade();
-      Alert.alert(
-        '🎉 Welcome to Premium!',
-        'You now have access to all premium features. Enjoy your enhanced vitamin journey!',
-        [{ text: 'Awesome!', style: 'default' }]
-      );
-    } catch (error) {
-      console.error('🚨 Upgrade failed:', error);
-      console.error('🚨 Error details:', JSON.stringify(error, null, 2));
-      
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      
-      // Check if this is a cancellation or testing error that should trigger mock upgrade
-      const shouldUseMockUpgrade = errorMessage.includes('USER_CANCELLED') || 
-                                 errorMessage.includes('cancelled') ||
-                                 errorMessage.includes('not allowed to make the purchase') || 
-                                 errorMessage.includes('PRODUCT_NOT_AVAILABLE') ||
-                                 __DEV__; // Always use mock in development
-      
-      if (shouldUseMockUpgrade) {
-        console.log('💡 Using mock upgrade for app store approval testing...');
-        
-        try {
-          await mockUpgradeToPremium(selectedPlan);
+    // NOTE: Premium system removed - all features now free via donation model
+    console.log('💝 Upgrade button pressed - showing donation info');
+    Alert.alert(
+      '✨ All Features Free!',
+      'All features are now unlocked for everyone! If you\'d like to support development, consider buying us a coffee.',
+      [
+        { text: 'Maybe Later', style: 'cancel' },
+        { text: 'Support Us ☕', style: 'default', onPress: () => {
+          // This would open the donation link
+          console.log('Opening donation link...');
           if (onUpgrade) onUpgrade();
-          Alert.alert(
-            '🧪 Mock Upgrade Successful!',
-            'Premium features unlocked for testing purposes. In production, this will be a real purchase.',
-            [{ text: 'Continue Testing', style: 'default' }]
-          );
-          return; // Exit early on successful mock upgrade
-        } catch (mockError) {
-          console.error('🚨 Mock upgrade failed:', mockError);
-        }
-      }
-      
-      // Show original error if mock upgrade isn't appropriate or failed
-      Alert.alert(
-        'Upgrade Failed', 
-        `${errorMessage}\n\nThis is expected in testing environments.`,
-        [{ text: 'OK', style: 'default' }]
-      );
-    }
+        }}
+      ]
+    );
   };
 
   const handleFreeTrial = async () => {
-    const started = await startFreeTrial();
-    if (started) {
-      if (onUpgrade) onUpgrade();
-      Alert.alert(
-        '🎉 Free Trial Started!',
-        'You now have 7 days of Premium access. Enjoy exploring all features!',
-        [{ text: 'Let\'s go!', style: 'default' }]
-      );
-    } else {
-      Alert.alert('Trial Already Used', 'You\'ve already used your free trial, but you can still upgrade to Premium!');
-    }
+    // NOTE: Premium system removed - all features now free
+    console.log('💝 Free trial button pressed - all features already free');
+    if (onUpgrade) onUpgrade();
+    Alert.alert(
+      '🎉 All Features Unlocked!',
+      'Good news! All features are now free for everyone. Enjoy the full app!',
+      [{ text: 'Awesome!', style: 'default' }]
+    );
   };
 
   const openPrivacyPolicy = () => {

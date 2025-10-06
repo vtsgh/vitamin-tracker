@@ -36,32 +36,7 @@ export default function Schedule() {
   const emojiScale = useSharedValue(0);
   const emojiRotation = useSharedValue(0);
 
-  useFocusEffect(
-    useCallback(() => {
-      const fetchPlans = async () => {
-        try {
-          const plansJson = await AsyncStorage.getItem('vitaminPlans');
-          const plans: VitaminPlan[] = plansJson ? JSON.parse(plansJson) : [];
-          setVitaminPlans(plans);
-        } catch (error) {
-          console.error('Error loading vitamin plans:', error);
-        }
-      };
-      fetchPlans();
-      // Reset navigation state when screen comes into focus
-      setIsNavigating(false);
-      
-      // Only trigger intro animations on first load or after creating a new plan
-      if (!hasAnimated) {
-        startIntroAnimations();
-        setHasAnimated(true);
-      } else {
-        // Show elements immediately without animation when returning from edit
-        showElementsImmediately();
-      }
-    }, [hasAnimated, startIntroAnimations, showElementsImmediately])
-  );
-
+  // Define animation functions before useFocusEffect to avoid hoisting errors
   const startIntroAnimations = useCallback(() => {
     // Reset all animations
     titleOpacity.value = 0;
@@ -99,6 +74,32 @@ export default function Schedule() {
     emojiScale.value = 1;
     emojiRotation.value = 0; // Reset rotation
   }, [titleOpacity, sloganOpacity, contentOpacity, emojiScale, emojiRotation]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchPlans = async () => {
+        try {
+          const plansJson = await AsyncStorage.getItem('vitaminPlans');
+          const plans: VitaminPlan[] = plansJson ? JSON.parse(plansJson) : [];
+          setVitaminPlans(plans);
+        } catch (error) {
+          console.error('Error loading vitamin plans:', error);
+        }
+      };
+      fetchPlans();
+      // Reset navigation state when screen comes into focus
+      setIsNavigating(false);
+
+      // Only trigger intro animations on first load or after creating a new plan
+      if (!hasAnimated) {
+        startIntroAnimations();
+        setHasAnimated(true);
+      } else {
+        // Show elements immediately without animation when returning from edit
+        showElementsImmediately();
+      }
+    }, [hasAnimated, startIntroAnimations, showElementsImmediately])
+  );
 
   const animatedButtonStyle = useAnimatedStyle(() => {
     return {
@@ -306,7 +307,7 @@ export default function Schedule() {
     lastTapTime.current = now;
     setIsNavigating(true);
     console.log('✅ Navigating to home');
-    router.push('/(tabs)/');
+    router.push('/');
   };
 
   return (

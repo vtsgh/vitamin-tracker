@@ -331,7 +331,7 @@ export class SmartNotificationEngine {
             hour,
             minute,
             repeats: true,
-          },
+          } as Notifications.CalendarTriggerInput,
         });
         notificationIds.push(dailyId);
         break;
@@ -346,7 +346,7 @@ export class SmartNotificationEngine {
             hour,
             minute,
             repeats: true,
-          },
+          } as Notifications.CalendarTriggerInput,
         });
         notificationIds.push(weeklyId);
         break;
@@ -360,7 +360,10 @@ export class SmartNotificationEngine {
 
           const id = await Notifications.scheduleNotificationAsync({
             content,
-            trigger: { date: triggerDate },
+            trigger: {
+              type: 'date',
+              date: triggerDate
+            } as Notifications.DateTriggerInput,
           });
           notificationIds.push(id);
         }
@@ -379,7 +382,7 @@ export class SmartNotificationEngine {
                 hour,
                 minute,
                 repeats: true,
-              },
+              } as Notifications.CalendarTriggerInput,
             });
             notificationIds.push(customId);
           }
@@ -425,7 +428,7 @@ export class SmartNotificationEngine {
     return {
       title,
       body,
-      sound: true,
+      sound: 'default',
       data: {
         vitaminName: plan.vitamin,
         planId: plan.id,

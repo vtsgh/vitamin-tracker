@@ -72,7 +72,7 @@ export default function NotificationDebugScreen() {
       console.log(`✅ Completed: ${description}`);
     } catch (error) {
       console.error(`❌ Failed: ${description}`, error);
-      Alert.alert('Error', `${description} failed: ${error.message}`);
+      Alert.alert('Error', `${description} failed: ${(error as Error).message}`);
     } finally {
       setIsLoading(false);
     }
@@ -162,7 +162,7 @@ export default function NotificationDebugScreen() {
       
       Alert.alert('All Notifications', notifications.length > 0 ? message : 'No notifications scheduled');
     } catch (error) {
-      Alert.alert('Error', `Failed to get notifications: ${error.message}`);
+      Alert.alert('Error', `Failed to get notifications: ${(error as Error).message}`);
     }
   };
 

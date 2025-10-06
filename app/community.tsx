@@ -83,7 +83,7 @@ export default function PollsAndFeedback() {
   };
 
   const handleGoHome = () => {
-    router.push('/(tabs)/');
+    router.push('/');
   };
 
 

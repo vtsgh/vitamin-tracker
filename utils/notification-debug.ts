@@ -273,11 +273,14 @@ export async function showNotificationTestMenu(): Promise<void> {
                 sound: true,
                 ...(Platform.OS === 'android' && { channelId: 'vitamin-reminders' }),
               },
-              trigger: { seconds: 3 }
+              trigger: {
+                type: 'timeInterval',
+                seconds: 3
+              } as Notifications.TimeIntervalTriggerInput
             });
             Alert.alert('✅ Success', `Test notification scheduled! ID: ${id}`);
           } catch (error) {
-            Alert.alert('❌ Error', `Failed to schedule test: ${error.message}`);
+            Alert.alert('❌ Error', `Failed to schedule test: ${(error as Error).message}`);
           }
         }
       },
@@ -288,7 +291,7 @@ export async function showNotificationTestMenu(): Promise<void> {
             const audit = await auditNotifications();
             Alert.alert('📊 Audit Complete', audit.summary);
           } catch (error) {
-            Alert.alert('❌ Error', `Audit failed: ${error.message}`);
+            Alert.alert('❌ Error', `Audit failed: ${(error as Error).message}`);
           }
         }
       },
@@ -299,7 +302,7 @@ export async function showNotificationTestMenu(): Promise<void> {
             await debugStorageNotificationMismatch();
             await showStorageDebugAlert();
           } catch (error) {
-            Alert.alert('❌ Error', `Storage debug failed: ${error.message}`);
+            Alert.alert('❌ Error', `Storage debug failed: ${(error as Error).message}`);
           }
         }
       },
@@ -310,7 +313,7 @@ export async function showNotificationTestMenu(): Promise<void> {
             const cleaned = await cleanupOrphanedNotifications();
             Alert.alert('🧹 Cleanup Complete', `Removed ${cleaned} orphaned notifications`);
           } catch (error) {
-            Alert.alert('❌ Error', `Cleanup failed: ${error.message}`);
+            Alert.alert('❌ Error', `Cleanup failed: ${(error as Error).message}`);
           }
         }
       },
@@ -334,7 +337,7 @@ export async function showNotificationTestMenu(): Promise<void> {
                     await resetNotificationSystem();
                     Alert.alert('🔄 Reset Complete', 'Notification system has been rebuilt');
                   } catch (error) {
-                    Alert.alert('❌ Error', `Reset failed: ${error.message}`);
+                    Alert.alert('❌ Error', `Reset failed: ${(error as Error).message}`);
                   }
                 }
               }

@@ -18,7 +18,7 @@ export default function HealthInsights() {
   const weeklyArticles = getWeeklyArticles();
 
   const handleGoHome = () => {
-    router.push('/(tabs)/');
+    router.push('/');
   };
 
   const handleCardPress = (card: VitaminEducationCard) => {

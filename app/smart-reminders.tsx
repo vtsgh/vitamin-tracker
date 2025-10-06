@@ -227,7 +227,7 @@ export default function SmartReminders() {
   };
 
   const handleGoHome = () => {
-    router.push('/(tabs)/');
+    router.push('/');
   };
 
   const getBehaviorSummary = () => {

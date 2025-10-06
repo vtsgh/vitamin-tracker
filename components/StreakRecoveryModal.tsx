@@ -58,10 +58,9 @@ export function StreakRecoveryModal({
       triggerUpgrade(
         PREMIUM_FEATURES.STREAK_RECOVERY,
         UPGRADE_TRIGGER_CONTEXTS.STREAK_ABOUT_TO_BREAK,
-        { 
-          currentStreak, 
-          missedDate,
-          feature: 'Streak Shield'
+        {
+          currentStreak,
+          customMessage: `Recover missed dose from ${missedDate}`
         }
       );
       return;

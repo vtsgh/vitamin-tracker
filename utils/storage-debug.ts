@@ -206,6 +206,6 @@ ${deadReferences > 0 ? '⚠️ Plans have dead references!' : '✅ All plan refe
     
   } catch (error) {
     const { Alert } = require('react-native');
-    Alert.alert('❌ Debug Error', `Failed to debug storage: ${error.message}`);
+    Alert.alert('❌ Debug Error', `Failed to debug storage: ${(error as Error).message}`);
   }
 }

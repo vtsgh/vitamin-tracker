@@ -129,8 +129,8 @@ export async function runNotificationTest(): Promise<void> {
   } catch (error) {
     console.error('🧪 ============ NOTIFICATION TEST FAILED ============');
     console.error('🧪 Error:', error);
-    console.error('🧪 Error message:', error.message);
-    console.error('🧪 Error stack:', error.stack);
+    console.error('🧪 Error message:', (error as Error).message);
+    console.error('🧪 Error stack:', (error as Error).stack);
   }
 }
 
@@ -428,16 +428,16 @@ export async function scheduleVitaminReminders(plan: VitaminPlan): Promise<strin
     // For now, just schedule a simple repeating daily notification
     console.log(`📅 Scheduling daily repeating notification at ${hour}:${minute.toString().padStart(2, '0')}`);
     
-    let trigger;
-    
+    let trigger: Notifications.NotificationTriggerInput;
+
     if (Platform.OS === 'ios') {
-      // iOS: Use calendar trigger for exact time  
+      // iOS: Use calendar trigger for exact time
       trigger = {
         type: 'calendar',
         hour,
         minute,
         repeats: true,
-      };
+      } as Notifications.CalendarTriggerInput;
     } else {
       // Android: Use separate notification handler
       return await scheduleAndroidNotifications(plan, hour, minute, notificationContent);
