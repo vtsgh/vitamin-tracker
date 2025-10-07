@@ -235,14 +235,14 @@ export function getStreakForPlan(streaks: Streak[], vitaminPlanId: string): Stre
  * Get motivational message based on streak
  */
 export function getMotivationalMessage(streak: number): string {
-  if (streak === 0) return "Ready to start your health journey?";
+  if (streak === 0) return "Ready to start your streak?";
   if (streak === 1) return "Great start! One day is a win";
   if (streak === 2) return "Two days strong! You're building momentum";
-  if (streak === 3) return "3-day streak! That's habit-forming magic 🪄";
+  if (streak === 3) return "3-day streak! Habits are forming";
   if (streak === 7) return "One week! Your consistency is paying off";
   if (streak === 14) return "Two weeks of dedication! You're amazing";
   if (streak === 30) return "30 days! You're a vitamin champion";
-  if (streak >= 50) return "Incredible dedication! You're an inspiration ✨";
+  if (streak >= 50) return "Incredible dedication! You're crushing it";
 
   return `${streak} days strong! Keep it up`;
 }

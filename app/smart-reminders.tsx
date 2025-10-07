@@ -295,7 +295,7 @@ export default function SmartReminders() {
         <Text style={styles.pageTitle}>Smart Reminders</Text>
         <Text style={styles.pageSubtitle}>AI-powered timing that learns from your habits</Text>
         <Text style={styles.privacyNotice}>
-          🔒 All data stays on your device - no tracking or collection from us!
+          🔒 All data stays on your device - time-based reminders only, no location tracking needed!
         </Text>
 
         {/* Settings Section */}
@@ -345,15 +345,6 @@ export default function SmartReminders() {
                   (value) => updateSetting('behaviorLearning', value),
                   true,
                   '🧠'
-                )}
-
-                {renderSettingToggle(
-                  'Location Reminders',
-                  'Get reminded when you arrive at home or work',
-                  settings.locationReminders,
-                  (value) => updateSetting('locationReminders', value),
-                  true,
-                  '📍'
                 )}
               </>
             )}

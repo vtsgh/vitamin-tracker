@@ -169,7 +169,11 @@ export const TIME_INSIGHTS = {
   },
 };
 
-// Location-based reminder types (for future implementation)
+// Location-based reminder types (REMOVED - conflicts with privacy-first approach)
+// Location reminders would require iOS Location Services, giving Apple access to location data
+// This conflicts with our "no tracking" privacy promise
+// If implementing in the future, would need expo-location and geofencing
+/*
 export const LOCATION_TYPES = {
   HOME: {
     id: 'home',
@@ -207,6 +211,7 @@ export const LOCATION_TYPES = {
     defaultRadius: 100,
   },
 } as const;
+*/
 
 // Smart snooze suggestions based on context
 export const SMART_SNOOZE_OPTIONS = {
