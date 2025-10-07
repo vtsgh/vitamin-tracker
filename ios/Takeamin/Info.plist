@@ -55,6 +55,8 @@
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER).expo.index_route</string>
     </array>
+    <key>NSUserNotificationsUsageDescription</key>
+    <string>We need notification permission to remind you to take your vitamins at your scheduled times.</string>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>
     <key>UIRequiredDeviceCapabilities</key>
