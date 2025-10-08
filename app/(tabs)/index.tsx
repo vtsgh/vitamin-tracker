@@ -41,13 +41,13 @@ function getFeatures(colors: any): FeatureButton[] {
       enabled: true
     },
     {
-      id: 'donate',
-      title: 'Support Takeamin',
-      subtitle: 'Support privacy-first development',
+      id: 'about',
+      title: 'About Takeamin',
+      subtitle: 'Learn about the app',
       icon: '☕',
       customIcon: require('../../assets/images/iced-coffee.png'),
       color: colors.donateButton,
-      route: null, // Special handling
+      route: '/about',
       enabled: true
     },
     {
@@ -207,41 +207,6 @@ export default function Home() {
     };
   });
 
-  const handleDonationPress = () => {
-    Alert.alert(
-      "Support Takeamin",
-      "Built and maintained by a solo developer who loves coffee! If you find Takeamin useful, consider buying me a coffee!",
-      [
-        { text: "Maybe Later", style: "cancel" },
-        {
-          text: "Buy me a coffee!",
-          onPress: async () => {
-            try {
-              const donationURL = 'https://buymeacoffee.com/Takeamin';
-              const supported = await Linking.canOpenURL(donationURL);
-
-              if (supported) {
-                await Linking.openURL(donationURL);
-                console.log('Opening donation page - thank you for supporting Takeamin!');
-              } else {
-                Alert.alert(
-                  'Unable to open donation page',
-                  'Please visit: buymeacoffee.com/Takeamin'
-                );
-              }
-            } catch (error) {
-              console.error('Error opening donation link:', error);
-              Alert.alert(
-                'Unable to open donation page',
-                'Please visit: buymeacoffee.com/Takeamin'
-              );
-            }
-          }
-        }
-      ]
-    );
-  };
-
   const handleFeaturePress = (feature: FeatureButton) => {
     const now = Date.now();
     if (now - lastTapTime.current < 500 || isNavigating) { // 500ms debounce
@@ -249,12 +214,6 @@ export default function Home() {
       return;
     }
     lastTapTime.current = now;
-
-    // Handle donation specially
-    if (feature.id === 'donate') {
-      handleDonationPress();
-      return;
-    }
 
     // Handle debug notifications (dev only)
     if (feature.id === 'notification-debug') {

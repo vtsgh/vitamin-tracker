@@ -77,6 +77,7 @@ function AppContent() {
         <Stack.Screen name="smart-reminders" options={{ headerShown: false }} />
         <Stack.Screen name="medical-disclaimer" options={{ headerShown: false }} />
         <Stack.Screen name="theme-picker" options={{ headerShown: false }} />
+        <Stack.Screen name="about" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style={isDark ? "light" : "dark"} />
