@@ -96,7 +96,7 @@ export default function About() {
           </View>
 
           <View style={styles.featureCard}>
-            <Text style={styles.featureIcon}>💚</Text>
+            <Text style={styles.featureIcon}>🎁</Text>
             <View style={styles.featureContent}>
               <Text style={styles.featureTitle}>Free Forever</Text>
               <Text style={styles.featureText}>All features available to everyone, always</Text>
